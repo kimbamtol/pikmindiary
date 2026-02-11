@@ -210,13 +210,13 @@ function autoDetectLanguageByLocation() {
 }
 
 function detectLanguageFromCoords(lat, lng) {
-    // 일본 영역 (대략적 범위)
-    if (lat >= 24 && lat <= 46 && lng >= 122 && lng <= 154) {
-        return 'ja';
-    }
-    // 한국 영역 (대략적 범위)
+    // 한국 영역 먼저 체크 (일본 범위에 포함되므로 우선 판별)
     if (lat >= 33 && lat <= 43 && lng >= 124 && lng <= 132) {
         return 'ko';
+    }
+    // 일본 영역
+    if (lat >= 24 && lat <= 46 && lng >= 122 && lng <= 154) {
+        return 'ja';
     }
     // 그 외 영어
     return 'en';
@@ -299,39 +299,6 @@ async function toggleBookmark(coordinateId, button) {
         }
     } catch (error) {
         console.error('Bookmark toggle failed:', error);
-    }
-}
-
-// 유효성 평가
-async function submitValidity(coordinateId, feedbackType, button) {
-    try {
-        const res = await fetchWithCSRF(`/interactions/validity/${coordinateId}/`, {
-            method: 'POST',
-            body: `feedback_type=${feedbackType}`,
-        });
-        const data = await res.json();
-
-        // UI 업데이트
-        const validBtn = document.querySelector('.validity-valid');
-        const invalidBtn = document.querySelector('.validity-invalid');
-        const validCount = document.querySelector('.valid-count');
-        const invalidCount = document.querySelector('.invalid-count');
-
-        // 활성 상태 초기화
-        validBtn.classList.remove('active');
-        invalidBtn.classList.remove('active');
-
-        // 새 상태 적용
-        if (data.submitted === 'VALID') {
-            validBtn.classList.add('active');
-        } else if (data.submitted === 'INVALID') {
-            invalidBtn.classList.add('active');
-        }
-
-        validCount.textContent = data.valid_count;
-        invalidCount.textContent = data.invalid_count;
-    } catch (error) {
-        console.error('Validity submit failed:', error);
     }
 }
 

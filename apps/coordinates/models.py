@@ -78,16 +78,12 @@ class Coordinate(models.Model):
     view_count = models.PositiveIntegerField(_('조회수'), default=0)
     bookmark_count = models.PositiveIntegerField(_('북마크 수'), default=0)
     comment_count = models.PositiveIntegerField(_('댓글 수'), default=0)
-    valid_count = models.PositiveIntegerField(_('유효 평가 수'), default=0)
-    invalid_count = models.PositiveIntegerField(_('무효 평가 수'), default=0)
     copy_count = models.PositiveIntegerField(_('복사 수'), default=0)
     
     # 타임스탬프
     created_at = models.DateTimeField(_('작성일'), auto_now_add=True)
     updated_at = models.DateTimeField(_('수정일'), auto_now=True)
     approved_at = models.DateTimeField(_('승인일'), null=True, blank=True)
-    last_verified_at = models.DateTimeField(_('마지막 검증일'), null=True, blank=True)
-    
     # 비회원 작성용 비밀번호
     guest_password = models.CharField(
         _('비회원 비밀번호'),
@@ -117,35 +113,11 @@ class Coordinate(models.Model):
             models.Index(fields=['status', '-created_at']),
             models.Index(fields=['category', 'status']),
             models.Index(fields=['-like_count']),
-            models.Index(fields=['-valid_count']),
             models.Index(fields=['author', 'status']),
         ]
     
     def __str__(self):
         return f"[{self.get_category_display()}] {self.title}"
-    
-    @property
-    def trust_score(self):
-        """신뢰도 점수 (valid - invalid)"""
-        return self.valid_count - self.invalid_count
-    
-    @property
-    def is_trusted(self):
-        """신뢰할 수 있는 좌표인지"""
-        return self.trust_score >= 0 and self.valid_count >= 3
-    
-    @property
-    def is_outdated(self):
-        """오래된 좌표인지 (30일 이상 검증 없음)"""
-        from django.utils import timezone
-        from datetime import timedelta
-        
-        if not self.last_verified_at:
-            # 승인 후 30일 이상 검증 없음
-            if self.approved_at:
-                return timezone.now() - self.approved_at > timedelta(days=30)
-            return False
-        return timezone.now() - self.last_verified_at > timedelta(days=30)
     
     def get_coords_string(self):
         """좌표 문자열 반환 (복사용)"""

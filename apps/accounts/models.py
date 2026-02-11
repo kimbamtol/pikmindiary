@@ -157,8 +157,6 @@ class CustomUser(AbstractUser):
     # 통계 (캐시용)
     total_posts = models.PositiveIntegerField(default=0)
     total_likes_received = models.PositiveIntegerField(default=0)
-    total_valid_received = models.PositiveIntegerField(default=0)
-    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     

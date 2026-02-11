@@ -40,9 +40,6 @@
                     {% if coordinate.status == 'PENDING' %}
                     <span class="badge badge-pending">{% trans "승인 대기" %}</span>
                     {% endif %}
-                    {% if coordinate.is_outdated %}
-                    <span class="badge badge-warning">{% trans "오래됨" %}</span>
-                    {% endif %}
                 </div>
 
                 <h1 class="detail-title">{{ coordinate|translate_field:"title" }}</h1>
@@ -101,59 +98,6 @@
                         class="btn-interaction btn-report">
                         🚨 {% trans "신고" %}
                     </a>
-                </div>
-
-                <!-- 유효성 평가 -->
-                <div class="validity-section">
-                    <h3>📊 {% trans "유효성 평가" %}</h3>
-                    <p>{% trans "이 좌표가 지금도 유효한가요?" %}</p>
-
-                    {% if user.is_authenticated and user == coordinate.author %}
-                    <!-- 본인 글 - 평가 불가 -->
-                    <div class="validity-display">
-                        <span class="validity-stat valid">✅ {{ coordinate.valid_count }}</span>
-                        <span class="validity-stat invalid">❌ {{ coordinate.invalid_count }}</span>
-                    </div>
-                    <p class="owner-notice">{% trans "본인 글은 평가할 수 없습니다." %}</p>
-                    {% else %}
-                    <!-- 다른 사람 글 (비회원 포함) -->
-                    {% if can_submit_validity %}
-                    <div class="validity-buttons">
-                        <button class="btn-validity validity-valid {% if user_validity == 'VALID' %}active{% endif %}"
-                            onclick="submitValidity({{ coordinate.pk }}, 'VALID', this)">
-                            ✅ {% trans "지금도 됨" %} (<span class="valid-count">{{ coordinate.valid_count }}</span>)
-                        </button>
-                        <button
-                            class="btn-validity validity-invalid {% if user_validity == 'INVALID' %}active{% endif %}"
-                            onclick="submitValidity({{ coordinate.pk }}, 'INVALID', this)">
-                            ❌ {% trans "이제 안 됨" %} (<span class="invalid-count">{{ coordinate.invalid_count }}</span>)
-                        </button>
-                    </div>
-                    {% else %}
-                    <!-- 1개월 미만 - 평가 불가 -->
-                    <div class="validity-display">
-                        <span class="validity-stat valid">✅ {{ coordinate.valid_count }}</span>
-                        <span class="validity-stat invalid">❌ {{ coordinate.invalid_count }}</span>
-                    </div>
-                    <div class="validity-buttons">
-                        <button class="btn-validity validity-valid disabled" disabled
-                            title="작성 후 1개월이 지난 게시글만 평가할 수 있습니다.">
-                            ✅ {% trans "지금도 됨" %} ({{ coordinate.valid_count }})
-                        </button>
-                        <button class="btn-validity validity-invalid disabled" disabled
-                            title="작성 후 1개월이 지난 게시글만 평가할 수 있습니다.">
-                            ❌ {% trans "이제 안 됨" %} ({{ coordinate.invalid_count }})
-                        </button>
-                    </div>
-                    <p class="validity-notice">⏰ {% trans "작성 후 1개월이 지난 게시글만 평가할 수 있습니다." %} ({{ days_until_validity }}{% trans "일 후 활성화" %})</p>
-                    {% endif %}
-                    {% endif %}
-
-                    {% if coordinate.last_verified_at %}
-                    <p class="last-verified">
-                        {% trans "마지막 검증" %}: {{ coordinate.last_verified_at|date:"Y.m.d H:i" }}
-                    </p>
-                    {% endif %}
                 </div>
 
                 <!-- 수정/삭제 버튼 (작성자, 관리자, 또는 비회원 글) -->
@@ -589,88 +533,6 @@
         background: var(--bg-secondary);
         border-radius: var(--radius-lg);
         margin-bottom: var(--spacing-lg);
-    }
-
-    .validity-section h3 {
-        margin-bottom: var(--spacing-sm);
-    }
-
-    .validity-section>p {
-        color: var(--text-secondary);
-        margin-bottom: var(--spacing-md);
-    }
-
-    .validity-buttons {
-        display: flex;
-        gap: var(--spacing-md);
-        flex-wrap: wrap;
-    }
-
-    .btn-validity {
-        flex: 1;
-        min-width: 150px;
-        padding: var(--spacing-md);
-        border: 2px solid var(--bg-tertiary);
-        border-radius: var(--radius-md);
-        background: var(--bg-primary);
-        font-size: 1rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all var(--transition-fast);
-    }
-
-    .btn-validity:hover {
-        transform: translateY(-2px);
-    }
-
-    .validity-valid:hover,
-    .validity-valid.active {
-        border-color: #4CAF50;
-        background: #E8F5E9;
-        color: #2E7D32;
-    }
-
-    .validity-invalid:hover,
-    .validity-invalid.active {
-        border-color: #F44336;
-        background: #FFEBEE;
-        color: #C62828;
-    }
-
-    .validity-display {
-        display: flex;
-        gap: var(--spacing-lg);
-        margin-bottom: var(--spacing-md);
-    }
-
-    .validity-stat {
-        font-size: 1.2rem;
-        font-weight: 600;
-    }
-
-    .last-verified {
-        font-size: 0.85rem;
-        color: var(--text-light);
-        margin-top: var(--spacing-md);
-    }
-
-    .btn-validity.disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-        background: var(--bg-tertiary);
-    }
-
-    .btn-validity.disabled:hover {
-        transform: none;
-    }
-
-    .validity-notice {
-        font-size: 0.85rem;
-        color: var(--text-secondary);
-        margin-top: var(--spacing-md);
-        padding: var(--spacing-sm) var(--spacing-md);
-        background: var(--bg-tertiary);
-        border-radius: var(--radius-sm);
     }
 
     .owner-actions {

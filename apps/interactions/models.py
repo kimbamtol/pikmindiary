@@ -62,45 +62,6 @@ class Bookmark(models.Model):
         return f"{self.user.nickname} ★ {self.coordinate.title}"
 
 
-class ValidityFeedback(models.Model):
-    """유효성 평가 (지금도 됨 / 이제 안 됨)"""
-    
-    class FeedbackType(models.TextChoices):
-        VALID = 'VALID', _('지금도 됨')
-        INVALID = 'INVALID', _('이제 안 됨')
-    
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name='validity_feedbacks',
-        verbose_name=_('사용자')
-    )
-    coordinate = models.ForeignKey(
-        'coordinates.Coordinate',
-        on_delete=models.CASCADE,
-        related_name='validity_feedbacks',
-        verbose_name=_('좌표')
-    )
-    feedback_type = models.CharField(
-        _('평가 유형'),
-        max_length=10,
-        choices=FeedbackType.choices
-    )
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    
-    class Meta:
-        verbose_name = _('유효성 평가')
-        verbose_name_plural = _('유효성 평가들')
-        unique_together = ['user', 'coordinate']
-        indexes = [
-            models.Index(fields=['coordinate', 'feedback_type']),
-        ]
-    
-    def __str__(self):
-        return f"{self.user.nickname} - {self.coordinate.title}: {self.get_feedback_type_display()}"
-
-
 class CommentLike(models.Model):
     """댓글 좋아요"""
 

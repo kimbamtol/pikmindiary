@@ -1,4 +1,4 @@
-"""Interactions app URLs - 좋아요, 북마크, 유효성 평가, 알림"""
+"""Interactions app URLs - 좋아요, 북마크, 알림"""
 from django.urls import path
 from . import views
 
@@ -8,8 +8,6 @@ urlpatterns = [
     path('like/<int:coordinate_id>/', views.toggle_like, name='toggle_like'),
     path('comment-like/<int:comment_id>/', views.toggle_comment_like, name='toggle_comment_like'),
     path('bookmark/<int:coordinate_id>/', views.toggle_bookmark, name='toggle_bookmark'),
-    path('validity/<int:coordinate_id>/', views.submit_validity, name='submit_validity'),
-    
     # 알림 API
     path('notifications/', views.get_notifications, name='get_notifications'),
     path('notifications/unread-count/', views.get_unread_count, name='get_unread_count'),

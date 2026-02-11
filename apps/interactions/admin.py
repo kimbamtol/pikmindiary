@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Like, Bookmark, ValidityFeedback, Notification
+from .models import Like, Bookmark, Notification
 
 
 @admin.register(Like)
@@ -13,13 +13,6 @@ class LikeAdmin(admin.ModelAdmin):
 class BookmarkAdmin(admin.ModelAdmin):
     list_display = ['user', 'coordinate', 'created_at']
     list_filter = ['created_at']
-    search_fields = ['user__nickname', 'coordinate__title']
-
-
-@admin.register(ValidityFeedback)
-class ValidityFeedbackAdmin(admin.ModelAdmin):
-    list_display = ['user', 'coordinate', 'feedback_type', 'created_at']
-    list_filter = ['feedback_type', 'created_at']
     search_fields = ['user__nickname', 'coordinate__title']
 
 

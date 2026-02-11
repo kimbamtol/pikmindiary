@@ -48,11 +48,6 @@
                 <span class="stat-label">{% trans "받은 좋아요" %}</span>
             </div>
             <div class="stat-card card">
-                <span class="stat-icon">✅</span>
-                <span class="stat-value">{{ total_valid_received }}</span>
-                <span class="stat-label">{% trans "받은 검증" %}</span>
-            </div>
-            <div class="stat-card card">
                 <span class="stat-icon">⭐</span>
                 <span class="stat-value">{{ bookmark_count }}</span>
                 <span class="stat-label">{% trans "북마크" %}</span>
@@ -204,7 +199,7 @@
 
     .stats-grid {
         display: grid;
-        grid-template-columns: repeat(5, 1fr);
+        grid-template-columns: repeat(4, 1fr);
         gap: var(--spacing-md);
         margin-bottom: var(--spacing-xl);
     }

@@ -30,8 +30,6 @@ class Ranking(models.Model):
     # 점수 구성 요소 (디버깅 및 상세 표시용)
     approved_posts_count = models.PositiveIntegerField(_('승인된 글 수'), default=0)
     likes_received_count = models.PositiveIntegerField(_('받은 좋아요 수'), default=0)
-    valid_received_count = models.PositiveIntegerField(_('받은 VALID 수'), default=0)
-    invalid_received_count = models.PositiveIntegerField(_('받은 INVALID 수'), default=0)
     farming_likes_received_count = models.PositiveIntegerField(_('농사 일지 좋아요 수'), default=0)
     copy_received_count = models.PositiveIntegerField(_('받은 복사 수'), default=0)
     

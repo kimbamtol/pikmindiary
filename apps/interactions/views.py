@@ -1,4 +1,4 @@
-"""Interactions views - 좋아요, 북마크, 유효성 평가"""
+"""Interactions views - 좋아요, 북마크"""
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
@@ -6,7 +6,7 @@ from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 from django.utils import timezone
 
-from .models import Like, Bookmark, ValidityFeedback, Notification, CommentLike
+from .models import Like, Bookmark, Notification, CommentLike
 from apps.coordinates.models import Coordinate
 from apps.comments.models import Comment
 
@@ -152,123 +152,6 @@ def toggle_bookmark(request, coordinate_id):
     return JsonResponse({
         'bookmarked': bookmarked,
         'bookmark_count': coordinate.bookmark_count,
-    })
-
-
-@require_POST
-def submit_validity(request, coordinate_id):
-    """유효성 평가 제출 (비회원도 가능, 본인 글 제외, 작성 1개월 후부터)"""
-    from datetime import timedelta
-    
-    coordinate = get_object_or_404(Coordinate, pk=coordinate_id)
-    feedback_type = request.POST.get('feedback_type')
-    
-    # 작성 1개월 경과 체크
-    one_month_ago = timezone.now() - timedelta(days=30)
-    if coordinate.created_at > one_month_ago:
-        return JsonResponse({'error': _('작성 후 1개월이 지난 게시글만 평가할 수 있습니다.')}, status=400)
-
-    # 본인 글은 평가 불가
-    if request.user.is_authenticated and coordinate.author == request.user:
-        return JsonResponse({'error': _('본인 글은 평가할 수 없습니다.')}, status=400)
-
-    if feedback_type not in ['VALID', 'INVALID']:
-        return JsonResponse({'error': _('잘못된 평가 유형입니다.')}, status=400)
-    
-    if request.user.is_authenticated:
-        # 로그인 사용자: DB에서 관리
-        existing = ValidityFeedback.objects.filter(
-            user=request.user,
-            coordinate=coordinate
-        ).first()
-        
-        if existing:
-            old_type = existing.feedback_type
-            
-            if old_type == feedback_type:
-                # 같은 평가 클릭 시 취소
-                existing.delete()
-                if old_type == 'VALID':
-                    coordinate.valid_count = max(0, coordinate.valid_count - 1)
-                else:
-                    coordinate.invalid_count = max(0, coordinate.invalid_count - 1)
-                submitted = None
-            else:
-                # 다른 평가로 변경
-                existing.feedback_type = feedback_type
-                existing.save()
-                
-                if feedback_type == 'VALID':
-                    coordinate.valid_count += 1
-                    coordinate.invalid_count = max(0, coordinate.invalid_count - 1)
-                else:
-                    coordinate.invalid_count += 1
-                    coordinate.valid_count = max(0, coordinate.valid_count - 1)
-                submitted = feedback_type
-        else:
-            # 새 평가
-            ValidityFeedback.objects.create(
-                user=request.user,
-                coordinate=coordinate,
-                feedback_type=feedback_type
-            )
-            
-            if feedback_type == 'VALID':
-                coordinate.valid_count += 1
-            else:
-                coordinate.invalid_count += 1
-            submitted = feedback_type
-    else:
-        # 비회원: 세션으로 관리
-        validity_coords = request.session.get('validity_coords', {})
-        coord_key = str(coordinate_id)
-        current_vote = validity_coords.get(coord_key)
-        
-        if current_vote == feedback_type:
-            # 같은 평가 클릭 시 취소
-            del validity_coords[coord_key]
-            if feedback_type == 'VALID':
-                coordinate.valid_count = max(0, coordinate.valid_count - 1)
-            else:
-                coordinate.invalid_count = max(0, coordinate.invalid_count - 1)
-            submitted = None
-        else:
-            if current_vote:
-                # 기존 투표 취소
-                if current_vote == 'VALID':
-                    coordinate.valid_count = max(0, coordinate.valid_count - 1)
-                else:
-                    coordinate.invalid_count = max(0, coordinate.invalid_count - 1)
-            
-            # 새 투표
-            validity_coords[coord_key] = feedback_type
-            if feedback_type == 'VALID':
-                coordinate.valid_count += 1
-            else:
-                coordinate.invalid_count += 1
-            submitted = feedback_type
-        
-        request.session['validity_coords'] = validity_coords
-    
-    coordinate.last_verified_at = timezone.now()
-    coordinate.save(update_fields=['valid_count', 'invalid_count', 'last_verified_at'])
-    
-    # 작성자 통계 및 랭킹 업데이트
-    if coordinate.author:
-        coordinate.author.total_valid_received = ValidityFeedback.objects.filter(
-            coordinate__author=coordinate.author,
-            feedback_type='VALID'
-        ).count()
-        coordinate.author.save(update_fields=['total_valid_received'])
-        
-        # 랭킹 동기화
-        from apps.rankings.utils import update_user_ranking
-        update_user_ranking(coordinate.author)
-    
-    return JsonResponse({
-        'submitted': submitted,
-        'valid_count': coordinate.valid_count,
-        'invalid_count': coordinate.invalid_count,
     })
 
 

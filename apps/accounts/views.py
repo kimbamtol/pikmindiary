@@ -37,7 +37,6 @@ def my_page(request):
         'bookmark_count': bookmark_count,
         'recent_posts': recent_posts,
         'total_likes_received': user.total_likes_received,
-        'total_valid_received': user.total_valid_received,
         'my_suggestions': my_suggestions,
         'unread_replies': unread_replies,
     }

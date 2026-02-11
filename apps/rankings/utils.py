@@ -23,9 +23,9 @@ def get_period_start(period_type):
 def update_user_ranking(user):
     """사용자 랭킹 업데이트 (기간당 2개 쿼리로 최적화)"""
     from apps.coordinates.models import Coordinate
-    from apps.interactions.models import Like, ValidityFeedback
+    from apps.interactions.models import Like
     from apps.farming.models import FarmingJournalLike
-    from django.db.models import Sum, Count, Q
+    from django.db.models import Sum, Count
 
     if not user:
         return
@@ -44,13 +44,11 @@ def update_user_ranking(user):
         if is_all:
             coord_qs = Coordinate.objects.filter(author=user, status=Coordinate.Status.APPROVED)
             like_qs = Like.objects.filter(coordinate__author=user)
-            validity_qs = ValidityFeedback.objects.filter(coordinate__author=user)
             farming_qs = FarmingJournalLike.objects.filter(journal__author=user)
         else:
             start_datetime = timezone.make_aware(datetime.combine(period_start, datetime.min.time()))
             coord_qs = Coordinate.objects.filter(author=user, status=Coordinate.Status.APPROVED, approved_at__gte=start_datetime)
             like_qs = Like.objects.filter(coordinate__author=user, created_at__gte=start_datetime)
-            validity_qs = ValidityFeedback.objects.filter(coordinate__author=user, created_at__gte=start_datetime)
             farming_qs = FarmingJournalLike.objects.filter(journal__author=user, created_at__gte=start_datetime)
 
         # 좌표 통계: 승인된 글 수 + 복사 합계 (1개 쿼리)
@@ -64,14 +62,6 @@ def update_user_ranking(user):
         # 좋아요 수 (1개 쿼리)
         ranking.likes_received_count = like_qs.count()
 
-        # VALID/INVALID 동시 집계 (1개 쿼리)
-        validity_stats = validity_qs.aggregate(
-            valid=Count('id', filter=Q(feedback_type=ValidityFeedback.FeedbackType.VALID)),
-            invalid=Count('id', filter=Q(feedback_type=ValidityFeedback.FeedbackType.INVALID)),
-        )
-        ranking.valid_received_count = validity_stats['valid'] or 0
-        ranking.invalid_received_count = validity_stats['invalid'] or 0
-
         # 농사 일지 좋아요 수 (1개 쿼리)
         ranking.farming_likes_received_count = farming_qs.count()
 
@@ -79,8 +69,6 @@ def update_user_ranking(user):
         ranking.save(update_fields=[
             'approved_posts_count',
             'likes_received_count',
-            'valid_received_count',
-            'invalid_received_count',
             'farming_likes_received_count',
             'copy_received_count',
             'score',

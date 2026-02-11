@@ -32,23 +32,8 @@
             <ul>
                 <li><strong>{% trans "검색" %}</strong>: {% trans "제목, 설명, 작성자 닉네임으로 검색" %}</li>
                 <li><strong>{% trans "카테고리" %}</strong>: {% trans "버섯/빅플라워/모종 등으로 필터링" %}</li>
-                <li><strong>{% trans "정렬" %}</strong>: {% trans "최신순, 좋아요순, 검증순" %}</li>
+                <li><strong>{% trans "정렬" %}</strong>: {% trans "최신순, 좋아요순, 북마크순" %}</li>
             </ul>
-        </div>
-
-        <div class="guide-section">
-            <h2>✅ {% trans "유효성 평가" %}</h2>
-            <p>
-                {% trans "좌표가" %} <strong>{% trans "지금도 유효한지" %}</strong> {% trans "다른 유저들이 평가합니다." %}
-            </p>
-            <div class="validity-example">
-                <button class="btn-validity valid">✅ {% trans "지금도 됨" %}</button>
-                <button class="btn-validity invalid">❌ {% trans "이제 안 됨" %}</button>
-            </div>
-            <p>
-                {% trans "평가가 많이 쌓인 좌표는" %} <strong>{% trans "\"검증된 좌표\"" %}</strong>{% trans "로 표시되고," %}
-                {% trans "반대로 \"이제 안 됨\"이 많으면" %} <strong>{% trans "\"신뢰도 낮음\"" %}</strong> {% trans "배지가 붙습니다." %}
-            </p>
         </div>
 
         <div class="guide-section">
@@ -59,8 +44,6 @@
             <ul>
                 <li>{% trans "승인된 글 작성:" %} <strong>+10{% trans "점" %}</strong></li>
                 <li>{% trans "받은 좋아요 (좌표):" %} <strong>+2{% trans "점" %}</strong></li>
-                <li>{% trans "받은 \"지금도 됨\" 평가:" %} <strong>+3{% trans "점" %}</strong></li>
-                <li>{% trans "받은 \"이제 안 됨\" 평가:" %} <strong class="negative">-5{% trans "점" %}</strong></li>
                 <li>🌱 {% trans "농사 일지 좋아요:" %} <strong>+10{% trans "점" %}</strong></li>
             </ul>
             <p>{% trans "전체/주간/월간 랭킹에서 상위 기여자를 확인할 수 있습니다." %}</p>
@@ -145,34 +128,11 @@
         margin: var(--spacing-md) 0;
     }
 
-    .btn-validity {
-        padding: var(--spacing-sm) var(--spacing-md);
-        border-radius: var(--radius-md);
-        font-weight: 600;
-        cursor: default;
-    }
-
-    .btn-validity.valid {
-        background: #E8F5E9;
-        color: #2E7D32;
-        border: 2px solid #4CAF50;
-    }
-
-    .btn-validity.invalid {
-        background: #FFEBEE;
-        color: #C62828;
-        border: 2px solid #F44336;
-    }
-
     .guide-actions {
         display: flex;
         justify-content: space-between;
         gap: var(--spacing-md);
         margin-top: var(--spacing-xl);
-    }
-
-    .negative {
-        color: #C62828;
     }
 
     .tip {

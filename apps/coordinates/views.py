@@ -10,7 +10,7 @@ from django.utils.translation import gettext as _
 from django.contrib.auth.hashers import make_password, check_password
 
 from .models import Coordinate, CoordinateImage
-from apps.interactions.models import Like, Bookmark, ValidityFeedback
+from apps.interactions.models import Like, Bookmark
 from apps.rankings.utils import update_user_ranking
 
 
@@ -156,22 +156,10 @@ def coordinate_detail(request, pk):
     # 사용자 상호작용 상태
     user_liked = False
     user_bookmarked = False
-    user_validity = None
-    
     if request.user.is_authenticated:
         user_liked = Like.objects.filter(user=request.user, coordinate=coordinate).exists()
         user_bookmarked = Bookmark.objects.filter(user=request.user, coordinate=coordinate).exists()
-        validity_feedback = ValidityFeedback.objects.filter(user=request.user, coordinate=coordinate).first()
-        if validity_feedback:
-            user_validity = validity_feedback.feedback_type
-    
-    # 유효성 평가 1개월 제한 체크
-    one_month_ago = timezone.now() - timedelta(days=30)
-    can_submit_validity = coordinate.created_at <= one_month_ago
-    days_until_validity = 0
-    if not can_submit_validity:
-        days_until_validity = 30 - (timezone.now() - coordinate.created_at).days
-    
+
     # 댓글 정렬
     from apps.comments.models import Comment
     from apps.interactions.models import CommentLike
@@ -214,9 +202,6 @@ def coordinate_detail(request, pk):
         'images': coordinate.images.all(),
         'user_liked': user_liked,
         'user_bookmarked': user_bookmarked,
-        'user_validity': user_validity,
-        'can_submit_validity': can_submit_validity,
-        'days_until_validity': days_until_validity,
         'comments': comments,
         'comment_sort': sort,
         'user_liked_comments': user_liked_comments,

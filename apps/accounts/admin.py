@@ -16,7 +16,7 @@ class CustomUserAdmin(UserAdmin):
             'fields': ('nickname', 'bio', 'profile_image', 'profile_emoji', 'special_title')
         }),
         ('통계', {
-            'fields': ('total_posts', 'total_likes_received', 'total_valid_received'),
+            'fields': ('total_posts', 'total_likes_received'),
             'classes': ('collapse',)
         }),
     )
