@@ -44,6 +44,8 @@ Thumbs.db
 # Claude Code
 .agent/
 .claude/
+CLAUDE.md
+PROJECT_CONTEXT.md
 
 # Utility scripts (one-off)
 compare_regions.py
