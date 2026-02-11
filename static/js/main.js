@@ -2,6 +2,11 @@
  * 메인 JavaScript
  */
 
+// TRANSLATIONS 안전 접근 헬퍼
+function t(key) {
+    return (typeof TRANSLATIONS !== 'undefined' && TRANSLATIONS[key]) || key;
+}
+
 // ============================================
 // 테마 선택 (계절/날씨)
 // ============================================
@@ -31,10 +36,10 @@ function setTheme(season, weather) {
     closeThemeSelector();
 
     // 토스트 메시지
-    const seasonNames = { spring: '🌸 봄', summer: '🌻 여름', fall: '🍂 가을', winter: '❄️ 겨울' };
-    const weatherNames = { clear: '☀️ 맑음', rain: '🌧️ 비', snow: '🌨️ 눈', storm: '⛈️ 폭풍', cloudy: '☁️ 흐림', wind: '💨 바람' };
+    var seasonNames = { spring: '🌸 ' + t('spring'), summer: '🌻 ' + t('summer'), fall: '🍂 ' + t('fall'), winter: '❄️ ' + t('winter') };
+    var weatherNames = { clear: '☀️ ' + t('clear'), rain: '🌧️ ' + t('rain'), snow: '🌨️ ' + t('snow'), storm: '⛈️ ' + t('storm'), cloudy: '☁️ ' + t('cloudy'), wind: '💨 ' + t('wind') };
 
-    showToast(`${seasonNames[season]} - ${weatherNames[weather]} 테마 적용!`);
+    showToast(seasonNames[season] + ' - ' + weatherNames[weather] + ' ' + t('themeApplied'));
 }
 
 // 자동 테마 (위치 기반)
@@ -46,7 +51,7 @@ function setAutoTheme() {
     closeThemeSelector();
 
     // 페이지 새로고침으로 자동 테마 적용
-    showToast('🔄 자동 테마 모드로 전환합니다...', 'success');
+    showToast('🔄 ' + t('autoThemeSwitch'), 'success');
     setTimeout(() => location.reload(), 1000);
 }
 
@@ -76,6 +81,29 @@ document.addEventListener('DOMContentLoaded', () => {
                         s.querySelector('.theme-btn')?.setAttribute('aria-expanded', 'false');
                     }
                 });
+                // 언어 선택기 닫기
+                document.querySelectorAll('.language-selector').forEach(s => s.classList.remove('open'));
+                const isOpen = selector.classList.toggle('open');
+                btn.setAttribute('aria-expanded', isOpen);
+            }
+        });
+    });
+
+    // 언어 선택 버튼 클릭 이벤트
+    const langBtns = document.querySelectorAll('.lang-btn');
+    langBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const selector = btn.closest('.language-selector');
+            if (selector) {
+                document.querySelectorAll('.language-selector').forEach(s => {
+                    if (s !== selector) s.classList.remove('open');
+                });
+                // 테마 선택기 닫기
+                document.querySelectorAll('.theme-selector').forEach(s => {
+                    s.classList.remove('open');
+                    s.querySelector('.theme-btn')?.setAttribute('aria-expanded', 'false');
+                });
                 const isOpen = selector.classList.toggle('open');
                 btn.setAttribute('aria-expanded', isOpen);
             }
@@ -90,7 +118,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 selector.querySelector('.theme-btn')?.setAttribute('aria-expanded', 'false');
             }
         });
+        document.querySelectorAll('.language-selector').forEach(selector => {
+            if (!selector.contains(e.target)) {
+                selector.classList.remove('open');
+            }
+        });
     });
+
+    // 위치 기반 언어 자동 감지 (첫 방문 시)
+    autoDetectLanguageByLocation();
 });
 
 // 낮/밤 시간대 설정 (6시~18시 낮, 나머지 밤) - 자동 모드일 때만
@@ -114,8 +150,76 @@ function setTimeMode(mode) {
     localStorage.setItem('manualTime', mode);
     closeThemeSelector();
 
-    const modeNames = { day: '🌤️ 낮', night: '🌙 밤' };
-    showToast(`${modeNames[mode]} 모드 적용!`);
+    showToast(mode === 'day' ? t('dayMode') : t('nightMode'));
+}
+
+// ============================================
+// 위치 기반 언어 자동 감지
+// ============================================
+function autoDetectLanguageByLocation() {
+    // 이미 수동 선택한 적이 있으면 스킵
+    if (localStorage.getItem('langManuallySet')) return;
+    // 쿠키에 django_language가 있으면 스킵 (이미 설정됨)
+    if (getCookie('django_language')) return;
+
+    // 위치 권한이 허용되어 있을 때만 (landing에서 이미 요청한 상태)
+    if (!navigator.geolocation) return;
+
+    navigator.geolocation.getCurrentPosition(function(position) {
+        var lat = position.coords.latitude;
+        var lng = position.coords.longitude;
+        var detectedLang = detectLanguageFromCoords(lat, lng);
+
+        // 현재 언어와 다르면 자동 전환
+        var htmlLang = document.documentElement.lang || 'ko';
+        if (detectedLang && detectedLang !== htmlLang) {
+            // CSRF 토큰으로 언어 변경 POST
+            var csrfToken = getCookie('csrftoken');
+            if (csrfToken) {
+                var form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '/i18n/setlang/';
+                form.style.display = 'none';
+
+                var csrfInput = document.createElement('input');
+                csrfInput.type = 'hidden';
+                csrfInput.name = 'csrfmiddlewaretoken';
+                csrfInput.value = csrfToken;
+                form.appendChild(csrfInput);
+
+                var langInput = document.createElement('input');
+                langInput.type = 'hidden';
+                langInput.name = 'language';
+                langInput.value = detectedLang;
+                form.appendChild(langInput);
+
+                var nextInput = document.createElement('input');
+                nextInput.type = 'hidden';
+                nextInput.name = 'next';
+                nextInput.value = window.location.pathname;
+                form.appendChild(nextInput);
+
+                document.body.appendChild(form);
+                localStorage.setItem('langManuallySet', 'auto');
+                form.submit();
+            }
+        }
+    }, function() {
+        // 위치 권한 거부 - 무시
+    }, { timeout: 5000, maximumAge: 300000 });
+}
+
+function detectLanguageFromCoords(lat, lng) {
+    // 일본 영역 (대략적 범위)
+    if (lat >= 24 && lat <= 46 && lng >= 122 && lng <= 154) {
+        return 'ja';
+    }
+    // 한국 영역 (대략적 범위)
+    if (lat >= 33 && lat <= 43 && lng >= 124 && lng <= 132) {
+        return 'ko';
+    }
+    // 그 외 영어
+    return 'en';
 }
 
 // ============================================
@@ -244,12 +348,12 @@ function copyCoords(coordinateId) {
 
             function showSuccess() {
                 if (copyBtn) {
-                    copyBtn.innerHTML = '✅ 복사됨';
+                    copyBtn.innerHTML = '✅ ' + t('copied');
                     setTimeout(function () {
-                        copyBtn.innerHTML = '📋 복사';
+                        copyBtn.innerHTML = '📋 ' + t('copy');
                     }, 1500);
                 }
-                showToast('좌표가 클립보드에 복사되었습니다!');
+                showToast(t('coordsCopied'));
             }
 
             // iOS/Safari 감지
@@ -270,7 +374,7 @@ function copyCoords(coordinateId) {
         })
         .catch(function (error) {
             console.error('Copy failed:', error);
-            showToast('복사에 실패했습니다.', 'error');
+            showToast(t('copyFailed'), 'error');
         });
 }
 
@@ -305,10 +409,10 @@ function copyTextForiOS(text, callback) {
         if (success) {
             callback();
         } else {
-            alert('복사됨: ' + text);
+            alert(t('copied') + ': ' + text);
         }
     } catch (err) {
-        alert('복사됨: ' + text);
+        alert(t('copied') + ': ' + text);
     }
 
     document.body.removeChild(input);
@@ -329,7 +433,7 @@ function copyTextFallback(text, callback) {
         document.execCommand('copy');
         callback();
     } catch (err) {
-        alert('복사됨: ' + text);
+        alert(t('copied') + ': ' + text);
     }
 
     document.body.removeChild(textarea);
@@ -395,6 +499,13 @@ document.addEventListener('DOMContentLoaded', () => {
             loadNotificationsMobile();
         });
     }
+
+    // 언어 수동 선택 시 localStorage에 기록
+    document.querySelectorAll('.lang-option').forEach(btn => {
+        btn.addEventListener('click', () => {
+            localStorage.setItem('langManuallySet', 'true');
+        });
+    });
 });
 
 // 이미지 미리보기
@@ -412,7 +523,7 @@ function previewImages(input) {
             const div = document.createElement('div');
             div.className = 'preview-image';
             div.innerHTML = `
-                <img src="${e.target.result}" alt="미리보기 ${index + 1}">
+                <img src="${e.target.result}" alt="Preview ${index + 1}">
                 <button type="button" class="preview-remove" onclick="removePreviewImage(${index})">×</button>
             `;
             preview.appendChild(div);
@@ -473,7 +584,7 @@ async function loadNotifications() {
                     ? '/accounts/my/suggestions/'
                     : `/coordinates/${notif.coordinate_id}/`;
                 return `
-                <a href="${url}" 
+                <a href="${url}"
                    class="notification-item ${notif.is_read ? '' : 'unread'}"
                    data-id="${notif.id}"
                    onclick="markNotificationRead(${notif.id})">
@@ -483,11 +594,11 @@ async function loadNotifications() {
             `;
             }).join('');
         } else {
-            list.innerHTML = '<div class="notification-empty">알림이 없습니다</div>';
+            list.innerHTML = '<div class="notification-empty">' + t('noNotifications') + '</div>';
         }
     } catch (error) {
         console.error('Failed to load notifications:', error);
-        list.innerHTML = '<div class="notification-empty">알림을 불러올 수 없습니다</div>';
+        list.innerHTML = '<div class="notification-empty">' + t('loadNotifFailed') + '</div>';
     }
 }
 
@@ -506,7 +617,7 @@ async function loadNotificationsMobile() {
                     ? '/accounts/my/suggestions/'
                     : `/coordinates/${notif.coordinate_id}/`;
                 return `
-                <a href="${url}" 
+                <a href="${url}"
                    class="notification-item ${notif.is_read ? '' : 'unread'}"
                    data-id="${notif.id}"
                    onclick="markNotificationRead(${notif.id})">
@@ -516,11 +627,11 @@ async function loadNotificationsMobile() {
             `;
             }).join('');
         } else {
-            list.innerHTML = '<div class="notification-empty">알림이 없습니다</div>';
+            list.innerHTML = '<div class="notification-empty">' + t('noNotifications') + '</div>';
         }
     } catch (error) {
         console.error('Failed to load mobile notifications:', error);
-        list.innerHTML = '<div class="notification-empty">알림을 불러올 수 없습니다</div>';
+        list.innerHTML = '<div class="notification-empty">' + t('loadNotifFailed') + '</div>';
     }
 }
 
@@ -583,7 +694,7 @@ async function markAllNotificationsRead() {
 
 // 모든 알림 삭제
 async function deleteAllNotifications() {
-    if (!confirm('모든 알림을 삭제하시겠습니까?')) return;
+    if (!confirm(t('deleteAllConfirm'))) return;
 
     try {
         await fetchWithCSRF('/interactions/notifications/delete-all/', {

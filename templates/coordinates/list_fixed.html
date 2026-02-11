@@ -1,16 +1,17 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load i18n %}
 
-{% block title %}피크민 좌표 목록 - 버섯, 모종, 빅플라워 좌표 모음 | 피크민 다이어리{% endblock %}
-{% block description %}피크민 블룸 버섯 좌표, 모종 좌표, 빅플라워 위치를 한눈에! 유저들이 공유한 피크민 엽서 좌표를 검색하고 복사하세요.{% endblock %}
-{% block og_title %}피크민 좌표 목록 - 피크민 블룸 좌표 모음{% endblock %}
+{% block title %}{% trans "피크민 좌표 목록 - 버섯, 모종, 빅플라워 좌표 모음 | 피크민 다이어리" %}{% endblock %}
+{% block description %}{% trans "피크민 블룸 버섯 좌표, 모종 좌표, 빅플라워 위치를 한눈에! 유저들이 공유한 피크민 엽서 좌표를 검색하고 복사하세요." %}{% endblock %}
+{% block og_title %}{% trans "피크민 좌표 목록 - 피크민 블룸 좌표 모음" %}{% endblock %}
 
 {% block content %}
 <div class="container">
     <div class="list-header">
-        <h1 class="page-title">📍 좌표 목록</h1>
+        <h1 class="page-title">📍 {% trans "좌표 목록" %}</h1>
         <a href="{% url 'coordinates:create' %}" class="btn btn-primary">
-            ✏️ 새 좌표 제보
+            ✏️ {% trans "새 좌표 제보" %}
         </a>
     </div>
 
@@ -18,7 +19,7 @@
         <!-- 좌측 랭킹 위젯 -->
         <aside class="ranking-sidebar">
             <div class="ranking-widget">
-                <h3 class="ranking-widget-title">🏆 TOP 5 랭커</h3>
+                <h3 class="ranking-widget-title">🏆 {% trans "TOP 5 랭커" %}</h3>
                 {% if ranker_stats %}
                 <div class="ranking-widget-list">
                     {% for stat in ranker_stats %}
@@ -39,14 +40,14 @@
                             <span title="빅플라워">🌻{{ stat.bigflower }}</span>
                             <span title="모종">🌱{{ stat.seedling }}</span>
                             <span title="총 글 수">📝{{ stat.total_posts }}</span>
-                            <span class="ranker-score">{{ stat.ranking.score }}점</span>
+                            <span class="ranker-score">{{ stat.ranking.score }}{% trans "점" %}</span>
                         </div>
                     </a>
                     {% endfor %}
                 </div>
-                <a href="{% url 'rankings:list' %}" class="ranking-widget-more">더보기 →</a>
+                <a href="{% url 'rankings:list' %}" class="ranking-widget-more">{% trans "더보기" %} →</a>
                 {% else %}
-                <p class="ranking-widget-empty">아직 랭킹이 없어요</p>
+                <p class="ranking-widget-empty">{% trans "아직 랭킹이 없어요" %}</p>
                 {% endif %}
             </div>
 
@@ -67,21 +68,21 @@
             <div class="filter-bar">
                 <form method="get" class="filter-form">
                     <div class="search-box">
-                        <input type="text" name="q" value="{{ query }}" placeholder="제목, 엽서이름, 닉네임 검색..."
+                        <input type="text" name="q" value="{{ query }}" placeholder="{% trans "제목, 엽서이름, 닉네임 검색..." %}"
                             class="form-control">
                         <button type="submit" class="btn btn-primary">🔍</button>
                     </div>
 
                     <div class="filter-options">
                         <select name="category" class="form-control" onchange="this.form.submit()">
-                            <option value="">전체 카테고리</option>
+                            <option value="">{% trans "전체 카테고리" %}</option>
                             {% for value, label in categories %}
                             <option value="{{ value }}" {% if category==value %}selected{% endif %}>{{ label }}</option>
                             {% endfor %}
                         </select>
 
                         <select name="region" class="form-control" onchange="this.form.submit()">
-                            <option value="">전체 지역</option>
+                            <option value="">{% trans "전체 지역" %}</option>
                             {% for value, label in regions %}
                             <option value="{{ value }}" {% if region_filter==value %}selected{% endif %}>{{ label }}
                             </option>
@@ -89,10 +90,10 @@
                         </select>
 
                         <select name="sort" class="form-control" onchange="this.form.submit()">
-                            <option value="latest" {% if sort=="latest" %}selected{% endif %}>최신순</option>
-                            <option value="copies" {% if sort=="copies" %}selected{% endif %}>복사순</option>
-                            <option value="likes" {% if sort=="likes" %}selected{% endif %}>좋아요순</option>
-                            <option value="bookmarks" {% if sort=="bookmarks" %}selected{% endif %}>북마크순</option>
+                            <option value="latest" {% if sort=="latest" %}selected{% endif %}>{% trans "최신순" %}</option>
+                            <option value="copies" {% if sort=="copies" %}selected{% endif %}>{% trans "복사순" %}</option>
+                            <option value="likes" {% if sort=="likes" %}selected{% endif %}>{% trans "좋아요순" %}</option>
+                            <option value="bookmarks" {% if sort=="bookmarks" %}selected{% endif %}>{% trans "북마크순" %}</option>
                         </select>
                     </div>
                 </form>
@@ -114,7 +115,7 @@
                                 {{ coord.get_category_display }}
                             </span>
                             {% if coord.is_outdated %}
-                            <span class="badge badge-warning coord-card-badge">오래됨</span>
+                            <span class="badge badge-warning coord-card-badge">{% trans "오래됨" %}</span>
                             {% endif %}
                         </div>
 
@@ -128,7 +129,7 @@
                                 <span class="coord-region">{{ coord.get_region_display }}</span>
                             </div>
                             <div class="coord-card-meta">
-                                <span>{{ coord.author.nickname|default:"익명" }}</span>
+                                <span>{{ coord.author.nickname|default:_("익명") }}</span>
                             </div>
                         </div>
                     </a>
@@ -156,22 +157,22 @@
             {% if has_next %}
             <div id="scroll-sentinel" class="scroll-loading">
                 <div class="loading-spinner"></div>
-                <span>로딩 중...</span>
+                <span>{% trans "로딩 중..." %}</span>
             </div>
             {% endif %}
 
             {% else %}
             <div class="empty-state">
                 <div class="empty-state-icon">🗺️</div>
-                <h2 class="empty-state-title">좌표가 없습니다</h2>
+                <h2 class="empty-state-title">{% trans "좌표가 없습니다" %}</h2>
                 <p class="empty-state-desc">
                     {% if query or category %}
-                    검색 조건에 맞는 좌표가 없습니다.
+                    {% trans "검색 조건에 맞는 좌표가 없습니다." %}
                     {% else %}
-                    첫 번째 좌표를 제보해주세요!
+                    {% trans "첫 번째 좌표를 제보해주세요!" %}
                     {% endif %}
                 </p>
-                <a href="{% url 'coordinates:create' %}" class="btn btn-primary">새 좌표 제보</a>
+                <a href="{% url 'coordinates:create' %}" class="btn btn-primary">{% trans "새 좌표 제보" %}</a>
             </div>
             {% endif %}
         </main>
@@ -540,7 +541,7 @@
     }
 </style>
 
-<div id="copy-toast" class="copy-toast">✅ 복사되었습니다<br><small>좋아요와 댓글은 업로더분에게 큰 힘이 됩니다!</small></div>
+<div id="copy-toast" class="copy-toast">✅ {% trans "복사되었습니다" %}<br><small>{% trans "좋아요와 댓글은 업로더분에게 큰 힘이 됩니다!" %}</small></div>
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {

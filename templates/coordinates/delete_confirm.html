@@ -1,11 +1,12 @@
 {% extends 'base.html' %}
+{% load i18n %}
 
-{% block title %}좌표 삭제 - 피크민 다이어리{% endblock %}
+{% block title %}{% trans "좌표 삭제" %} - {% trans "피크민 다이어리" %}{% endblock %}
 
 {% block content %}
 <div class="container">
     <div class="confirm-page">
-        <h1 class="page-title">🗑️ 좌표 삭제</h1>
+        <h1 class="page-title">🗑️ {% trans "좌표 삭제" %}</h1>
 
         <div class="confirm-box">
             <div class="coordinate-preview">
@@ -20,8 +21,8 @@
             </div>
 
             <div class="warning-text">
-                <p>⚠️ 정말로 이 좌표를 삭제하시겠습니까?</p>
-                <p>삭제된 좌표는 복구할 수 없습니다.</p>
+                <p>⚠️ {% trans "정말로 이 좌표를 삭제하시겠습니까?" %}</p>
+                <p>{% trans "삭제된 좌표는 복구할 수 없습니다." %}</p>
             </div>
 
             <form method="post" class="delete-form">
@@ -30,14 +31,14 @@
                 <!-- 비회원 비밀번호 확인 -->
                 {% if not can_delete and coordinate.guest_password %}
                 <div class="form-group">
-                    <label class="form-label">비밀번호 *</label>
-                    <input type="password" name="password" class="form-control" required placeholder="작성 시 입력한 비밀번호">
+                    <label class="form-label">{% trans "비밀번호" %} *</label>
+                    <input type="password" name="password" class="form-control" required placeholder="{% trans "작성 시 입력한 비밀번호" %}">
                 </div>
                 {% endif %}
 
                 <div class="form-actions">
-                    <a href="{% url 'coordinates:detail' pk=coordinate.pk %}" class="btn btn-outline">취소</a>
-                    <button type="submit" class="btn btn-danger">삭제하기</button>
+                    <a href="{% url 'coordinates:detail' pk=coordinate.pk %}" class="btn btn-outline">{% trans "취소" %}</a>
+                    <button type="submit" class="btn btn-danger">{% trans "삭제하기" %}</button>
                 </div>
             </form>
         </div>

@@ -1,9 +1,10 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load i18n %}
 
-{% block title %}피크민 좌표 지도 - 버섯, 모종, 빅플라워 위치 지도 | 피크민 다이어리{% endblock %}
-{% block description %}피크민 블룸 지도로 주변 버섯, 모종, 빅플라워 좌표를 한눈에 확인하세요. 피크민 엽서 위치를 쉽게 찾을 수 있습니다.{% endblock %}
-{% block og_title %}피크민 좌표 지도 - 피크민 블룸 위치 지도{% endblock %}
+{% block title %}{% trans "피크민 좌표 지도 - 버섯, 모종, 빅플라워 위치 지도 | 피크민 다이어리" %}{% endblock %}
+{% block description %}{% trans "피크민 블룸 지도로 주변 버섯, 모종, 빅플라워 좌표를 한눈에 확인하세요. 피크민 엽서 위치를 쉽게 찾을 수 있습니다." %}{% endblock %}
+{% block og_title %}{% trans "피크민 좌표 지도 - 피크민 블룸 위치 지도" %}{% endblock %}
 
 {% block extra_css %}
 <!-- Leaflet CSS -->
@@ -552,31 +553,31 @@
     <!-- 왼쪽 컨트롤 -->
     <div class="map-controls">
         <a href="{% url 'coordinates:list' %}" class="back-btn">
-            ← 목록으로
+            ← {% trans "목록으로" %}
         </a>
         <button class="list-btn" id="listToggle">
-            📋 리스트 (<span id="visibleCount">0</span>)
+            📋 {% trans "리스트" %} (<span id="visibleCount">0</span>)
         </button>
         <button class="location-btn" id="myLocationBtn">
-            📍 내 위치로
+            📍 {% trans "내 위치로" %}
         </button>
         <a href="{% url 'coordinates:create' %}?from_map=1" class="report-btn" id="reportBtn">
-            ➕ 제보하기
+            ➕ {% trans "제보하기" %}
         </a>
     </div>
 
     <!-- 오른쪽 필터 -->
     <div class="map-filters">
         <div class="filter-box">
-            <label><input type="checkbox" class="category-filter" value="MUSHROOM" checked> 🍄 버섯</label>
-            <label><input type="checkbox" class="category-filter" value="BIGFLOWER" checked> 🌸 빅플라워</label>
-            <label><input type="checkbox" class="category-filter" value="SEEDLING" checked> 🌱 모종</label>
-            <label><input type="checkbox" class="category-filter" value="OTHER" checked> 📍 기타</label>
+            <label><input type="checkbox" class="category-filter" value="MUSHROOM" checked> 🍄 {% trans "버섯" %}</label>
+            <label><input type="checkbox" class="category-filter" value="BIGFLOWER" checked> 🌸 {% trans "빅플라워" %}</label>
+            <label><input type="checkbox" class="category-filter" value="SEEDLING" checked> 🌱 {% trans "모종" %}</label>
+            <label><input type="checkbox" class="category-filter" value="OTHER" checked> 📍 {% trans "기타" %}</label>
         </div>
         <!-- 검색 바 -->
         <div class="map-search-box">
-            <input type="text" id="mapViewSearchInput" class="map-view-search-input" placeholder="🔍 장소, 주소 검색...">
-            <button type="button" class="map-view-search-btn" id="mapViewSearchBtn">검색</button>
+            <input type="text" id="mapViewSearchInput" class="map-view-search-input" placeholder="🔍 {% trans "장소, 주소 검색..." %}">
+            <button type="button" class="map-view-search-btn" id="mapViewSearchBtn">{% trans "검색" %}</button>
         </div>
         <div id="mapViewSearchResults" class="map-view-search-results"></div>
     </div>
@@ -588,7 +589,7 @@
             <button class="list-close" id="listClose">×</button>
         </div>
         <div class="list-content" id="listContent">
-            <div class="list-empty">지도를 이동하면 보이는 게시글이 표시됩니다.</div>
+            <div class="list-empty">{% trans "지도를 이동하면 보이는 게시글이 표시됩니다." %}</div>
         </div>
     </div>
 

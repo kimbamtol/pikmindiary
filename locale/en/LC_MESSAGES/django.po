@@ -1,0 +1,1938 @@
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: pikmin-diary 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-02-11 14:06\n"
+"PO-Revision-Date: 2026-02-11 14:06\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+msgid "%(name)s님이 '%(title)s'에 %(emoji)s 댓글을 남겼어요"
+msgstr "%(name)s left a %(emoji)s comment on '%(title)s'"
+
+msgid "%(name)s님이 회원님의 댓글에 %(emoji)s 답글을 남겼어요"
+msgstr "%(name)s left a %(emoji)s reply to your comment"
+
+msgid "%(nickname)s님이 '%(title)s'에 ❤️ 좋아요를 눌렀어요"
+msgstr "%(nickname)s liked '%(title)s' ❤️"
+
+msgid "'%(title)s'이(가) 📋 %(milestone)s회 복사되었어요!"
+msgstr "'%(title)s' has been copied 📋 %(milestone)s times!"
+
+msgid "1개월"
+msgstr "1 month"
+
+msgid "1년"
+msgstr "1 year"
+
+msgid "1일"
+msgstr "1 day"
+
+msgid "3일"
+msgstr "3 days"
+
+msgid "7일"
+msgstr "7 days"
+
+msgid "Google 계정"
+msgstr "Google account"
+
+msgid "Google 계정으로 가입"
+msgstr "Sign up with Google"
+
+msgid "Google 계정으로 계속"
+msgstr "Continue with Google"
+
+msgid "Google 계정으로 계속하시겠습니까?"
+msgstr "Would you like to continue with Google?"
+
+msgid "Google 계정으로 로그인"
+msgstr "Sign in with Google"
+
+msgid "Google 계정으로 피크민 다이어리에 로그인합니다"
+msgstr "Sign in to Pikmin Diary with your Google account"
+
+msgid "Google 로그인"
+msgstr "Google Sign-In"
+
+msgid "IP 주소"
+msgstr "IP Address"
+
+msgid "JPEG, PNG, WebP 형식, 각 최대 5MB"
+msgstr "JPEG, PNG, WebP format, max 5MB each"
+
+msgid "Nintendo 또는 Niantic과 관련이 없습니다."
+msgstr "Not affiliated with Nintendo or Niantic."
+
+msgid "TOP 5 랭커"
+msgstr "TOP 5 Rankers"
+
+msgid "가을"
+msgstr "Autumn"
+
+msgid "가을 날씨"
+msgstr "Autumn weather"
+
+msgid "가입하기"
+msgstr "Sign Up"
+
+msgid "개인정보가 포함된 스크린샷은 사용하지 마세요."
+msgstr "Do not use screenshots containing personal information."
+
+msgid "개척자"
+msgstr "Pioneer"
+
+msgid "거절"
+msgstr "Reject"
+
+msgid "거절됨"
+msgstr "Rejected"
+
+msgid "거짓 좌표 제보 시 계정이 정지될 수 있습니다."
+msgstr "Submitting false coordinates may result in account suspension."
+
+msgid "건의 완료"
+msgstr "Suggestion complete"
+
+msgid "건의사항 답변"
+msgstr "Suggestion response"
+
+msgid "건의사항을 자유롭게 작성해주세요"
+msgstr "Feel free to write your suggestions"
+
+msgid "건의사항이 성공적으로 접수되었습니다!"
+msgstr "Your suggestion has been successfully submitted!"
+
+msgid "건의사항이 없습니다"
+msgstr "No suggestions"
+
+msgid "건의사항이 접수되었습니다!"
+msgstr "Your suggestion has been submitted!"
+
+msgid "건의하기"
+msgstr "Submit Suggestion"
+
+msgid "검색"
+msgstr "Search"
+
+msgid "검색 조건에 맞는 좌표가 없습니다."
+msgstr "No coordinates match your search criteria."
+
+msgid "겨울"
+msgstr "Winter"
+
+msgid "겨울 날씨"
+msgstr "Winter weather"
+
+msgid "경도"
+msgstr "Longitude"
+
+msgid "경도 (Longitude)"
+msgstr "Longitude"
+
+msgid "계정 관리"
+msgstr "Account Management"
+
+msgid "계정 설정"
+msgstr "Account Settings"
+
+msgid "과"
+msgstr "and"
+
+msgid "관리자 - 모든 옵션 사용 가능"
+msgstr "Admin - All options available"
+
+msgid "관리자 메모"
+msgstr "Admin memo"
+
+msgid "관리자 부여 칭호가 우선 적용됩니다."
+msgstr "Admin-assigned titles take priority."
+
+msgid "관리자 승인"
+msgstr "Admin approval"
+
+msgid "관리자가 부여하는 특별 칭호"
+msgstr "Special title assigned by admin"
+
+msgid "관리자가 부여한 칭호가 있습니다"
+msgstr "You have an admin-assigned title"
+
+msgid "권한이 없습니다."
+msgstr "You do not have permission."
+
+msgid "글로우 효과"
+msgstr "Glow effect"
+
+msgid "글자색과 배경색이 같으면 글자가 보이지 않을 수 있어요!"
+msgstr ""
+"Text may be invisible if text color and background color are the same!"
+
+msgid "기각"
+msgstr "Dismissed"
+
+msgid "기간 시작일"
+msgstr "Period start date"
+
+msgid "기간 유형"
+msgstr "Period type"
+
+msgid "기본"
+msgstr "Default"
+
+msgid "기여도에 따라 랭킹에 이름이 올라갑니다"
+msgstr "Your name appears in rankings based on contributions"
+
+msgid "기타"
+msgstr "Other"
+
+msgid "기타 🌍"
+msgstr "Other 🌍"
+
+msgid "꽃 심어주기 요청"
+msgstr "Flower planting request"
+
+msgid "꽃 종류"
+msgstr "Flower type"
+
+msgid "나의 농사 기록 공유"
+msgstr "Share my farming record"
+
+msgid "나의 농사 기록을 공유해보세요!"
+msgstr "Share your farming records!"
+
+msgid "남긴 댓글이 없습니다"
+msgstr "No comments posted"
+
+msgid "낮"
+msgstr "Day"
+
+msgid "낮 모드 적용!"
+msgstr "Light mode applied!"
+
+msgid "내 건의사항"
+msgstr "My Suggestions"
+
+msgid "내 글 목록"
+msgstr "My Posts"
+
+msgid "내 농사 활동"
+msgstr "My Farming Activity"
+
+msgid "내 요청"
+msgstr "My Requests"
+
+msgid "내 위치 입력하기"
+msgstr "Enter my location"
+
+msgid "내 위치로"
+msgstr "Go to my location"
+
+msgid "내 일지"
+msgstr "My Journal"
+
+msgid "내 일지 & 참여 기록"
+msgstr "My Journal & Participation History"
+
+msgid "내 지역 계절에 맞는 화면"
+msgstr "Screen matching your region's season"
+
+msgid "내 활동"
+msgstr "My Activity"
+
+msgid "내가 남긴 댓글"
+msgstr "My comments"
+
+msgid "내가 쓴 글"
+msgstr "My posts"
+
+msgid "내가 쓴 글 관리"
+msgstr "Manage my posts"
+
+msgid "내가 쓴 농사 일지"
+msgstr "My farming journals"
+
+msgid "내가 올린 요청"
+msgstr "My requests"
+
+msgid "내가 참여한 농사"
+msgstr "Farming I participated in"
+
+msgid "내용"
+msgstr "Content"
+
+msgid "노랑"
+msgstr "Yellow"
+
+msgid "농사"
+msgstr "Farming"
+
+msgid "농사 게시판"
+msgstr "Farming Board"
+
+msgid "농사 과정이나 후기를 작성해주세요."
+msgstr "Please write about your farming experience or results."
+
+msgid "농사 도움이 필요하면 요청해보세요!"
+msgstr "Need help farming? Post a request!"
+
+msgid "농사 요청"
+msgstr "Farming Request"
+
+msgid "농사 요청 작성"
+msgstr "Create Farming Request"
+
+msgid "농사 요청이 등록되었습니다!"
+msgstr "Farming request has been posted!"
+
+msgid "농사 요청이 완료되었습니다!"
+msgstr "Farming request has been completed!"
+
+msgid "농사 일지"
+msgstr "Farming Journal"
+
+msgid "농사 일지 삭제"
+msgstr "Delete Farming Journal"
+
+msgid "농사 일지 수정"
+msgstr "Edit Farming Journal"
+
+msgid "농사 일지 작성"
+msgstr "Write Farming Journal"
+
+msgid "농사 일지 좋아요"
+msgstr "Farming journal like"
+
+msgid "농사 일지 좋아요 수"
+msgstr "Farming journal like count"
+
+msgid "농사 일지 좋아요:"
+msgstr "Farming journal likes:"
+
+msgid "농사 일지가 등록되었습니다!"
+msgstr "Farming journal has been posted!"
+
+msgid "농사 일지가 삭제되었습니다."
+msgstr "Farming journal has been deleted."
+
+msgid "농사 일지가 수정되었습니다."
+msgstr "Farming journal has been updated."
+
+msgid "농사 좋아요"
+msgstr "Farming like"
+
+msgid "눈"
+msgstr "Snow"
+
+msgid "닉네임"
+msgstr "Nickname"
+
+msgid "닉네임 (선택)"
+msgstr "Nickname (optional)"
+
+msgid "닉네임 배경 색상"
+msgstr "Nickname background color"
+
+msgid "닉네임 배지의 CSS 스타일"
+msgstr "CSS style for nickname badge"
+
+msgid "닉네임 색상"
+msgstr "Nickname color"
+
+msgid "닉네임 왼쪽에 표시됩니다."
+msgstr "Displayed to the left of the nickname."
+
+msgid "닉네임, 프로필 이미지, 자기소개 수정"
+msgstr "Edit nickname, profile image, and bio"
+
+msgid "닉네임을 입력하세요"
+msgstr "Enter your nickname"
+
+msgid "다른 사용자에게 표시되는 이름입니다."
+msgstr "This is the name displayed to other users."
+
+msgid "다른 유저들이 평가합니다."
+msgstr "Other users will evaluate it."
+
+msgid "다음"
+msgstr "Next"
+
+msgid "닫기"
+msgstr "Close"
+
+msgid "답글"
+msgstr "Reply"
+
+msgid "답글을 입력하세요..."
+msgstr "Write a reply..."
+
+msgid "답글을 입력하세요... (사진만 올릴 경우 비워둬도 됩니다)"
+msgstr "Write a reply... (can be left blank if posting a photo only)"
+
+msgid "답글이 등록되었습니다."
+msgstr "Reply has been posted."
+
+msgid "답변"
+msgstr "Response"
+
+msgid "답변완료"
+msgstr "Responded"
+
+msgid "대기"
+msgstr "Pending"
+
+msgid "대기 중"
+msgstr "Pending"
+
+msgid "대기중"
+msgstr "Pending"
+
+msgid "댓글"
+msgstr "Comment"
+
+msgid "댓글 내용을 입력해주세요."
+msgstr "Please enter your comment."
+
+msgid "댓글 내용이나 사진 중 하나는 입력해주세요."
+msgstr "Please enter either a comment or a photo."
+
+msgid "댓글 수"
+msgstr "Comment count"
+
+msgid "댓글 신고"
+msgstr "Report comment"
+
+msgid "댓글 좋아요"
+msgstr "Comment like"
+
+msgid "댓글 좋아요들"
+msgstr "Comment likes"
+
+msgid "댓글들"
+msgstr "Comments"
+
+msgid "댓글에 첨부할 사진 (최대 5MB, JPG/PNG/WEBP)"
+msgstr "Photo to attach to comment (max 5MB, JPG/PNG/WEBP)"
+
+msgid "댓글을 입력하세요..."
+msgstr "Write a comment..."
+
+msgid "댓글을 입력하세요... (사진만 올릴 경우 비워둬도 됩니다)"
+msgstr "Write a comment... (can be left blank if posting a photo only)"
+
+msgid "댓글이 등록되었습니다."
+msgstr "Comment has been posted."
+
+msgid "댓글이 삭제되었습니다."
+msgstr "Comment has been deleted."
+
+msgid "댓글이 수정되었습니다."
+msgstr "Comment has been updated."
+
+msgid "더보기"
+msgstr "Show more"
+
+msgid "돌아가기"
+msgstr "Go back"
+
+msgid "등록"
+msgstr "Submit"
+
+msgid "등록하기"
+msgstr "Submit"
+
+msgid "또는"
+msgstr "or"
+
+msgid "또는 게임 내에서 공유하기 → 좌표 확인"
+msgstr "Or share in-game → check coordinates"
+
+msgid "또는 이메일로 가입"
+msgstr "Or sign up with email"
+
+msgid "랭커가 직접 선택한 칭호 (1위: 모든 칭호, 2~3위: 일반 칭호만)"
+msgstr ""
+"Title chosen by ranker (1st: all titles, 2nd-3rd: regular titles only)"
+
+msgid "랭킹"
+msgstr "Ranking"
+
+msgid "랭킹 시스템"
+msgstr "Ranking System"
+
+msgid "랭킹 참여"
+msgstr "Ranking participation"
+
+msgid "랭킹들"
+msgstr "Rankings"
+
+msgid "로 표시되고,"
+msgstr "is displayed as,"
+
+msgid "로그아웃"
+msgstr "Log Out"
+
+msgid "로그아웃하거나 계정을 관리합니다."
+msgstr "Log out or manage your account."
+
+msgid "로그인"
+msgstr "Log In"
+
+msgid "로그인 없이 둘러보기"
+msgstr "Browse without logging in"
+
+msgid "로그인 없이도 좌표 제보, 댓글 작성이 모두 가능합니다."
+msgstr "You can submit coordinates and write comments without logging in."
+
+msgid "로그인하고 참여하기"
+msgstr "Log in and join"
+
+msgid "로그인하기"
+msgstr "Log In"
+
+msgid "로그인하지 않아도 글과 댓글을 남길 수 있습니다!"
+msgstr "You can post and comment without logging in!"
+
+msgid "로딩 중..."
+msgstr "Loading..."
+
+msgid "를 공유하는 커뮤니티입니다."
+msgstr "is a community for sharing."
+
+msgid "를 입력하세요."
+msgstr "Please enter."
+
+msgid "리스트"
+msgstr "List"
+
+msgid "마감"
+msgstr "Closed"
+
+msgid "마감 시간"
+msgstr "Deadline"
+
+msgid "마음에 드는 좌표를 북마크해보세요!"
+msgstr "Bookmark your favorite coordinates!"
+
+msgid "마음에 드는 좌표를 저장해두고 나중에 확인"
+msgstr "Save your favorite coordinates and check them later"
+
+msgid "마이페이지"
+msgstr "My Page"
+
+msgid "마이페이지 기능"
+msgstr "My Page Features"
+
+msgid "마이페이지 시스템 안내"
+msgstr "My Page System Guide"
+
+msgid "마이페이지 안내"
+msgstr "My Page Guide"
+
+msgid "마이페이지로"
+msgstr "Go to My Page"
+
+msgid "마지막 검증"
+msgstr "Last verification"
+
+msgid "마지막 검증일"
+msgstr "Last verification date"
+
+msgid "맑음"
+msgstr "Clear"
+
+msgid "매월 1일 00:00 ~ 말일 24:00"
+msgstr "1st of every month 00:00 ~ last day 24:00"
+
+msgid "매주 월요일 00:00 ~ 일요일 24:00"
+msgstr "Every Monday 00:00 ~ Sunday 24:00"
+
+msgid "메뉴 열기"
+msgstr "Open menu"
+
+msgid "메시지"
+msgstr "Message"
+
+msgid "메시지 (선택)"
+msgstr "Message (optional)"
+
+msgid "메인 내비게이션"
+msgstr "Main navigation"
+
+msgid "메인으로"
+msgstr "Go to Home"
+
+msgid "명"
+msgstr "members"
+
+msgid "명 참여"
+msgstr "participants"
+
+msgid "모두 삭제"
+msgstr "Delete all"
+
+msgid "모두 읽음 처리"
+msgstr "Mark all as read"
+
+msgid "모든 알림을 삭제하시겠습니까?"
+msgstr "Delete all notifications?"
+
+msgid "모든 칭호 선택 가능"
+msgstr "All titles available"
+
+msgid "모바일 메뉴"
+msgstr "Mobile menu"
+
+msgid "모종"
+msgstr "Seedling"
+
+msgid "모집중"
+msgstr "Recruiting"
+
+msgid "모집중인 요청"
+msgstr "Open requests"
+
+msgid "모집중인 요청이 없어요"
+msgstr "No open requests"
+
+msgid "목록으로"
+msgstr "Back to list"
+
+msgid "무지개"
+msgstr "Rainbow"
+
+msgid "무효 평가 수"
+msgstr "Invalid rating count"
+
+msgid "미리보기"
+msgstr "Preview"
+
+msgid "바람"
+msgstr "Wind"
+
+msgid "받은 INVALID 수"
+msgstr "INVALID votes received"
+
+msgid "받은 VALID 수"
+msgstr "VALID votes received"
+
+msgid "받은 검증"
+msgstr "Validations received"
+
+msgid "받은 복사"
+msgstr "Copies received"
+
+msgid "받은 복사 수"
+msgstr "Copy count received"
+
+msgid "받은 좋아요"
+msgstr "Likes received"
+
+msgid "받은 좋아요 (좌표)"
+msgstr "Likes received (coordinates)"
+
+msgid "받은 좋아요 (좌표):"
+msgstr "Likes received (coordinates):"
+
+msgid "받은 좋아요 수"
+msgstr "Like count received"
+
+msgid "받은 좋아요, 유효성 평가 등 통계 확인"
+msgstr "Check stats like likes received and validity ratings"
+
+msgid "발신자"
+msgstr "Sender"
+
+msgid "밤"
+msgstr "Night"
+
+msgid "밤 모드 적용!"
+msgstr "Dark mode applied!"
+
+msgid "배경만"
+msgstr "Background only"
+
+msgid "배지 스타일"
+msgstr "Badge style"
+
+msgid "배지 커스터마이즈"
+msgstr "Customize badge"
+
+msgid "배지가 붙습니다."
+msgstr "a badge will be attached."
+
+msgid "버그 신고, 기능 제안, 문의사항 모두 환영합니다."
+msgstr "Bug reports, feature suggestions, and inquiries are all welcome."
+
+msgid "버섯"
+msgstr "Mushroom"
+
+msgid "버섯, 빅플라워, 농사 정보"
+msgstr "Mushroom, Big Flower, and farming info"
+
+msgid "버섯/빅플라워/모종 등으로 필터링"
+msgstr "Filter by Mushroom/Big Flower/Seedling etc."
+
+msgid "버튼으로 지도에서 직접 위치 선택"
+msgstr "Select location directly from the map with the button"
+
+msgid "버튼으로 현재 위치 자동 입력"
+msgstr "Auto-fill current location with the button"
+
+msgid "별도의 회원가입 절차 없이 Google 로그인만 하면 됩니다."
+msgstr "Just sign in with Google — no separate registration needed."
+
+msgid "보내기"
+msgstr "Send"
+
+msgid "보라"
+msgstr "Purple"
+
+msgid "복사"
+msgstr "Copy"
+
+msgid "복사 마일스톤"
+msgstr "Copy milestone"
+
+msgid "복사 수"
+msgstr "Copy count"
+
+msgid "복사되었습니다"
+msgstr "Copied"
+
+msgid "복사됨"
+msgstr "Copied"
+
+msgid "복사순"
+msgstr "Sort by copies"
+
+msgid "복사에 실패했습니다."
+msgstr "Failed to copy."
+
+msgid "본인 글에는 좋아요를 누를 수 없습니다"
+msgstr "You cannot like your own post"
+
+msgid "본인 글에는 좋아요를 누를 수 없습니다."
+msgstr "You cannot like your own post."
+
+msgid "본인 글은 평가할 수 없습니다."
+msgstr "You cannot rate your own post."
+
+msgid "본인 댓글에는 좋아요를 누를 수 없습니다."
+msgstr "You cannot like your own comment."
+
+msgid "봄"
+msgstr "Spring"
+
+msgid "봄 날씨"
+msgstr "Spring weather"
+
+msgid "부모 댓글"
+msgstr "Parent comment"
+
+msgid "부적절한 내용"
+msgstr "Inappropriate content"
+
+msgid "부적절한 내용은 신고해주세요."
+msgstr "Please report inappropriate content."
+
+msgid "북마크"
+msgstr "Bookmark"
+
+msgid "북마크 기능"
+msgstr "Bookmark Feature"
+
+msgid "북마크 수"
+msgstr "Bookmark count"
+
+msgid "북마크들"
+msgstr "Bookmarks"
+
+msgid "북마크순"
+msgstr "Sort by bookmarks"
+
+msgid "북마크한 글"
+msgstr "Bookmarked posts"
+
+msgid "북마크한 글이 없습니다"
+msgstr "No bookmarked posts"
+
+msgid "북미 🌎"
+msgstr "North America 🌎"
+
+msgid "분류"
+msgstr "Category"
+
+msgid "분홍"
+msgstr "Pink"
+
+msgid "비"
+msgstr "Rain"
+
+msgid "비밀번호"
+msgstr "Password"
+
+msgid "비밀번호 (수정/삭제용)"
+msgstr "Password (for editing/deleting)"
+
+msgid "비밀번호 확인"
+msgstr "Confirm password"
+
+msgid "비밀번호는 나중에 글을 수정/삭제할 때 사용합니다."
+msgstr "The password is used for editing/deleting your post later."
+
+msgid "비밀번호를 다시 입력하세요"
+msgstr "Re-enter your password"
+
+msgid "비밀번호를 입력하세요"
+msgstr "Enter your password"
+
+msgid "비워두면 작성자 닉네임 사용"
+msgstr "Leave blank to use author's nickname"
+
+msgid "비회원"
+msgstr "Guest"
+
+msgid "비회원 글은 마이페이지에서 조회할 수 없습니다."
+msgstr "Guest posts cannot be viewed from My Page."
+
+msgid "비회원 글입니다. 작성 시 입력한 비밀번호를 입력해주세요."
+msgstr ""
+"This is a guest post. Please enter the password you set when creating it."
+
+msgid "비회원 닉네임"
+msgstr "Guest nickname"
+
+msgid "비회원 비밀번호"
+msgstr "Guest password"
+
+msgid "비회원 여부"
+msgstr "Guest status"
+
+msgid "비회원 작성 시 비밀번호를 설정하면 나중에 수정/삭제할 수 있어요."
+msgstr "Setting a password as a guest lets you edit/delete later."
+
+msgid "비회원도 이용 가능해요!"
+msgstr "Guests can use it too!"
+
+msgid "비회원으로 글 작성"
+msgstr "Post as guest"
+
+msgid "비회원으로 글을 작성합니다. 닉네임과 비밀번호를 입력해주세요."
+msgstr "Posting as a guest. Please enter a nickname and password."
+
+msgid "비회원으로 작성된 글입니다. 비밀번호를 입력해주세요."
+msgstr "This is a guest post. Please enter the password."
+
+msgid "비회원으로 작성한 경우 True"
+msgstr "True if posted as guest"
+
+msgid "비회원은 닉네임과 비밀번호를 입력해야 합니다."
+msgstr "Guests must enter a nickname and password."
+
+msgid "비회원은 비밀번호를 입력해야 합니다."
+msgstr "Guests must enter a password."
+
+msgid "비회원은 확인할 수 없습니다"
+msgstr "Not available for guests"
+
+msgid "비회원이 글 수정/삭제 시 사용"
+msgstr "Used by guests for editing/deleting posts"
+
+msgid "비회원이 글 수정/삭제 시 사용하는 비밀번호 (해시됨)"
+msgstr "Password used by guests for editing/deleting posts (hashed)"
+
+msgid "빅플라워"
+msgstr "Big Flower"
+
+msgid "빅플라워 농사를 도와주고, 나의 농사 기록을 공유하세요!"
+msgstr "Help with Big Flower farming and share your records!"
+
+msgid "빅플라워 농사를 도와주세요!"
+msgstr "Help with Big Flower farming!"
+
+msgid "빅플라워 농사를 도와줄 분을 찾아보세요!"
+msgstr "Find someone to help with Big Flower farming!"
+
+msgid "빨강"
+msgstr "Red"
+
+msgid "사용자"
+msgstr "User"
+
+msgid "사용자들"
+msgstr "Users"
+
+msgid "사이트 공지"
+msgstr "Site notice"
+
+msgid "사이트 안내"
+msgstr "Site guide"
+
+msgid "사이트 이용 중 불편한 점이나 개선 제안이 있으시면 알려주세요!"
+msgstr "Let us know if you have any issues or suggestions for improvement!"
+
+msgid "사진"
+msgstr "Photo"
+
+msgid "사진 댓글"
+msgstr "Photo comment"
+
+msgid "사진 파일 크기는 5MB를 초과할 수 없습니다."
+msgstr "Photo file size cannot exceed 5MB."
+
+msgid "사진에 닉네임 워터마크 표시"
+msgstr "Show nickname watermark on photos"
+
+msgid "삭제"
+msgstr "Delete"
+
+msgid "삭제 권한이 없습니다."
+msgstr "You do not have permission to delete."
+
+msgid "삭제된 댓글입니다."
+msgstr "This comment has been deleted."
+
+msgid "삭제된 일지는 복구할 수 없습니다."
+msgstr "Deleted journals cannot be recovered."
+
+msgid "삭제된 좌표는 복구할 수 없습니다."
+msgstr "Deleted coordinates cannot be recovered."
+
+msgid "삭제됨"
+msgstr "Deleted"
+
+msgid "삭제하기"
+msgstr "Delete"
+
+msgid "삭제하시겠습니까?"
+msgstr "Are you sure you want to delete?"
+
+msgid "삭제할 이미지를 선택하세요"
+msgstr "Select images to delete"
+
+msgid "상세 내용"
+msgstr "Details"
+
+msgid "상위 3위 내에 들면 특별 칭호를 선택할 수 있습니다."
+msgstr "Top 3 rankers can choose a special title."
+
+msgid "상태"
+msgstr "Status"
+
+msgid "새 이미지 추가"
+msgstr "Add new image"
+
+msgid "새 좌표 제보"
+msgstr "Submit new coordinates"
+
+msgid "서포터"
+msgstr "Supporter"
+
+msgid "선택 완료"
+msgstr "Selection complete"
+
+msgid "선택한 칭호"
+msgstr "Selected title"
+
+msgid "설명"
+msgstr "Description"
+
+msgid "설정"
+msgstr "Settings"
+
+msgid "소중한 의견 감사합니다."
+msgstr "Thank you for your valuable feedback."
+
+msgid "수신자"
+msgstr "Recipient"
+
+msgid "수정"
+msgstr "Edit"
+
+msgid "수정 권한이 없습니다."
+msgstr "You do not have permission to edit."
+
+msgid "수정/삭제용"
+msgstr "For editing/deleting"
+
+msgid "수정일"
+msgstr "Edited date"
+
+msgid "수정하기"
+msgstr "Edit"
+
+msgid "순서"
+msgstr "Order"
+
+msgid "순위"
+msgstr "Rank"
+
+msgid "스크린샷 첨부 (최대 5장)"
+msgstr "Attach screenshots (max 5)"
+
+msgid "스타일"
+msgstr "Style"
+
+msgid "스팸/광고"
+msgstr "Spam/Advertising"
+
+msgid "승인"
+msgstr "Approved"
+
+msgid "승인 대기"
+msgstr "Pending approval"
+
+msgid "승인된 글"
+msgstr "Approved posts"
+
+msgid "승인된 글 수"
+msgstr "Approved post count"
+
+msgid "승인된 글 수, 받은 좋아요, 받은 유효성 평가"
+msgstr "Approved post count, likes received, validity ratings received"
+
+msgid "승인된 글 작성"
+msgstr "Approved post submissions"
+
+msgid "승인된 글 작성:"
+msgstr "Approved post submissions:"
+
+msgid "승인됨"
+msgstr "Approved"
+
+msgid "승인일"
+msgstr "Approval date"
+
+msgid "시간대"
+msgstr "Timezone"
+
+msgid "신고"
+msgstr "Report"
+
+msgid "신고 대상"
+msgstr "Report target"
+
+msgid "신고 대상 댓글"
+msgstr "Reported comment"
+
+msgid "신고 사유"
+msgstr "Report reason"
+
+msgid "신고 사유를 자세히 적어주세요 (선택)"
+msgstr "Please describe the reason in detail (optional)"
+
+msgid "신고가 접수되었습니다."
+msgstr "Your report has been submitted."
+
+msgid "신고들"
+msgstr "Reports"
+
+msgid "신고일"
+msgstr "Report date"
+
+msgid "신고자"
+msgstr "Reporter"
+
+msgid "신고하기"
+msgstr "Report"
+
+msgid "심은 꽃"
+msgstr "Flowers planted"
+
+msgid "심은 꽃 수"
+msgstr "Number of flowers planted"
+
+msgid "아시아 🌏"
+msgstr "Asia 🌏"
+
+msgid "아직 남긴 댓글이 없습니다."
+msgstr "No comments posted yet."
+
+msgid "아직 농사 일지가 없습니다."
+msgstr "No farming journals yet."
+
+msgid "아직 농사 일지가 없어요"
+msgstr "No farming journals yet"
+
+msgid "아직 답변이 없습니다"
+msgstr "No response yet"
+
+msgid "아직 댓글이 없습니다. 첫 댓글을 남겨보세요!"
+msgstr "No comments yet. Be the first to comment!"
+
+msgid "아직 랭킹이 없습니다"
+msgstr "No rankings yet"
+
+msgid "아직 랭킹이 없어요"
+msgstr "No rankings yet"
+
+msgid "아직 작성한 글이 없습니다."
+msgstr "No posts yet."
+
+msgid "아직 참여자가 없습니다. 첫 번째 봉사자가 되어주세요!"
+msgstr "No participants yet. Be the first volunteer!"
+
+msgid "아직 참여한 농사가 없습니다."
+msgstr "You haven't participated in any farming yet."
+
+msgid "안내"
+msgstr "Guide"
+
+msgid "알림"
+msgstr "Notifications"
+
+msgid "알림 목록"
+msgstr "Notification list"
+
+msgid "알림 유형"
+msgstr "Notification type"
+
+msgid "알림들"
+msgstr "Notifications"
+
+msgid "알림을 불러올 수 없습니다"
+msgstr "Unable to load notifications"
+
+msgid "알림을 찾을 수 없습니다."
+msgstr "Notification not found."
+
+msgid "알림이 없습니다"
+msgstr "No notifications"
+
+msgid "어떤 도움이 필요한지 설명해주세요."
+msgstr "Please describe what help you need."
+
+msgid "언어 선택"
+msgstr "Language"
+
+msgid "업데이트 내역"
+msgstr "Update history"
+
+msgid "없음"
+msgstr "None"
+
+msgid "여름"
+msgstr "Summer"
+
+msgid "여름 날씨"
+msgstr "Summer weather"
+
+msgid "엽서 사진 첨부 (선택)"
+msgstr "Attach postcard photo (optional)"
+
+msgid "엽서이름"
+msgstr "Postcard name"
+
+msgid "영구"
+msgstr "Permanent"
+
+msgid "예: 강남역 근처 버섯"
+msgstr "e.g. Mushroom near Gangnam Station"
+
+msgid "예: 강남역 엽서"
+msgstr "e.g. Gangnam Station postcard"
+
+msgid "예: 빨간 꽃"
+msgstr "e.g. Red flower"
+
+msgid "예: 빨간 꽃, 노란 꽃"
+msgstr "e.g. Red flower, yellow flower"
+
+msgid "예: 빨간 꽃, 아무 꽃이나"
+msgstr "e.g. Red flower, any flower"
+
+msgid "예: 서울 강남구"
+msgstr "e.g. Gangnam-gu, Seoul"
+
+msgid "예: 시부야역 빅플라워 농사 완료!"
+msgstr "e.g. Shibuya Station Big Flower farming done!"
+
+msgid "예: 시부야역 앞"
+msgstr "e.g. In front of Shibuya Station"
+
+msgid "예: 신주쿠역 남쪽 출구"
+msgstr "e.g. Shinjuku Station south exit"
+
+msgid "예: 신주쿠역 빅플라워 도와주세요!"
+msgstr "e.g. Help with Shinjuku Station Big Flower!"
+
+msgid "오늘 %(category)s 카테고리에 %(limit)s개를 이미 등록했습니다. 내일 다시 시도해주세요."
+msgstr ""
+"You've already submitted %(limit)s in the %(category)s category today. "
+"Please try again tomorrow."
+
+msgid "오래된순"
+msgstr "Oldest first"
+
+msgid "오래됨"
+msgstr "Old"
+
+msgid "올린 요청이 없습니다."
+msgstr "No requests posted."
+
+msgid "완료"
+msgstr "Complete"
+
+msgid "완료 처리"
+msgstr "Mark as complete"
+
+msgid "요청하기"
+msgstr "Request"
+
+msgid "운영자 답변"
+msgstr "Admin response"
+
+msgid "운영자가 확인 후 반영하도록 하겠습니다."
+msgstr "The admin will review and apply it."
+
+msgid "운영자에게 건의하기"
+msgstr "Send suggestion to admin"
+
+msgid "운영자에게 건의할 내용이 있다면 건의하기 페이지를 이용해주세요."
+msgstr ""
+"If you have suggestions for the admin, please use the suggestion page."
+
+msgid "워터마크 닉네임"
+msgstr "Watermark nickname"
+
+msgid "워터마크 닉네임 (선택)"
+msgstr "Watermark nickname (optional)"
+
+msgid "워터마크 표시"
+msgstr "Show watermark"
+
+msgid "워터마크에 표시될 이름 (비어있으면 작성자 닉네임 사용)"
+msgstr "Name displayed on watermark (uses author's nickname if blank)"
+
+msgid "워터마크에 표시될 이름을 직접 지정할 수 있습니다."
+msgstr "You can set the name displayed on the watermark."
+
+msgid "월간"
+msgstr "Monthly"
+
+msgid "위"
+msgstr "Up"
+
+msgid "위도"
+msgstr "Latitude"
+
+msgid "위도 (Latitude)"
+msgstr "Latitude"
+
+msgid "위치"
+msgstr "Location"
+
+msgid "위치를 허용하면 입장 후"
+msgstr "If you allow location access, after entering"
+
+msgid "위치명"
+msgstr "Location name"
+
+msgid "위치에 대한 추가 설명 (선택사항)"
+msgstr "Additional description for the location (optional)"
+
+msgid "유럽 🇪🇺"
+msgstr "Europe 🇪🇺"
+
+msgid "유저들이 함께 하는 버섯, 빅플라워, 농사 정보"
+msgstr "Mushroom, Big Flower, and farming info shared by users"
+
+msgid "유효 평가 수"
+msgstr "Valid rating count"
+
+msgid "유효성 평가"
+msgstr "Validity rating"
+
+msgid "유효성 평가는 작성 후 1개월이 지난 글부터 가능합니다."
+msgstr "Validity ratings are available for posts older than 1 month."
+
+msgid "유효성 평가들"
+msgstr "Validity ratings"
+
+msgid "으로 간편하게 가입할 수 있습니다."
+msgstr "for easy registration."
+
+msgid "으로 글 작성 가능"
+msgstr "to create posts"
+
+msgid "을 거쳐 공개"
+msgstr "reviewed before publishing"
+
+msgid "이 사이트는 Nintendo 또는 Niantic과 관련이 없습니다."
+msgstr "This site is not affiliated with Nintendo or Niantic."
+
+msgid "이 사이트는 Nintendo/Niantic과 무관합니다."
+msgstr "This site is not affiliated with Nintendo/Niantic."
+
+msgid "이 사이트는?"
+msgstr "About this site"
+
+msgid "이 좌표가 지금도 유효한가요?"
+msgstr "Are these coordinates still valid?"
+
+msgid "이 펼쳐집니다!"
+msgstr "will unfold!"
+
+msgid "이메일"
+msgstr "Email"
+
+msgid "이메일 (선택, 답변 받고 싶으시면)"
+msgstr "Email (optional, if you want a response)"
+
+msgid "이메일은 변경할 수 없습니다."
+msgstr "Email cannot be changed."
+
+msgid "이메일을 입력하세요"
+msgstr "Enter your email"
+
+msgid "이모지 없음"
+msgstr "No emoji"
+
+msgid "이미 계정이 있으신가요?"
+msgstr "Already have an account?"
+
+msgid "이미 신고한 게시글입니다."
+msgstr "You have already reported this post."
+
+msgid "이미 신고한 댓글입니다."
+msgstr "You have already reported this comment."
+
+msgid "이미 워터마크가 적용되어 있습니다."
+msgstr "Watermark has already been applied."
+
+msgid "이미 참여하셨습니다."
+msgstr "You have already participated."
+
+msgid "이미지"
+msgstr "Image"
+
+msgid "이미지 (최대 5장)"
+msgstr "Images (max 5)"
+
+msgid "이미지 없음"
+msgstr "No image"
+
+msgid "이전"
+msgstr "Previous"
+
+msgid "이제 안 됨"
+msgstr "No longer valid"
+
+msgid "익명"
+msgstr "Anonymous"
+
+msgid "익명님이 '%(title)s'에 ❤️ 좋아요를 눌렀어요"
+msgstr "Anonymous liked '%(title)s' ❤️"
+
+msgid "일 후 활성화"
+msgstr "days until activation"
+
+msgid "일반 칭호만 선택 가능"
+msgstr "Only regular titles available"
+
+msgid "일본 🇯🇵"
+msgstr "Japan 🇯🇵"
+
+msgid "일지"
+msgstr "Journal"
+
+msgid "일지 작성"
+msgstr "Write journal"
+
+msgid "일지 작성하기"
+msgstr "Write a journal entry"
+
+msgid "읽음 여부"
+msgstr "Read status"
+
+msgid "입장하기"
+msgstr "Enter"
+
+msgid "자기소개"
+msgstr "Bio"
+
+msgid "자동 (위치 기반)"
+msgstr "Auto (location-based)"
+
+msgid "자동 테마 모드로 전환합니다..."
+msgstr "Switching to auto theme mode..."
+
+msgid "작성 글"
+msgstr "Posts written"
+
+msgid "작성 시 입력한 비밀번호"
+msgstr "Password entered when posting"
+
+msgid "작성 후 1개월이 지난 게시글만 평가할 수 있습니다."
+msgstr "Only posts older than 1 month can be rated."
+
+msgid "작성일"
+msgstr "Date posted"
+
+msgid "작성자"
+msgstr "Author"
+
+msgid "작성한 글 전체 조회 (대기/승인/거절 상태별)"
+msgstr "View all posts (by pending/approved/rejected status)"
+
+msgid "작성한 글이 없습니다"
+msgstr "No posts written"
+
+msgid "작성한 농사 일지가 없습니다."
+msgstr "No farming journals written."
+
+msgid "작성한 모든 글을 한눈에 확인하고 관리"
+msgstr "View and manage all your posts at a glance"
+
+msgid "잘못된 정보"
+msgstr "Incorrect information"
+
+msgid "잘못된 평가 유형입니다."
+msgstr "Invalid rating type."
+
+msgid "장소"
+msgstr "Location"
+
+msgid "장소, 주소 검색..."
+msgstr "Search location, address..."
+
+msgid "장소, 주소, 건물명 검색..."
+msgstr "Search location, address, building..."
+
+msgid "장소명"
+msgstr "Location name"
+
+msgid "저장"
+msgstr "Save"
+
+msgid "저장해둔 좌표 목록"
+msgstr "Saved coordinates list"
+
+msgid "전설의 대원"
+msgstr "Legendary Explorer"
+
+msgid "전용 스타일/색상/칭호 코드 (쉼표 구분, 예: underline,rainbow,explorer)"
+msgstr ""
+"Custom style/color/title codes (comma-separated, e.g. "
+"underline,rainbow,explorer)"
+
+msgid "전용 아이템"
+msgstr "Exclusive items"
+
+msgid "전체"
+msgstr "All"
+
+msgid "전체 보기"
+msgstr "View all"
+
+msgid "전체 지역"
+msgstr "All regions"
+
+msgid "전체 카테고리"
+msgstr "All categories"
+
+msgid "전체/주간/월간 랭킹에서 상위 기여자를 확인할 수 있습니다."
+msgstr "View top contributors in overall/weekly/monthly rankings."
+
+msgid "점"
+msgstr "points"
+
+msgid "점수 계산 방식"
+msgstr "Score calculation"
+
+msgid "접근 권한이 없습니다."
+msgstr "Access denied."
+
+msgid "정렬"
+msgstr "Sort"
+
+msgid "정말로 이 농사 일지를 삭제하시겠습니까?"
+msgstr "Are you sure you want to delete this farming journal?"
+
+msgid "정말로 이 좌표를 삭제하시겠습니까?"
+msgstr "Are you sure you want to delete these coordinates?"
+
+msgid "정지"
+msgstr "Suspended"
+
+msgid "정지 기간"
+msgstr "Suspension period"
+
+msgid "정지 만료"
+msgstr "Suspension expiry"
+
+msgid "정지 목록"
+msgstr "Suspension list"
+
+msgid "정지 사유"
+msgstr "Suspension reason"
+
+msgid "정지 시작"
+msgstr "Suspension start"
+
+msgid "정지 해제 시간"
+msgstr "Unsuspension time"
+
+msgid "정지 해제한 관리자"
+msgstr "Admin who unsuspended"
+
+msgid "정지된 사용자"
+msgstr "Suspended user"
+
+msgid "정지한 관리자"
+msgstr "Admin who suspended"
+
+msgid "제목"
+msgstr "Title"
+
+msgid "제목, 설명, 작성자 닉네임으로 검색"
+msgstr "Search by title, description, or author nickname"
+
+msgid "제목, 엽서이름, 닉네임 검색..."
+msgstr "Search by title, postcard name, or nickname..."
+
+msgid "제목과 내용을 입력해주세요."
+msgstr "Please enter a title and content."
+
+msgid "제목을 입력해주세요"
+msgstr "Please enter a title"
+
+msgid "제보하기"
+msgstr "Submit"
+
+msgid "제출 후"
+msgstr "After submission"
+
+msgid "제출하기"
+msgstr "Submit"
+
+msgid "조회수"
+msgstr "Views"
+
+msgid "좋아요"
+msgstr "Like"
+
+msgid "좋아요 수"
+msgstr "Like count"
+
+msgid "좋아요들"
+msgstr "Likes"
+
+msgid "좋아요순"
+msgstr "Sort by likes"
+
+msgid "좋아요와 댓글은 업로더분에게 큰 힘이 됩니다!"
+msgstr "Likes and comments really encourage the poster!"
+
+msgid "좌표"
+msgstr "Coordinates"
+
+msgid "좌표 검색 & 필터"
+msgstr "Search & Filter Coordinates"
+
+msgid "좌표 게시글에 댓글을 남겨보세요!"
+msgstr "Leave a comment on a coordinate post!"
+
+msgid "좌표 둘러보기"
+msgstr "Browse Coordinates"
+
+msgid "좌표 마스터"
+msgstr "Coordinate Master"
+
+msgid "좌표 목록"
+msgstr "Coordinate List"
+
+msgid "좌표 목록 보기"
+msgstr "View Coordinate List"
+
+msgid "좌표 목록으로"
+msgstr "Back to Coordinate List"
+
+msgid "좌표 복사"
+msgstr "Copy Coordinates"
+
+msgid "좌표 삭제"
+msgstr "Delete Coordinates"
+
+msgid "좌표 수정"
+msgstr "Edit Coordinates"
+
+msgid "좌표 신고"
+msgstr "Report Coordinates"
+
+msgid "좌표 이미지"
+msgstr "Coordinate image"
+
+msgid "좌표 이미지들"
+msgstr "Coordinate images"
+
+msgid "좌표 입력 방법:"
+msgstr "How to enter coordinates:"
+
+msgid "좌표 제보 방법"
+msgstr "How to submit coordinates"
+
+msgid "좌표 제보, 농사 봉사, 데코 정보 등을 서로 나누고 검증합니다."
+msgstr ""
+"Share and verify coordinate submissions, farming help, deco info, and more."
+
+msgid "좌표(위도, 경도) 입력"
+msgstr "Enter coordinates (latitude, longitude)"
+
+msgid "좌표가"
+msgstr "Coordinates"
+
+msgid "좌표가 등록되었습니다."
+msgstr "Coordinates have been submitted."
+
+msgid "좌표가 복사되었습니다"
+msgstr "Coordinates copied"
+
+msgid "좌표가 삭제되었습니다."
+msgstr "Coordinates have been deleted."
+
+msgid "좌표가 수정되었습니다."
+msgstr "Coordinates have been updated."
+
+msgid "좌표가 없습니다"
+msgstr "No coordinates"
+
+msgid "좌표가 클립보드에 복사되었습니다!"
+msgstr "Coordinates copied to clipboard!"
+
+msgid "좌표들"
+msgstr "Coordinates"
+
+msgid "좌표를 제보하고 첫 번째 랭커가 되어보세요!"
+msgstr "Submit coordinates and become the first ranker!"
+
+msgid "주간"
+msgstr "Weekly"
+
+msgid "주의사항"
+msgstr "Notice"
+
+msgid "주황"
+msgstr "Orange"
+
+msgid "지금도 됨"
+msgstr "Still valid"
+
+msgid "지금도 유효한지"
+msgstr "whether still valid"
+
+msgid "지도로 보기"
+msgstr "View on Map"
+
+msgid "지도를 이동하면 보이는 게시글이 표시됩니다."
+msgstr "Posts will update as you move the map."
+
+msgid "지도를 터치하여 위치를 선택하세요"
+msgstr "Tap the map to select a location"
+
+msgid "지도에서 선택"
+msgstr "Select on map"
+
+msgid "지도에서 위치 선택"
+msgstr "Select location on map"
+
+msgid "지역"
+msgstr "Region"
+
+msgid "진행중"
+msgstr "In progress"
+
+msgid "참여 기록"
+msgstr "Participation history"
+
+msgid "참여 완료"
+msgstr "Participation complete"
+
+msgid "참여일"
+msgstr "Participation date"
+
+msgid "참여자"
+msgstr "Participants"
+
+msgid "참여하기"
+msgstr "Participate"
+
+msgid "참여해주셔서 감사합니다! 🌸"
+msgstr "Thank you for participating! 🌸"
+
+msgid "처리 상태"
+msgstr "Processing status"
+
+msgid "처리됨"
+msgstr "Processed"
+
+msgid "처리일"
+msgstr "Processing date"
+
+msgid "처리자"
+msgstr "Processed by"
+
+msgid "첫 번째 농사 일지를 작성해보세요!"
+msgstr "Write the first farming journal!"
+
+msgid "첫 번째 좌표를 제보해보세요!"
+msgstr "Submit the first coordinates!"
+
+msgid "첫 번째 좌표를 제보해주세요!"
+msgstr "Please submit the first coordinates!"
+
+msgid "체크하면 기존 이미지 + 새 이미지 모두에 워터마크가 적용됩니다. (한번 적용하면 취소 불가)"
+msgstr ""
+"When checked, watermark will be applied to both existing and new images. "
+"(Cannot be undone once applied)"
+
+msgid "체크하면 업로드된 모든 사진 좌상단/우하단에 닉네임이 반투명하게 표시됩니다."
+msgstr ""
+"When checked, your nickname will appear semi-transparently on the top-"
+"left/bottom-right of all uploaded photos."
+
+msgid "초록"
+msgstr "Green"
+
+msgid "총 점수"
+msgstr "Total score"
+
+msgid "최근 건의사항"
+msgstr "Recent suggestions"
+
+msgid "최근 남긴 댓글"
+msgstr "Recent comments"
+
+msgid "최근 농사 일지"
+msgstr "Recent farming journals"
+
+msgid "최근 작성한 글"
+msgstr "Recent posts"
+
+msgid "최대 5장까지 업로드 가능 (기존 이미지 포함)"
+msgstr "Up to 5 images can be uploaded (including existing images)"
+
+msgid "최신순"
+msgstr "Newest first"
+
+msgid "최신순, 좋아요순, 검증순"
+msgstr "Newest, most liked, most verified"
+
+msgid "추가 건의하기"
+msgstr "Submit another suggestion"
+
+msgid "취소"
+msgstr "Cancel"
+
+msgid "칭호"
+msgstr "Title"
+
+msgid "칭호 글자 색상"
+msgstr "Title text color"
+
+msgid "칭호 배경 색상"
+msgstr "Title background color"
+
+msgid "칭호 없음"
+msgstr "No title"
+
+msgid "카테고리"
+msgstr "Category"
+
+msgid "카테고리 선택 (버섯/빅플라워/모종/기타)"
+msgstr "Select category (Mushroom/Big Flower/Seedling/Other)"
+
+msgid "테마 메뉴"
+msgstr "Theme menu"
+
+msgid "테마 선택"
+msgstr "Select theme"
+
+msgid "테마 적용!"
+msgstr "Theme applied!"
+
+msgid "통계"
+msgstr "Statistics"
+
+msgid "통계 확인"
+msgstr "View statistics"
+
+msgid "특별 칭호"
+msgstr "Special title"
+
+msgid "파랑"
+msgstr "Blue"
+
+msgid "평가 유형"
+msgstr "Rating type"
+
+msgid "평가가 많이 쌓인 좌표는"
+msgstr "Coordinates with many ratings"
+
+msgid "폭풍"
+msgstr "Storm"
+
+msgid "프로필"
+msgstr "Profile"
+
+msgid "프로필 설정"
+msgstr "Profile Settings"
+
+msgid "프로필 이모지"
+msgstr "Profile emoji"
+
+msgid "프로필 이미지"
+msgstr "Profile image"
+
+msgid "피크민 관련 이모지 (랭킹 등록 사용자만)"
+msgstr "Pikmin-related emoji (ranking users only)"
+
+msgid "피크민 다이어리"
+msgstr "Pikmin Diary"
+
+msgid "피크민 다이어리 - 피크민 블룸 버섯, 모종, 엽서 좌표 커뮤니티"
+msgstr ""
+"Pikmin Diary - Pikmin Bloom Mushroom, Seedling & Postcard Coordinate "
+"Community"
+
+msgid "피크민 다이어리 - 피크민 블룸 좌표 공유 커뮤니티"
+msgstr "Pikmin Diary - Pikmin Bloom Coordinate Sharing Community"
+
+msgid "피크민 다이어리 - 피크민 블룸 좌표 커뮤니티"
+msgstr "Pikmin Diary - Pikmin Bloom Coordinate Community"
+
+msgid "피크민 다이어리 커뮤니티"
+msgstr "Pikmin Diary Community"
+
+msgid "피크민 다이어리에 가입하세요!"
+msgstr "Join Pikmin Diary!"
+
+msgid "피크민 다이어리에 오신 것을 환영합니다!"
+msgstr "Welcome to Pikmin Diary!"
+
+msgid "피크민 블룸 버섯 좌표, 모종 좌표, 빅플라워 위치, 엽서 정보를 공유하는 유저 커뮤니티"
+msgstr ""
+"A user community for sharing Pikmin Bloom mushroom coordinates, seedling "
+"coordinates, Big Flower locations, and postcard info"
+
+msgid ""
+"피크민 블룸 버섯 좌표, 모종 좌표, 빅플라워 위치, 엽서 정보를 함께 공유하는 유저 커뮤니티입니다. 피크민 좌표를 찾고 농사 정보를 "
+"나눠보세요!"
+msgstr ""
+"A user community for sharing Pikmin Bloom mushroom coordinates, seedling "
+"coordinates, Big Flower locations, and postcard info. Find Pikmin "
+"coordinates and share farming tips!"
+
+msgid "피크민 블룸 버섯 좌표, 모종 좌표, 빅플라워 위치를 한눈에! 유저들이 공유한 피크민 엽서 좌표를 검색하고 복사하세요."
+msgstr ""
+"View Pikmin Bloom mushroom coordinates, seedling coordinates, and Big Flower"
+" locations at a glance! Search and copy Pikmin postcard coordinates shared "
+"by users."
+
+msgid "피크민 블룸 버섯, 모종, 빅플라워 좌표를 공유하고 농사 정보를 나눠요!"
+msgstr ""
+"Share Pikmin Bloom mushroom, seedling, and Big Flower coordinates and "
+"exchange farming tips!"
+
+msgid "피크민 블룸 좌표 공유 커뮤니티"
+msgstr "Pikmin Bloom Coordinate Sharing Community"
+
+msgid "피크민 블룸 지도로 주변 버섯, 모종, 빅플라워 좌표를 한눈에 확인하세요. 피크민 엽서 위치를 쉽게 찾을 수 있습니다."
+msgstr ""
+"View nearby mushroom, seedling, and Big Flower coordinates at a glance on "
+"the Pikmin Bloom map. Easily find Pikmin postcard locations."
+
+msgid "피크민 블룸을 플레이하는 유저들이"
+msgstr "Users who play Pikmin Bloom"
+
+msgid "피크민 좌표 목록 - 버섯, 모종, 빅플라워 좌표 모음 | 피크민 다이어리"
+msgstr ""
+"Pikmin Coordinate List - Mushroom, Seedling & Big Flower Coordinates | "
+"Pikmin Diary"
+
+msgid "피크민 좌표 목록 - 피크민 블룸 좌표 모음"
+msgstr "Pikmin Coordinate List - Pikmin Bloom Coordinates"
+
+msgid "피크민 좌표 지도 - 버섯, 모종, 빅플라워 위치 지도 | 피크민 다이어리"
+msgstr ""
+"Pikmin Coordinate Map - Mushroom, Seedling & Big Flower Locations | Pikmin "
+"Diary"
+
+msgid "피크민 좌표 지도 - 피크민 블룸 위치 지도"
+msgstr "Pikmin Coordinate Map - Pikmin Bloom Location Map"
+
+msgid "피크민 탐험가"
+msgstr "Pikmin Explorer"
+
+msgid ""
+"피크민, 피크민 블룸, 피크민 좌표, 피크민 버섯, 피크민 버섯 좌표, 피크민 모종, 피크민 모종 좌표, 피크민 엽서, 피크민 엽서 "
+"좌표, 피크민 빅플라워, 피크민 농사, Pikmin Bloom"
+msgstr ""
+"Pikmin, Pikmin Bloom, Pikmin coordinates, Pikmin mushroom, Pikmin mushroom "
+"coordinates, Pikmin seedling, Pikmin seedling coordinates, Pikmin postcard, "
+"Pikmin postcard coordinates, Pikmin Big Flower, Pikmin farming, Pikmin Bloom"
+
+msgid "필요한 꽃"
+msgstr "Flowers needed"
+
+msgid "한국 🇰🇷"
+msgstr "South Korea 🇰🇷"
+
+msgid "해당 기간의 시작 날짜"
+msgstr "Start date of the period"
+
+msgid "허용되지 않는 파일 형식입니다. (JPG, PNG, WEBP만 가능)"
+msgstr "Unsupported file format. (Only JPG, PNG, WEBP allowed)"
+
+msgid "허위 좌표 제보 시 계정이 정지될 수 있습니다."
+msgstr "Submitting false coordinates may result in account suspension."
+
+msgid "현재 모집중인 요청이 없습니다."
+msgstr "No open requests at the moment."
+
+msgid "현재 순위"
+msgstr "Current rank"
+
+msgid "현재 이미지"
+msgstr "Current image"
+
+msgid "현재는 승인 없이 바로 게시됩니다! (당분간 운영)"
+msgstr ""
+"Posts are currently published immediately without approval! (temporary "
+"policy)"
+
+msgid "홀로그램 언더라인"
+msgstr "Hologram underline"
+
+msgid "확인"
+msgstr "Confirm"
+
+msgid "활발한 기여자에게 점수가 부여됩니다!"
+msgstr "Points are awarded to active contributors!"
+
+msgid "활성 상태"
+msgstr "Active status"
+
+msgid "회원 혜택"
+msgstr "Member benefits"
+
+msgid "회원가입"
+msgstr "Sign Up"
+
+msgid "회원가입 방법"
+msgstr "How to sign up"
+
+msgid "흐림"
+msgstr "Cloudy"
+
+msgid "📋 건의사항 '%(title)s'에 운영자가 답변했습니다!"
+msgstr "📋 Admin responded to suggestion '%(title)s'!"
+
+msgid "📋 건의사항 '%(title)s'이(가) '%(status)s'(으)로 변경되었습니다."
+msgstr "📋 Suggestion '%(title)s' has been changed to '%(status)s'."

@@ -2,6 +2,7 @@
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
+from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 from django.utils import timezone
 
@@ -17,7 +18,7 @@ def toggle_like(request, coordinate_id):
     
     # 본인 글은 좋아요 불가
     if request.user.is_authenticated and coordinate.author == request.user:
-        return JsonResponse({'error': '본인 글에는 좋아요를 누를 수 없습니다.'}, status=400)
+        return JsonResponse({'error': _('본인 글에는 좋아요를 누를 수 없습니다.')}, status=400)
     
     if request.user.is_authenticated:
         # 로그인 사용자: DB에서 관리
@@ -41,7 +42,7 @@ def toggle_like(request, coordinate_id):
                     actor=request.user,
                     notification_type=Notification.NotificationType.LIKE,
                     coordinate=coordinate,
-                    message=f"{request.user.nickname}님이 '{coordinate.title}'에 ❤️ 좋아요를 눌렀어요"
+                    message=_("%(nickname)s님이 '%(title)s'에 ❤️ 좋아요를 눌렀어요") % {'nickname': request.user.nickname, 'title': coordinate.title}
                 )
     else:
         # 비회원: 세션으로 관리
@@ -63,7 +64,7 @@ def toggle_like(request, coordinate_id):
                     actor=None,
                     notification_type=Notification.NotificationType.LIKE,
                     coordinate=coordinate,
-                    message=f"익명님이 '{coordinate.title}'에 ❤️ 좋아요를 눌렀어요"
+                    message=_("익명님이 '%(title)s'에 ❤️ 좋아요를 눌렀어요") % {'title': coordinate.title}
                 )
         
         request.session['liked_coords'] = liked_coords
@@ -94,7 +95,7 @@ def toggle_comment_like(request, comment_id):
 
     # 본인 댓글은 좋아요 불가
     if request.user.is_authenticated and comment.author == request.user:
-        return JsonResponse({'error': '본인 댓글에는 좋아요를 누를 수 없습니다.'}, status=400)
+        return JsonResponse({'error': _('본인 댓글에는 좋아요를 누를 수 없습니다.')}, status=400)
 
     if request.user.is_authenticated:
         # 로그인 사용자: DB에서 관리
@@ -165,14 +166,14 @@ def submit_validity(request, coordinate_id):
     # 작성 1개월 경과 체크
     one_month_ago = timezone.now() - timedelta(days=30)
     if coordinate.created_at > one_month_ago:
-        return JsonResponse({'error': '작성 후 1개월이 지난 게시글만 평가할 수 있습니다.'}, status=400)
-    
+        return JsonResponse({'error': _('작성 후 1개월이 지난 게시글만 평가할 수 있습니다.')}, status=400)
+
     # 본인 글은 평가 불가
     if request.user.is_authenticated and coordinate.author == request.user:
-        return JsonResponse({'error': '본인 글은 평가할 수 없습니다.'}, status=400)
-    
+        return JsonResponse({'error': _('본인 글은 평가할 수 없습니다.')}, status=400)
+
     if feedback_type not in ['VALID', 'INVALID']:
-        return JsonResponse({'error': '잘못된 평가 유형입니다.'}, status=400)
+        return JsonResponse({'error': _('잘못된 평가 유형입니다.')}, status=400)
     
     if request.user.is_authenticated:
         # 로그인 사용자: DB에서 관리
@@ -319,7 +320,7 @@ def mark_notification_read(request, pk):
         notification.save(update_fields=['is_read'])
         return JsonResponse({'success': True})
     except Notification.DoesNotExist:
-        return JsonResponse({'error': '알림을 찾을 수 없습니다.'}, status=404)
+        return JsonResponse({'error': _('알림을 찾을 수 없습니다.')}, status=404)
 
 
 @login_required

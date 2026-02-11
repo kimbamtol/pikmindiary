@@ -1,11 +1,12 @@
 {% extends 'base.html' %}
+{% load i18n %}
 
-{% block title %}좌표 수정 - 피크민 다이어리{% endblock %}
+{% block title %}{% trans "좌표 수정" %} - {% trans "피크민 다이어리" %}{% endblock %}
 
 {% block content %}
 <div class="container">
     <div class="form-page">
-        <h1 class="page-title">✏️ 좌표 수정</h1>
+        <h1 class="page-title">✏️ {% trans "좌표 수정" %}</h1>
 
         <form method="post" class="coord-form" enctype="multipart/form-data">
             {% csrf_token %}
@@ -13,29 +14,29 @@
             <!-- 비회원 비밀번호 확인 -->
             {% if not can_edit and coordinate.guest_password %}
             <div class="guest-notice">
-                <p>🔒 비회원으로 작성된 글입니다. 비밀번호를 입력해주세요.</p>
+                <p>🔒 {% trans "비회원으로 작성된 글입니다. 비밀번호를 입력해주세요." %}</p>
             </div>
             <div class="form-group">
-                <label class="form-label">비밀번호 *</label>
+                <label class="form-label">{% trans "비밀번호" %} *</label>
                 <input type="password" name="password" class="form-control" required>
             </div>
             {% endif %}
 
             <!-- 기본 정보 -->
             <div class="form-group">
-                <label class="form-label">제목 *</label>
+                <label class="form-label">{% trans "제목" %} *</label>
                 <input type="text" name="title" class="form-control" value="{{ coordinate.title }}" required
                     maxlength="100">
             </div>
 
             <div class="form-group">
-                <label class="form-label">엽서이름</label>
+                <label class="form-label">{% trans "엽서이름" %}</label>
                 <input type="text" name="postcard_name" class="form-control" value="{{ coordinate.postcard_name }}"
                     maxlength="100">
             </div>
 
             <div class="form-group">
-                <label class="form-label">카테고리 *</label>
+                <label class="form-label">{% trans "카테고리" %} *</label>
                 <select name="category" class="form-control" required>
                     {% for value, label in categories %}
                     <option value="{{ value }}" {% if coordinate.category == value %}selected{% endif %}>{{ label }}
@@ -47,12 +48,12 @@
             <!-- 좌표 입력 -->
             <div class="form-row">
                 <div class="form-group">
-                    <label class="form-label">위도 (Latitude) *</label>
+                    <label class="form-label">{% trans "위도 (Latitude)" %} *</label>
                     <input type="text" name="latitude" id="latitude" class="form-control"
                         value="{{ coordinate.latitude }}" required>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">경도 (Longitude) *</label>
+                    <label class="form-label">{% trans "경도 (Longitude)" %} *</label>
                     <input type="text" name="longitude" id="longitude" class="form-control"
                         value="{{ coordinate.longitude }}" required>
                 </div>
@@ -60,34 +61,34 @@
 
             <!-- 설명 -->
             <div class="form-group">
-                <label class="form-label">설명</label>
+                <label class="form-label">{% trans "설명" %}</label>
                 <textarea name="description" class="form-control" rows="4">{{ coordinate.description }}</textarea>
             </div>
 
             <!-- 기존 이미지 -->
             {% if coordinate.images.all %}
             <div class="form-group">
-                <label class="form-label">현재 이미지</label>
+                <label class="form-label">{% trans "현재 이미지" %}</label>
                 <div class="existing-images">
                     {% for img in coordinate.images.all %}
                     <div class="existing-image-item">
                         <img src="{{ img.image.url }}" alt="이미지 {{ forloop.counter }}">
                         <label class="delete-checkbox">
                             <input type="checkbox" name="delete_images" value="{{ img.pk }}">
-                            <span>삭제</span>
+                            <span>{% trans "삭제" %}</span>
                         </label>
                     </div>
                     {% endfor %}
                 </div>
-                <p class="form-hint">삭제할 이미지를 선택하세요</p>
+                <p class="form-hint">{% trans "삭제할 이미지를 선택하세요" %}</p>
             </div>
             {% endif %}
 
             <!-- 새 이미지 추가 -->
             <div class="form-group">
-                <label class="form-label">새 이미지 추가</label>
+                <label class="form-label">{% trans "새 이미지 추가" %}</label>
                 <input type="file" name="images" accept="image/*" multiple class="form-control">
-                <p class="form-hint">최대 5장까지 업로드 가능 (기존 이미지 포함)</p>
+                <p class="form-hint">{% trans "최대 5장까지 업로드 가능 (기존 이미지 포함)" %}</p>
             </div>
 
             <!-- 워터마크 옵션 -->
@@ -96,9 +97,9 @@
                     <input type="checkbox" name="watermark_enabled" id="watermark_enabled"
                            {% if coordinate.watermark_enabled %}checked{% endif %}
                            onchange="toggleWatermarkName()">
-                    <span class="checkbox-text">🔒 사진에 닉네임 워터마크 표시</span>
+                    <span class="checkbox-text">🔒 {% trans "사진에 닉네임 워터마크 표시" %}</span>
                 </label>
-                <small class="form-help">{% if coordinate.watermark_enabled %}이미 워터마크가 적용되어 있습니다.{% else %}체크하면 기존 이미지 + 새 이미지 모두에 워터마크가 적용됩니다. (한번 적용하면 취소 불가){% endif %}</small>
+                <small class="form-help">{% if coordinate.watermark_enabled %}{% trans "이미 워터마크가 적용되어 있습니다." %}{% else %}{% trans "체크하면 기존 이미지 + 새 이미지 모두에 워터마크가 적용됩니다. (한번 적용하면 취소 불가)" %}{% endif %}</small>
 
                 <div id="watermark-name-field" class="watermark-name-field"
                      style="display: {% if coordinate.watermark_enabled %}block{% else %}none{% endif %};">
@@ -112,8 +113,8 @@
 
             <!-- 버튼 -->
             <div class="form-actions">
-                <a href="{% url 'coordinates:detail' pk=coordinate.pk %}" class="btn btn-outline">취소</a>
-                <button type="submit" class="btn btn-primary btn-lg">수정하기</button>
+                <a href="{% url 'coordinates:detail' pk=coordinate.pk %}" class="btn btn-outline">{% trans "취소" %}</a>
+                <button type="submit" class="btn btn-primary btn-lg">{% trans "수정하기" %}</button>
             </div>
         </form>
     </div>

@@ -2,6 +2,7 @@
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
 from .models import Report
@@ -20,7 +21,7 @@ def report_coordinate(request, coordinate_id):
         
         # 이미 신고했는지 확인
         if Report.objects.filter(reporter=request.user, coordinate=coordinate).exists():
-            messages.warning(request, '이미 신고한 게시글입니다.')
+            messages.warning(request, _('이미 신고한 게시글입니다.'))
             return redirect('coordinates:detail', pk=coordinate_id)
         
         Report.objects.create(
@@ -30,7 +31,7 @@ def report_coordinate(request, coordinate_id):
             detail=detail,
         )
         
-        messages.success(request, '신고가 접수되었습니다.')
+        messages.success(request, _('신고가 접수되었습니다.'))
         return redirect('coordinates:detail', pk=coordinate_id)
     
     context = {
@@ -51,7 +52,7 @@ def report_comment(request, comment_id):
         
         # 이미 신고했는지 확인
         if Report.objects.filter(reporter=request.user, comment=comment).exists():
-            messages.warning(request, '이미 신고한 댓글입니다.')
+            messages.warning(request, _('이미 신고한 댓글입니다.'))
             return redirect('coordinates:detail', pk=comment.coordinate.pk)
         
         Report.objects.create(
@@ -61,7 +62,7 @@ def report_comment(request, comment_id):
             detail=detail,
         )
         
-        messages.success(request, '신고가 접수되었습니다.')
+        messages.success(request, _('신고가 접수되었습니다.'))
         return redirect('coordinates:detail', pk=comment.coordinate.pk)
     
     context = {

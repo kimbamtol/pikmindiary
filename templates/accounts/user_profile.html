@@ -1,11 +1,12 @@
 {% extends 'base.html' %}
+{% load i18n %}
 
-{% block title %}{{ profile_user.nickname }} 프로필 - 피크민 다이어리{% endblock %}
+{% block title %}{{ profile_user.nickname }} {% trans "프로필" %} - {% trans "피크민 다이어리" %}{% endblock %}
 
 {% block content %}
 <div class="container">
     <div class="profile-page">
-        <a href="{% url 'coordinates:list' %}" class="back-link">← 목록으로</a>
+        <a href="{% url 'coordinates:list' %}" class="back-link">← {% trans "목록으로" %}</a>
 
         <!-- 프로필 카드 -->
         <div class="profile-card card">
@@ -28,17 +29,17 @@
             <div class="profile-stats">
                 <div class="stat">
                     <span class="stat-value">{{ total_posts }}</span>
-                    <span class="stat-label">작성 글</span>
+                    <span class="stat-label">{% trans "작성 글" %}</span>
                 </div>
                 <div class="stat">
                     <span class="stat-value">{{ total_likes }}</span>
-                    <span class="stat-label">받은 좋아요</span>
+                    <span class="stat-label">{% trans "받은 좋아요" %}</span>
                 </div>
             </div>
         </div>
 
         <!-- 최근 글 -->
-        <h2 class="section-title">📝 최근 작성한 글</h2>
+        <h2 class="section-title">📝 {% trans "최근 작성한 글" %}</h2>
         {% if posts %}
         <div class="coord-grid grid grid-3">
             {% for coord in posts %}
@@ -60,11 +61,11 @@
             {% endfor %}
         </div>
         {% else %}
-        <p class="no-posts">아직 작성한 글이 없습니다.</p>
+        <p class="no-posts">{% trans "아직 작성한 글이 없습니다." %}</p>
         {% endif %}
 
         <!-- 최근 댓글 -->
-        <h2 class="section-title">💬 최근 남긴 댓글</h2>
+        <h2 class="section-title">💬 {% trans "최근 남긴 댓글" %}</h2>
         {% if recent_comments %}
         <div class="comments-list">
             {% for comment in recent_comments %}
@@ -75,10 +76,10 @@
                 <div class="comment-body">
                     <div class="comment-target">
                         {% if comment.coordinate %}
-                        <span class="target-badge">좌표</span>
+                        <span class="target-badge">{% trans "좌표" %}</span>
                         <span class="target-title">{{ comment.coordinate.title }}</span>
                         {% elif comment.farming_journal %}
-                        <span class="target-badge">일지</span>
+                        <span class="target-badge">{% trans "일지" %}</span>
                         <span class="target-title">{{ comment.farming_journal.title }}</span>
                         {% endif %}
                     </div>
@@ -86,7 +87,7 @@
                         {% if comment.content %}
                         {{ comment.content|truncatechars:80 }}
                         {% else %}
-                        <em>(사진 댓글)</em>
+                        <em>({% trans "사진 댓글" %})</em>
                         {% endif %}
                     </p>
                     <span class="comment-date">{{ comment.created_at|date:"m/d H:i" }}</span>
@@ -95,12 +96,12 @@
             {% endfor %}
         </div>
         {% else %}
-        <p class="no-posts">아직 남긴 댓글이 없습니다.</p>
+        <p class="no-posts">{% trans "아직 남긴 댓글이 없습니다." %}</p>
         {% endif %}
 
         <!-- 농사 일지 -->
         {% if farming_journals %}
-        <h2 class="section-title">🌾 농사 일지</h2>
+        <h2 class="section-title">🌾 {% trans "농사 일지" %}</h2>
         <div class="coord-grid grid grid-3">
             {% for journal in farming_journals %}
             <article class="card coord-card">

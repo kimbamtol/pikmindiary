@@ -1,30 +1,31 @@
 {% extends 'base.html' %}
+{% load i18n %}
 
-{% block title %}농사 게시판 - 피크민 다이어리{% endblock %}
+{% block title %}{% trans "농사 게시판" %} - {% trans "피크민 다이어리" %}{% endblock %}
 
 {% block content %}
 <div class="container farming-home">
     <div class="farming-header">
-        <h1 class="page-title">🌻 농사 게시판</h1>
-        <p class="page-desc">빅플라워 농사를 도와주고, 나의 농사 기록을 공유하세요!</p>
+        <h1 class="page-title">🌻 {% trans "농사 게시판" %}</h1>
+        <p class="page-desc">{% trans "빅플라워 농사를 도와주고, 나의 농사 기록을 공유하세요!" %}</p>
     </div>
 
     <div class="farming-nav">
         <a href="{% url 'farming:journal_list' %}" class="farming-nav-item">
             <span class="nav-icon">📔</span>
-            <span class="nav-title">농사 일지</span>
-            <span class="nav-desc">나의 농사 기록 공유</span>
+            <span class="nav-title">{% trans "농사 일지" %}</span>
+            <span class="nav-desc">{% trans "나의 농사 기록 공유" %}</span>
         </a>
         <a href="{% url 'farming:request_list' %}" class="farming-nav-item">
             <span class="nav-icon">🙋</span>
-            <span class="nav-title">농사 요청</span>
-            <span class="nav-desc">꽃 심어주기 요청</span>
+            <span class="nav-title">{% trans "농사 요청" %}</span>
+            <span class="nav-desc">{% trans "꽃 심어주기 요청" %}</span>
         </a>
         {% if user.is_authenticated %}
         <a href="{% url 'farming:my_farming' %}" class="farming-nav-item">
             <span class="nav-icon">👤</span>
-            <span class="nav-title">내 활동</span>
-            <span class="nav-desc">내 일지 &amp; 참여 기록</span>
+            <span class="nav-title">{% trans "내 활동" %}</span>
+            <span class="nav-desc">{% trans "내 일지 & 참여 기록" %}</span>
         </a>
         {% endif %}
     </div>
@@ -32,8 +33,8 @@
     <div class="farming-sections">
         <section class="farming-section">
             <div class="section-header">
-                <h2>📔 최근 농사 일지</h2>
-                <a href="{% url 'farming:journal_list' %}" class="btn btn-text">더보기 →</a>
+                <h2>📔 {% trans "최근 농사 일지" %}</h2>
+                <a href="{% url 'farming:journal_list' %}" class="btn btn-text">{% trans "더보기" %} →</a>
             </div>
             <div class="farming-grid">
                 {% for journal in recent_journals %}
@@ -44,15 +45,15 @@
                     </div>
                 </a>
                 {% empty %}
-                <p class="empty-text">아직 농사 일지가 없습니다.</p>
+                <p class="empty-text">{% trans "아직 농사 일지가 없습니다." %}</p>
                 {% endfor %}
             </div>
         </section>
 
         <section class="farming-section">
             <div class="section-header">
-                <h2>🙋 모집중인 요청</h2>
-                <a href="{% url 'farming:request_list' %}" class="btn btn-text">더보기 →</a>
+                <h2>🙋 {% trans "모집중인 요청" %}</h2>
+                <a href="{% url 'farming:request_list' %}" class="btn btn-text">{% trans "더보기" %} →</a>
             </div>
             <div class="farming-grid">
                 {% for req in recent_requests %}
@@ -63,7 +64,7 @@
                     </div>
                 </a>
                 {% empty %}
-                <p class="empty-text">현재 모집중인 요청이 없습니다.</p>
+                <p class="empty-text">{% trans "현재 모집중인 요청이 없습니다." %}</p>
                 {% endfor %}
             </div>
         </section>

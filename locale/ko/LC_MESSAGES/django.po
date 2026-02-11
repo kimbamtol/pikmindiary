@@ -1,0 +1,1906 @@
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: pikmin-diary 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-02-11 14:06\n"
+"PO-Revision-Date: 2026-02-11 14:06\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: ko\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+msgid "%(name)s님이 '%(title)s'에 %(emoji)s 댓글을 남겼어요"
+msgstr "%(name)s님이 '%(title)s'에 %(emoji)s 댓글을 남겼어요"
+
+msgid "%(name)s님이 회원님의 댓글에 %(emoji)s 답글을 남겼어요"
+msgstr "%(name)s님이 회원님의 댓글에 %(emoji)s 답글을 남겼어요"
+
+msgid "%(nickname)s님이 '%(title)s'에 ❤️ 좋아요를 눌렀어요"
+msgstr "%(nickname)s님이 '%(title)s'에 ❤️ 좋아요를 눌렀어요"
+
+msgid "'%(title)s'이(가) 📋 %(milestone)s회 복사되었어요!"
+msgstr "'%(title)s'이(가) 📋 %(milestone)s회 복사되었어요!"
+
+msgid "1개월"
+msgstr "1개월"
+
+msgid "1년"
+msgstr "1년"
+
+msgid "1일"
+msgstr "1일"
+
+msgid "3일"
+msgstr "3일"
+
+msgid "7일"
+msgstr "7일"
+
+msgid "Google 계정"
+msgstr "Google 계정"
+
+msgid "Google 계정으로 가입"
+msgstr "Google 계정으로 가입"
+
+msgid "Google 계정으로 계속"
+msgstr "Google 계정으로 계속"
+
+msgid "Google 계정으로 계속하시겠습니까?"
+msgstr "Google 계정으로 계속하시겠습니까?"
+
+msgid "Google 계정으로 로그인"
+msgstr "Google 계정으로 로그인"
+
+msgid "Google 계정으로 피크민 다이어리에 로그인합니다"
+msgstr "Google 계정으로 피크민 다이어리에 로그인합니다"
+
+msgid "Google 로그인"
+msgstr "Google 로그인"
+
+msgid "IP 주소"
+msgstr "IP 주소"
+
+msgid "JPEG, PNG, WebP 형식, 각 최대 5MB"
+msgstr "JPEG, PNG, WebP 형식, 각 최대 5MB"
+
+msgid "Nintendo 또는 Niantic과 관련이 없습니다."
+msgstr "Nintendo 또는 Niantic과 관련이 없습니다."
+
+msgid "TOP 5 랭커"
+msgstr "TOP 5 랭커"
+
+msgid "가을"
+msgstr "가을"
+
+msgid "가을 날씨"
+msgstr "가을 날씨"
+
+msgid "가입하기"
+msgstr "가입하기"
+
+msgid "개인정보가 포함된 스크린샷은 사용하지 마세요."
+msgstr "개인정보가 포함된 스크린샷은 사용하지 마세요."
+
+msgid "개척자"
+msgstr "개척자"
+
+msgid "거절"
+msgstr "거절"
+
+msgid "거절됨"
+msgstr "거절됨"
+
+msgid "거짓 좌표 제보 시 계정이 정지될 수 있습니다."
+msgstr "거짓 좌표 제보 시 계정이 정지될 수 있습니다."
+
+msgid "건의 완료"
+msgstr "건의 완료"
+
+msgid "건의사항 답변"
+msgstr "건의사항 답변"
+
+msgid "건의사항을 자유롭게 작성해주세요"
+msgstr "건의사항을 자유롭게 작성해주세요"
+
+msgid "건의사항이 성공적으로 접수되었습니다!"
+msgstr "건의사항이 성공적으로 접수되었습니다!"
+
+msgid "건의사항이 없습니다"
+msgstr "건의사항이 없습니다"
+
+msgid "건의사항이 접수되었습니다!"
+msgstr "건의사항이 접수되었습니다!"
+
+msgid "건의하기"
+msgstr "건의하기"
+
+msgid "검색"
+msgstr "검색"
+
+msgid "검색 조건에 맞는 좌표가 없습니다."
+msgstr "검색 조건에 맞는 좌표가 없습니다."
+
+msgid "겨울"
+msgstr "겨울"
+
+msgid "겨울 날씨"
+msgstr "겨울 날씨"
+
+msgid "경도"
+msgstr "경도"
+
+msgid "경도 (Longitude)"
+msgstr "경도 (Longitude)"
+
+msgid "계정 관리"
+msgstr "계정 관리"
+
+msgid "계정 설정"
+msgstr "계정 설정"
+
+msgid "과"
+msgstr "과"
+
+msgid "관리자 - 모든 옵션 사용 가능"
+msgstr "관리자 - 모든 옵션 사용 가능"
+
+msgid "관리자 메모"
+msgstr "관리자 메모"
+
+msgid "관리자 부여 칭호가 우선 적용됩니다."
+msgstr "관리자 부여 칭호가 우선 적용됩니다."
+
+msgid "관리자 승인"
+msgstr "관리자 승인"
+
+msgid "관리자가 부여하는 특별 칭호"
+msgstr "관리자가 부여하는 특별 칭호"
+
+msgid "관리자가 부여한 칭호가 있습니다"
+msgstr "관리자가 부여한 칭호가 있습니다"
+
+msgid "권한이 없습니다."
+msgstr "권한이 없습니다."
+
+msgid "글로우 효과"
+msgstr "글로우 효과"
+
+msgid "글자색과 배경색이 같으면 글자가 보이지 않을 수 있어요!"
+msgstr "글자색과 배경색이 같으면 글자가 보이지 않을 수 있어요!"
+
+msgid "기각"
+msgstr "기각"
+
+msgid "기간 시작일"
+msgstr "기간 시작일"
+
+msgid "기간 유형"
+msgstr "기간 유형"
+
+msgid "기본"
+msgstr "기본"
+
+msgid "기여도에 따라 랭킹에 이름이 올라갑니다"
+msgstr "기여도에 따라 랭킹에 이름이 올라갑니다"
+
+msgid "기타"
+msgstr "기타"
+
+msgid "기타 🌍"
+msgstr "기타 🌍"
+
+msgid "꽃 심어주기 요청"
+msgstr "꽃 심어주기 요청"
+
+msgid "꽃 종류"
+msgstr "꽃 종류"
+
+msgid "나의 농사 기록 공유"
+msgstr "나의 농사 기록 공유"
+
+msgid "나의 농사 기록을 공유해보세요!"
+msgstr "나의 농사 기록을 공유해보세요!"
+
+msgid "남긴 댓글이 없습니다"
+msgstr "남긴 댓글이 없습니다"
+
+msgid "낮"
+msgstr "낮"
+
+msgid "낮 모드 적용!"
+msgstr "낮 모드 적용!"
+
+msgid "내 건의사항"
+msgstr "내 건의사항"
+
+msgid "내 글 목록"
+msgstr "내 글 목록"
+
+msgid "내 농사 활동"
+msgstr "내 농사 활동"
+
+msgid "내 요청"
+msgstr "내 요청"
+
+msgid "내 위치 입력하기"
+msgstr "내 위치 입력하기"
+
+msgid "내 위치로"
+msgstr "내 위치로"
+
+msgid "내 일지"
+msgstr "내 일지"
+
+msgid "내 일지 & 참여 기록"
+msgstr "내 일지 & 참여 기록"
+
+msgid "내 지역 계절에 맞는 화면"
+msgstr "내 지역 계절에 맞는 화면"
+
+msgid "내 활동"
+msgstr "내 활동"
+
+msgid "내가 남긴 댓글"
+msgstr "내가 남긴 댓글"
+
+msgid "내가 쓴 글"
+msgstr "내가 쓴 글"
+
+msgid "내가 쓴 글 관리"
+msgstr "내가 쓴 글 관리"
+
+msgid "내가 쓴 농사 일지"
+msgstr "내가 쓴 농사 일지"
+
+msgid "내가 올린 요청"
+msgstr "내가 올린 요청"
+
+msgid "내가 참여한 농사"
+msgstr "내가 참여한 농사"
+
+msgid "내용"
+msgstr "내용"
+
+msgid "노랑"
+msgstr "노랑"
+
+msgid "농사"
+msgstr "농사"
+
+msgid "농사 게시판"
+msgstr "농사 게시판"
+
+msgid "농사 과정이나 후기를 작성해주세요."
+msgstr "농사 과정이나 후기를 작성해주세요."
+
+msgid "농사 도움이 필요하면 요청해보세요!"
+msgstr "농사 도움이 필요하면 요청해보세요!"
+
+msgid "농사 요청"
+msgstr "농사 요청"
+
+msgid "농사 요청 작성"
+msgstr "농사 요청 작성"
+
+msgid "농사 요청이 등록되었습니다!"
+msgstr "농사 요청이 등록되었습니다!"
+
+msgid "농사 요청이 완료되었습니다!"
+msgstr "농사 요청이 완료되었습니다!"
+
+msgid "농사 일지"
+msgstr "농사 일지"
+
+msgid "농사 일지 삭제"
+msgstr "농사 일지 삭제"
+
+msgid "농사 일지 수정"
+msgstr "농사 일지 수정"
+
+msgid "농사 일지 작성"
+msgstr "농사 일지 작성"
+
+msgid "농사 일지 좋아요"
+msgstr "농사 일지 좋아요"
+
+msgid "농사 일지 좋아요 수"
+msgstr "농사 일지 좋아요 수"
+
+msgid "농사 일지 좋아요:"
+msgstr "농사 일지 좋아요:"
+
+msgid "농사 일지가 등록되었습니다!"
+msgstr "농사 일지가 등록되었습니다!"
+
+msgid "농사 일지가 삭제되었습니다."
+msgstr "농사 일지가 삭제되었습니다."
+
+msgid "농사 일지가 수정되었습니다."
+msgstr "농사 일지가 수정되었습니다."
+
+msgid "농사 좋아요"
+msgstr "농사 좋아요"
+
+msgid "눈"
+msgstr "눈"
+
+msgid "닉네임"
+msgstr "닉네임"
+
+msgid "닉네임 (선택)"
+msgstr "닉네임 (선택)"
+
+msgid "닉네임 배경 색상"
+msgstr "닉네임 배경 색상"
+
+msgid "닉네임 배지의 CSS 스타일"
+msgstr "닉네임 배지의 CSS 스타일"
+
+msgid "닉네임 색상"
+msgstr "닉네임 색상"
+
+msgid "닉네임 왼쪽에 표시됩니다."
+msgstr "닉네임 왼쪽에 표시됩니다."
+
+msgid "닉네임, 프로필 이미지, 자기소개 수정"
+msgstr "닉네임, 프로필 이미지, 자기소개 수정"
+
+msgid "닉네임을 입력하세요"
+msgstr "닉네임을 입력하세요"
+
+msgid "다른 사용자에게 표시되는 이름입니다."
+msgstr "다른 사용자에게 표시되는 이름입니다."
+
+msgid "다른 유저들이 평가합니다."
+msgstr "다른 유저들이 평가합니다."
+
+msgid "다음"
+msgstr "다음"
+
+msgid "닫기"
+msgstr "닫기"
+
+msgid "답글"
+msgstr "답글"
+
+msgid "답글을 입력하세요..."
+msgstr "답글을 입력하세요..."
+
+msgid "답글을 입력하세요... (사진만 올릴 경우 비워둬도 됩니다)"
+msgstr "답글을 입력하세요... (사진만 올릴 경우 비워둬도 됩니다)"
+
+msgid "답글이 등록되었습니다."
+msgstr "답글이 등록되었습니다."
+
+msgid "답변"
+msgstr "답변"
+
+msgid "답변완료"
+msgstr "답변완료"
+
+msgid "대기"
+msgstr "대기"
+
+msgid "대기 중"
+msgstr "대기 중"
+
+msgid "대기중"
+msgstr "대기중"
+
+msgid "댓글"
+msgstr "댓글"
+
+msgid "댓글 내용을 입력해주세요."
+msgstr "댓글 내용을 입력해주세요."
+
+msgid "댓글 내용이나 사진 중 하나는 입력해주세요."
+msgstr "댓글 내용이나 사진 중 하나는 입력해주세요."
+
+msgid "댓글 수"
+msgstr "댓글 수"
+
+msgid "댓글 신고"
+msgstr "댓글 신고"
+
+msgid "댓글 좋아요"
+msgstr "댓글 좋아요"
+
+msgid "댓글 좋아요들"
+msgstr "댓글 좋아요들"
+
+msgid "댓글들"
+msgstr "댓글들"
+
+msgid "댓글에 첨부할 사진 (최대 5MB, JPG/PNG/WEBP)"
+msgstr "댓글에 첨부할 사진 (최대 5MB, JPG/PNG/WEBP)"
+
+msgid "댓글을 입력하세요..."
+msgstr "댓글을 입력하세요..."
+
+msgid "댓글을 입력하세요... (사진만 올릴 경우 비워둬도 됩니다)"
+msgstr "댓글을 입력하세요... (사진만 올릴 경우 비워둬도 됩니다)"
+
+msgid "댓글이 등록되었습니다."
+msgstr "댓글이 등록되었습니다."
+
+msgid "댓글이 삭제되었습니다."
+msgstr "댓글이 삭제되었습니다."
+
+msgid "댓글이 수정되었습니다."
+msgstr "댓글이 수정되었습니다."
+
+msgid "더보기"
+msgstr "더보기"
+
+msgid "돌아가기"
+msgstr "돌아가기"
+
+msgid "등록"
+msgstr "등록"
+
+msgid "등록하기"
+msgstr "등록하기"
+
+msgid "또는"
+msgstr "또는"
+
+msgid "또는 게임 내에서 공유하기 → 좌표 확인"
+msgstr "또는 게임 내에서 공유하기 → 좌표 확인"
+
+msgid "또는 이메일로 가입"
+msgstr "또는 이메일로 가입"
+
+msgid "랭커가 직접 선택한 칭호 (1위: 모든 칭호, 2~3위: 일반 칭호만)"
+msgstr "랭커가 직접 선택한 칭호 (1위: 모든 칭호, 2~3위: 일반 칭호만)"
+
+msgid "랭킹"
+msgstr "랭킹"
+
+msgid "랭킹 시스템"
+msgstr "랭킹 시스템"
+
+msgid "랭킹 참여"
+msgstr "랭킹 참여"
+
+msgid "랭킹들"
+msgstr "랭킹들"
+
+msgid "로 표시되고,"
+msgstr "로 표시되고,"
+
+msgid "로그아웃"
+msgstr "로그아웃"
+
+msgid "로그아웃하거나 계정을 관리합니다."
+msgstr "로그아웃하거나 계정을 관리합니다."
+
+msgid "로그인"
+msgstr "로그인"
+
+msgid "로그인 없이 둘러보기"
+msgstr "로그인 없이 둘러보기"
+
+msgid "로그인 없이도 좌표 제보, 댓글 작성이 모두 가능합니다."
+msgstr "로그인 없이도 좌표 제보, 댓글 작성이 모두 가능합니다."
+
+msgid "로그인하고 참여하기"
+msgstr "로그인하고 참여하기"
+
+msgid "로그인하기"
+msgstr "로그인하기"
+
+msgid "로그인하지 않아도 글과 댓글을 남길 수 있습니다!"
+msgstr "로그인하지 않아도 글과 댓글을 남길 수 있습니다!"
+
+msgid "로딩 중..."
+msgstr "로딩 중..."
+
+msgid "를 공유하는 커뮤니티입니다."
+msgstr "를 공유하는 커뮤니티입니다."
+
+msgid "를 입력하세요."
+msgstr "를 입력하세요."
+
+msgid "리스트"
+msgstr "리스트"
+
+msgid "마감"
+msgstr "마감"
+
+msgid "마감 시간"
+msgstr "마감 시간"
+
+msgid "마음에 드는 좌표를 북마크해보세요!"
+msgstr "마음에 드는 좌표를 북마크해보세요!"
+
+msgid "마음에 드는 좌표를 저장해두고 나중에 확인"
+msgstr "마음에 드는 좌표를 저장해두고 나중에 확인"
+
+msgid "마이페이지"
+msgstr "마이페이지"
+
+msgid "마이페이지 기능"
+msgstr "마이페이지 기능"
+
+msgid "마이페이지 시스템 안내"
+msgstr "마이페이지 시스템 안내"
+
+msgid "마이페이지 안내"
+msgstr "마이페이지 안내"
+
+msgid "마이페이지로"
+msgstr "마이페이지로"
+
+msgid "마지막 검증"
+msgstr "마지막 검증"
+
+msgid "마지막 검증일"
+msgstr "마지막 검증일"
+
+msgid "맑음"
+msgstr "맑음"
+
+msgid "매월 1일 00:00 ~ 말일 24:00"
+msgstr "매월 1일 00:00 ~ 말일 24:00"
+
+msgid "매주 월요일 00:00 ~ 일요일 24:00"
+msgstr "매주 월요일 00:00 ~ 일요일 24:00"
+
+msgid "메뉴 열기"
+msgstr "메뉴 열기"
+
+msgid "메시지"
+msgstr "메시지"
+
+msgid "메시지 (선택)"
+msgstr "메시지 (선택)"
+
+msgid "메인 내비게이션"
+msgstr "메인 내비게이션"
+
+msgid "메인으로"
+msgstr "메인으로"
+
+msgid "명"
+msgstr "명"
+
+msgid "명 참여"
+msgstr "명 참여"
+
+msgid "모두 삭제"
+msgstr "모두 삭제"
+
+msgid "모두 읽음 처리"
+msgstr "모두 읽음 처리"
+
+msgid "모든 알림을 삭제하시겠습니까?"
+msgstr "모든 알림을 삭제하시겠습니까?"
+
+msgid "모든 칭호 선택 가능"
+msgstr "모든 칭호 선택 가능"
+
+msgid "모바일 메뉴"
+msgstr "모바일 메뉴"
+
+msgid "모종"
+msgstr "모종"
+
+msgid "모집중"
+msgstr "모집중"
+
+msgid "모집중인 요청"
+msgstr "모집중인 요청"
+
+msgid "모집중인 요청이 없어요"
+msgstr "모집중인 요청이 없어요"
+
+msgid "목록으로"
+msgstr "목록으로"
+
+msgid "무지개"
+msgstr "무지개"
+
+msgid "무효 평가 수"
+msgstr "무효 평가 수"
+
+msgid "미리보기"
+msgstr "미리보기"
+
+msgid "바람"
+msgstr "바람"
+
+msgid "받은 INVALID 수"
+msgstr "받은 INVALID 수"
+
+msgid "받은 VALID 수"
+msgstr "받은 VALID 수"
+
+msgid "받은 검증"
+msgstr "받은 검증"
+
+msgid "받은 복사"
+msgstr "받은 복사"
+
+msgid "받은 복사 수"
+msgstr "받은 복사 수"
+
+msgid "받은 좋아요"
+msgstr "받은 좋아요"
+
+msgid "받은 좋아요 (좌표)"
+msgstr "받은 좋아요 (좌표)"
+
+msgid "받은 좋아요 (좌표):"
+msgstr "받은 좋아요 (좌표):"
+
+msgid "받은 좋아요 수"
+msgstr "받은 좋아요 수"
+
+msgid "받은 좋아요, 유효성 평가 등 통계 확인"
+msgstr "받은 좋아요, 유효성 평가 등 통계 확인"
+
+msgid "발신자"
+msgstr "발신자"
+
+msgid "밤"
+msgstr "밤"
+
+msgid "밤 모드 적용!"
+msgstr "밤 모드 적용!"
+
+msgid "배경만"
+msgstr "배경만"
+
+msgid "배지 스타일"
+msgstr "배지 스타일"
+
+msgid "배지 커스터마이즈"
+msgstr "배지 커스터마이즈"
+
+msgid "배지가 붙습니다."
+msgstr "배지가 붙습니다."
+
+msgid "버그 신고, 기능 제안, 문의사항 모두 환영합니다."
+msgstr "버그 신고, 기능 제안, 문의사항 모두 환영합니다."
+
+msgid "버섯"
+msgstr "버섯"
+
+msgid "버섯, 빅플라워, 농사 정보"
+msgstr "버섯, 빅플라워, 농사 정보"
+
+msgid "버섯/빅플라워/모종 등으로 필터링"
+msgstr "버섯/빅플라워/모종 등으로 필터링"
+
+msgid "버튼으로 지도에서 직접 위치 선택"
+msgstr "버튼으로 지도에서 직접 위치 선택"
+
+msgid "버튼으로 현재 위치 자동 입력"
+msgstr "버튼으로 현재 위치 자동 입력"
+
+msgid "별도의 회원가입 절차 없이 Google 로그인만 하면 됩니다."
+msgstr "별도의 회원가입 절차 없이 Google 로그인만 하면 됩니다."
+
+msgid "보내기"
+msgstr "보내기"
+
+msgid "보라"
+msgstr "보라"
+
+msgid "복사"
+msgstr "복사"
+
+msgid "복사 마일스톤"
+msgstr "복사 마일스톤"
+
+msgid "복사 수"
+msgstr "복사 수"
+
+msgid "복사되었습니다"
+msgstr "복사되었습니다"
+
+msgid "복사됨"
+msgstr "복사됨"
+
+msgid "복사순"
+msgstr "복사순"
+
+msgid "복사에 실패했습니다."
+msgstr "복사에 실패했습니다."
+
+msgid "본인 글에는 좋아요를 누를 수 없습니다"
+msgstr "본인 글에는 좋아요를 누를 수 없습니다"
+
+msgid "본인 글에는 좋아요를 누를 수 없습니다."
+msgstr "본인 글에는 좋아요를 누를 수 없습니다."
+
+msgid "본인 글은 평가할 수 없습니다."
+msgstr "본인 글은 평가할 수 없습니다."
+
+msgid "본인 댓글에는 좋아요를 누를 수 없습니다."
+msgstr "본인 댓글에는 좋아요를 누를 수 없습니다."
+
+msgid "봄"
+msgstr "봄"
+
+msgid "봄 날씨"
+msgstr "봄 날씨"
+
+msgid "부모 댓글"
+msgstr "부모 댓글"
+
+msgid "부적절한 내용"
+msgstr "부적절한 내용"
+
+msgid "부적절한 내용은 신고해주세요."
+msgstr "부적절한 내용은 신고해주세요."
+
+msgid "북마크"
+msgstr "북마크"
+
+msgid "북마크 기능"
+msgstr "북마크 기능"
+
+msgid "북마크 수"
+msgstr "북마크 수"
+
+msgid "북마크들"
+msgstr "북마크들"
+
+msgid "북마크순"
+msgstr "북마크순"
+
+msgid "북마크한 글"
+msgstr "북마크한 글"
+
+msgid "북마크한 글이 없습니다"
+msgstr "북마크한 글이 없습니다"
+
+msgid "북미 🌎"
+msgstr "북미 🌎"
+
+msgid "분류"
+msgstr "분류"
+
+msgid "분홍"
+msgstr "분홍"
+
+msgid "비"
+msgstr "비"
+
+msgid "비밀번호"
+msgstr "비밀번호"
+
+msgid "비밀번호 (수정/삭제용)"
+msgstr "비밀번호 (수정/삭제용)"
+
+msgid "비밀번호 확인"
+msgstr "비밀번호 확인"
+
+msgid "비밀번호는 나중에 글을 수정/삭제할 때 사용합니다."
+msgstr "비밀번호는 나중에 글을 수정/삭제할 때 사용합니다."
+
+msgid "비밀번호를 다시 입력하세요"
+msgstr "비밀번호를 다시 입력하세요"
+
+msgid "비밀번호를 입력하세요"
+msgstr "비밀번호를 입력하세요"
+
+msgid "비워두면 작성자 닉네임 사용"
+msgstr "비워두면 작성자 닉네임 사용"
+
+msgid "비회원"
+msgstr "비회원"
+
+msgid "비회원 글은 마이페이지에서 조회할 수 없습니다."
+msgstr "비회원 글은 마이페이지에서 조회할 수 없습니다."
+
+msgid "비회원 글입니다. 작성 시 입력한 비밀번호를 입력해주세요."
+msgstr "비회원 글입니다. 작성 시 입력한 비밀번호를 입력해주세요."
+
+msgid "비회원 닉네임"
+msgstr "비회원 닉네임"
+
+msgid "비회원 비밀번호"
+msgstr "비회원 비밀번호"
+
+msgid "비회원 여부"
+msgstr "비회원 여부"
+
+msgid "비회원 작성 시 비밀번호를 설정하면 나중에 수정/삭제할 수 있어요."
+msgstr "비회원 작성 시 비밀번호를 설정하면 나중에 수정/삭제할 수 있어요."
+
+msgid "비회원도 이용 가능해요!"
+msgstr "비회원도 이용 가능해요!"
+
+msgid "비회원으로 글 작성"
+msgstr "비회원으로 글 작성"
+
+msgid "비회원으로 글을 작성합니다. 닉네임과 비밀번호를 입력해주세요."
+msgstr "비회원으로 글을 작성합니다. 닉네임과 비밀번호를 입력해주세요."
+
+msgid "비회원으로 작성된 글입니다. 비밀번호를 입력해주세요."
+msgstr "비회원으로 작성된 글입니다. 비밀번호를 입력해주세요."
+
+msgid "비회원으로 작성한 경우 True"
+msgstr "비회원으로 작성한 경우 True"
+
+msgid "비회원은 닉네임과 비밀번호를 입력해야 합니다."
+msgstr "비회원은 닉네임과 비밀번호를 입력해야 합니다."
+
+msgid "비회원은 비밀번호를 입력해야 합니다."
+msgstr "비회원은 비밀번호를 입력해야 합니다."
+
+msgid "비회원은 확인할 수 없습니다"
+msgstr "비회원은 확인할 수 없습니다"
+
+msgid "비회원이 글 수정/삭제 시 사용"
+msgstr "비회원이 글 수정/삭제 시 사용"
+
+msgid "비회원이 글 수정/삭제 시 사용하는 비밀번호 (해시됨)"
+msgstr "비회원이 글 수정/삭제 시 사용하는 비밀번호 (해시됨)"
+
+msgid "빅플라워"
+msgstr "빅플라워"
+
+msgid "빅플라워 농사를 도와주고, 나의 농사 기록을 공유하세요!"
+msgstr "빅플라워 농사를 도와주고, 나의 농사 기록을 공유하세요!"
+
+msgid "빅플라워 농사를 도와주세요!"
+msgstr "빅플라워 농사를 도와주세요!"
+
+msgid "빅플라워 농사를 도와줄 분을 찾아보세요!"
+msgstr "빅플라워 농사를 도와줄 분을 찾아보세요!"
+
+msgid "빨강"
+msgstr "빨강"
+
+msgid "사용자"
+msgstr "사용자"
+
+msgid "사용자들"
+msgstr "사용자들"
+
+msgid "사이트 공지"
+msgstr "사이트 공지"
+
+msgid "사이트 안내"
+msgstr "사이트 안내"
+
+msgid "사이트 이용 중 불편한 점이나 개선 제안이 있으시면 알려주세요!"
+msgstr "사이트 이용 중 불편한 점이나 개선 제안이 있으시면 알려주세요!"
+
+msgid "사진"
+msgstr "사진"
+
+msgid "사진 댓글"
+msgstr "사진 댓글"
+
+msgid "사진 파일 크기는 5MB를 초과할 수 없습니다."
+msgstr "사진 파일 크기는 5MB를 초과할 수 없습니다."
+
+msgid "사진에 닉네임 워터마크 표시"
+msgstr "사진에 닉네임 워터마크 표시"
+
+msgid "삭제"
+msgstr "삭제"
+
+msgid "삭제 권한이 없습니다."
+msgstr "삭제 권한이 없습니다."
+
+msgid "삭제된 댓글입니다."
+msgstr "삭제된 댓글입니다."
+
+msgid "삭제된 일지는 복구할 수 없습니다."
+msgstr "삭제된 일지는 복구할 수 없습니다."
+
+msgid "삭제된 좌표는 복구할 수 없습니다."
+msgstr "삭제된 좌표는 복구할 수 없습니다."
+
+msgid "삭제됨"
+msgstr "삭제됨"
+
+msgid "삭제하기"
+msgstr "삭제하기"
+
+msgid "삭제하시겠습니까?"
+msgstr "삭제하시겠습니까?"
+
+msgid "삭제할 이미지를 선택하세요"
+msgstr "삭제할 이미지를 선택하세요"
+
+msgid "상세 내용"
+msgstr "상세 내용"
+
+msgid "상위 3위 내에 들면 특별 칭호를 선택할 수 있습니다."
+msgstr "상위 3위 내에 들면 특별 칭호를 선택할 수 있습니다."
+
+msgid "상태"
+msgstr "상태"
+
+msgid "새 이미지 추가"
+msgstr "새 이미지 추가"
+
+msgid "새 좌표 제보"
+msgstr "새 좌표 제보"
+
+msgid "서포터"
+msgstr "서포터"
+
+msgid "선택 완료"
+msgstr "선택 완료"
+
+msgid "선택한 칭호"
+msgstr "선택한 칭호"
+
+msgid "설명"
+msgstr "설명"
+
+msgid "설정"
+msgstr "설정"
+
+msgid "소중한 의견 감사합니다."
+msgstr "소중한 의견 감사합니다."
+
+msgid "수신자"
+msgstr "수신자"
+
+msgid "수정"
+msgstr "수정"
+
+msgid "수정 권한이 없습니다."
+msgstr "수정 권한이 없습니다."
+
+msgid "수정/삭제용"
+msgstr "수정/삭제용"
+
+msgid "수정일"
+msgstr "수정일"
+
+msgid "수정하기"
+msgstr "수정하기"
+
+msgid "순서"
+msgstr "순서"
+
+msgid "순위"
+msgstr "순위"
+
+msgid "스크린샷 첨부 (최대 5장)"
+msgstr "스크린샷 첨부 (최대 5장)"
+
+msgid "스타일"
+msgstr "스타일"
+
+msgid "스팸/광고"
+msgstr "스팸/광고"
+
+msgid "승인"
+msgstr "승인"
+
+msgid "승인 대기"
+msgstr "승인 대기"
+
+msgid "승인된 글"
+msgstr "승인된 글"
+
+msgid "승인된 글 수"
+msgstr "승인된 글 수"
+
+msgid "승인된 글 수, 받은 좋아요, 받은 유효성 평가"
+msgstr "승인된 글 수, 받은 좋아요, 받은 유효성 평가"
+
+msgid "승인된 글 작성"
+msgstr "승인된 글 작성"
+
+msgid "승인된 글 작성:"
+msgstr "승인된 글 작성:"
+
+msgid "승인됨"
+msgstr "승인됨"
+
+msgid "승인일"
+msgstr "승인일"
+
+msgid "시간대"
+msgstr "시간대"
+
+msgid "신고"
+msgstr "신고"
+
+msgid "신고 대상"
+msgstr "신고 대상"
+
+msgid "신고 대상 댓글"
+msgstr "신고 대상 댓글"
+
+msgid "신고 사유"
+msgstr "신고 사유"
+
+msgid "신고 사유를 자세히 적어주세요 (선택)"
+msgstr "신고 사유를 자세히 적어주세요 (선택)"
+
+msgid "신고가 접수되었습니다."
+msgstr "신고가 접수되었습니다."
+
+msgid "신고들"
+msgstr "신고들"
+
+msgid "신고일"
+msgstr "신고일"
+
+msgid "신고자"
+msgstr "신고자"
+
+msgid "신고하기"
+msgstr "신고하기"
+
+msgid "심은 꽃"
+msgstr "심은 꽃"
+
+msgid "심은 꽃 수"
+msgstr "심은 꽃 수"
+
+msgid "아시아 🌏"
+msgstr "아시아 🌏"
+
+msgid "아직 남긴 댓글이 없습니다."
+msgstr "아직 남긴 댓글이 없습니다."
+
+msgid "아직 농사 일지가 없습니다."
+msgstr "아직 농사 일지가 없습니다."
+
+msgid "아직 농사 일지가 없어요"
+msgstr "아직 농사 일지가 없어요"
+
+msgid "아직 답변이 없습니다"
+msgstr "아직 답변이 없습니다"
+
+msgid "아직 댓글이 없습니다. 첫 댓글을 남겨보세요!"
+msgstr "아직 댓글이 없습니다. 첫 댓글을 남겨보세요!"
+
+msgid "아직 랭킹이 없습니다"
+msgstr "아직 랭킹이 없습니다"
+
+msgid "아직 랭킹이 없어요"
+msgstr "아직 랭킹이 없어요"
+
+msgid "아직 작성한 글이 없습니다."
+msgstr "아직 작성한 글이 없습니다."
+
+msgid "아직 참여자가 없습니다. 첫 번째 봉사자가 되어주세요!"
+msgstr "아직 참여자가 없습니다. 첫 번째 봉사자가 되어주세요!"
+
+msgid "아직 참여한 농사가 없습니다."
+msgstr "아직 참여한 농사가 없습니다."
+
+msgid "안내"
+msgstr "안내"
+
+msgid "알림"
+msgstr "알림"
+
+msgid "알림 목록"
+msgstr "알림 목록"
+
+msgid "알림 유형"
+msgstr "알림 유형"
+
+msgid "알림들"
+msgstr "알림들"
+
+msgid "알림을 불러올 수 없습니다"
+msgstr "알림을 불러올 수 없습니다"
+
+msgid "알림을 찾을 수 없습니다."
+msgstr "알림을 찾을 수 없습니다."
+
+msgid "알림이 없습니다"
+msgstr "알림이 없습니다"
+
+msgid "어떤 도움이 필요한지 설명해주세요."
+msgstr "어떤 도움이 필요한지 설명해주세요."
+
+msgid "언어 선택"
+msgstr "언어 선택"
+
+msgid "업데이트 내역"
+msgstr "업데이트 내역"
+
+msgid "없음"
+msgstr "없음"
+
+msgid "여름"
+msgstr "여름"
+
+msgid "여름 날씨"
+msgstr "여름 날씨"
+
+msgid "엽서 사진 첨부 (선택)"
+msgstr "엽서 사진 첨부 (선택)"
+
+msgid "엽서이름"
+msgstr "엽서이름"
+
+msgid "영구"
+msgstr "영구"
+
+msgid "예: 강남역 근처 버섯"
+msgstr "예: 강남역 근처 버섯"
+
+msgid "예: 강남역 엽서"
+msgstr "예: 강남역 엽서"
+
+msgid "예: 빨간 꽃"
+msgstr "예: 빨간 꽃"
+
+msgid "예: 빨간 꽃, 노란 꽃"
+msgstr "예: 빨간 꽃, 노란 꽃"
+
+msgid "예: 빨간 꽃, 아무 꽃이나"
+msgstr "예: 빨간 꽃, 아무 꽃이나"
+
+msgid "예: 서울 강남구"
+msgstr "예: 서울 강남구"
+
+msgid "예: 시부야역 빅플라워 농사 완료!"
+msgstr "예: 시부야역 빅플라워 농사 완료!"
+
+msgid "예: 시부야역 앞"
+msgstr "예: 시부야역 앞"
+
+msgid "예: 신주쿠역 남쪽 출구"
+msgstr "예: 신주쿠역 남쪽 출구"
+
+msgid "예: 신주쿠역 빅플라워 도와주세요!"
+msgstr "예: 신주쿠역 빅플라워 도와주세요!"
+
+msgid "오늘 %(category)s 카테고리에 %(limit)s개를 이미 등록했습니다. 내일 다시 시도해주세요."
+msgstr "오늘 %(category)s 카테고리에 %(limit)s개를 이미 등록했습니다. 내일 다시 시도해주세요."
+
+msgid "오래된순"
+msgstr "오래된순"
+
+msgid "오래됨"
+msgstr "오래됨"
+
+msgid "올린 요청이 없습니다."
+msgstr "올린 요청이 없습니다."
+
+msgid "완료"
+msgstr "완료"
+
+msgid "완료 처리"
+msgstr "완료 처리"
+
+msgid "요청하기"
+msgstr "요청하기"
+
+msgid "운영자 답변"
+msgstr "운영자 답변"
+
+msgid "운영자가 확인 후 반영하도록 하겠습니다."
+msgstr "운영자가 확인 후 반영하도록 하겠습니다."
+
+msgid "운영자에게 건의하기"
+msgstr "운영자에게 건의하기"
+
+msgid "운영자에게 건의할 내용이 있다면 건의하기 페이지를 이용해주세요."
+msgstr "운영자에게 건의할 내용이 있다면 건의하기 페이지를 이용해주세요."
+
+msgid "워터마크 닉네임"
+msgstr "워터마크 닉네임"
+
+msgid "워터마크 닉네임 (선택)"
+msgstr "워터마크 닉네임 (선택)"
+
+msgid "워터마크 표시"
+msgstr "워터마크 표시"
+
+msgid "워터마크에 표시될 이름 (비어있으면 작성자 닉네임 사용)"
+msgstr "워터마크에 표시될 이름 (비어있으면 작성자 닉네임 사용)"
+
+msgid "워터마크에 표시될 이름을 직접 지정할 수 있습니다."
+msgstr "워터마크에 표시될 이름을 직접 지정할 수 있습니다."
+
+msgid "월간"
+msgstr "월간"
+
+msgid "위"
+msgstr "위"
+
+msgid "위도"
+msgstr "위도"
+
+msgid "위도 (Latitude)"
+msgstr "위도 (Latitude)"
+
+msgid "위치"
+msgstr "위치"
+
+msgid "위치를 허용하면 입장 후"
+msgstr "위치를 허용하면 입장 후"
+
+msgid "위치명"
+msgstr "위치명"
+
+msgid "위치에 대한 추가 설명 (선택사항)"
+msgstr "위치에 대한 추가 설명 (선택사항)"
+
+msgid "유럽 🇪🇺"
+msgstr "유럽 🇪🇺"
+
+msgid "유저들이 함께 하는 버섯, 빅플라워, 농사 정보"
+msgstr "유저들이 함께 하는 버섯, 빅플라워, 농사 정보"
+
+msgid "유효 평가 수"
+msgstr "유효 평가 수"
+
+msgid "유효성 평가"
+msgstr "유효성 평가"
+
+msgid "유효성 평가는 작성 후 1개월이 지난 글부터 가능합니다."
+msgstr "유효성 평가는 작성 후 1개월이 지난 글부터 가능합니다."
+
+msgid "유효성 평가들"
+msgstr "유효성 평가들"
+
+msgid "으로 간편하게 가입할 수 있습니다."
+msgstr "으로 간편하게 가입할 수 있습니다."
+
+msgid "으로 글 작성 가능"
+msgstr "으로 글 작성 가능"
+
+msgid "을 거쳐 공개"
+msgstr "을 거쳐 공개"
+
+msgid "이 사이트는 Nintendo 또는 Niantic과 관련이 없습니다."
+msgstr "이 사이트는 Nintendo 또는 Niantic과 관련이 없습니다."
+
+msgid "이 사이트는 Nintendo/Niantic과 무관합니다."
+msgstr "이 사이트는 Nintendo/Niantic과 무관합니다."
+
+msgid "이 사이트는?"
+msgstr "이 사이트는?"
+
+msgid "이 좌표가 지금도 유효한가요?"
+msgstr "이 좌표가 지금도 유효한가요?"
+
+msgid "이 펼쳐집니다!"
+msgstr "이 펼쳐집니다!"
+
+msgid "이메일"
+msgstr "이메일"
+
+msgid "이메일 (선택, 답변 받고 싶으시면)"
+msgstr "이메일 (선택, 답변 받고 싶으시면)"
+
+msgid "이메일은 변경할 수 없습니다."
+msgstr "이메일은 변경할 수 없습니다."
+
+msgid "이메일을 입력하세요"
+msgstr "이메일을 입력하세요"
+
+msgid "이모지 없음"
+msgstr "이모지 없음"
+
+msgid "이미 계정이 있으신가요?"
+msgstr "이미 계정이 있으신가요?"
+
+msgid "이미 신고한 게시글입니다."
+msgstr "이미 신고한 게시글입니다."
+
+msgid "이미 신고한 댓글입니다."
+msgstr "이미 신고한 댓글입니다."
+
+msgid "이미 워터마크가 적용되어 있습니다."
+msgstr "이미 워터마크가 적용되어 있습니다."
+
+msgid "이미 참여하셨습니다."
+msgstr "이미 참여하셨습니다."
+
+msgid "이미지"
+msgstr "이미지"
+
+msgid "이미지 (최대 5장)"
+msgstr "이미지 (최대 5장)"
+
+msgid "이미지 없음"
+msgstr "이미지 없음"
+
+msgid "이전"
+msgstr "이전"
+
+msgid "이제 안 됨"
+msgstr "이제 안 됨"
+
+msgid "익명"
+msgstr "익명"
+
+msgid "익명님이 '%(title)s'에 ❤️ 좋아요를 눌렀어요"
+msgstr "익명님이 '%(title)s'에 ❤️ 좋아요를 눌렀어요"
+
+msgid "일 후 활성화"
+msgstr "일 후 활성화"
+
+msgid "일반 칭호만 선택 가능"
+msgstr "일반 칭호만 선택 가능"
+
+msgid "일본 🇯🇵"
+msgstr "일본 🇯🇵"
+
+msgid "일지"
+msgstr "일지"
+
+msgid "일지 작성"
+msgstr "일지 작성"
+
+msgid "일지 작성하기"
+msgstr "일지 작성하기"
+
+msgid "읽음 여부"
+msgstr "읽음 여부"
+
+msgid "입장하기"
+msgstr "입장하기"
+
+msgid "자기소개"
+msgstr "자기소개"
+
+msgid "자동 (위치 기반)"
+msgstr "자동 (위치 기반)"
+
+msgid "자동 테마 모드로 전환합니다..."
+msgstr "자동 테마 모드로 전환합니다..."
+
+msgid "작성 글"
+msgstr "작성 글"
+
+msgid "작성 시 입력한 비밀번호"
+msgstr "작성 시 입력한 비밀번호"
+
+msgid "작성 후 1개월이 지난 게시글만 평가할 수 있습니다."
+msgstr "작성 후 1개월이 지난 게시글만 평가할 수 있습니다."
+
+msgid "작성일"
+msgstr "작성일"
+
+msgid "작성자"
+msgstr "작성자"
+
+msgid "작성한 글 전체 조회 (대기/승인/거절 상태별)"
+msgstr "작성한 글 전체 조회 (대기/승인/거절 상태별)"
+
+msgid "작성한 글이 없습니다"
+msgstr "작성한 글이 없습니다"
+
+msgid "작성한 농사 일지가 없습니다."
+msgstr "작성한 농사 일지가 없습니다."
+
+msgid "작성한 모든 글을 한눈에 확인하고 관리"
+msgstr "작성한 모든 글을 한눈에 확인하고 관리"
+
+msgid "잘못된 정보"
+msgstr "잘못된 정보"
+
+msgid "잘못된 평가 유형입니다."
+msgstr "잘못된 평가 유형입니다."
+
+msgid "장소"
+msgstr "장소"
+
+msgid "장소, 주소 검색..."
+msgstr "장소, 주소 검색..."
+
+msgid "장소, 주소, 건물명 검색..."
+msgstr "장소, 주소, 건물명 검색..."
+
+msgid "장소명"
+msgstr "장소명"
+
+msgid "저장"
+msgstr "저장"
+
+msgid "저장해둔 좌표 목록"
+msgstr "저장해둔 좌표 목록"
+
+msgid "전설의 대원"
+msgstr "전설의 대원"
+
+msgid "전용 스타일/색상/칭호 코드 (쉼표 구분, 예: underline,rainbow,explorer)"
+msgstr "전용 스타일/색상/칭호 코드 (쉼표 구분, 예: underline,rainbow,explorer)"
+
+msgid "전용 아이템"
+msgstr "전용 아이템"
+
+msgid "전체"
+msgstr "전체"
+
+msgid "전체 보기"
+msgstr "전체 보기"
+
+msgid "전체 지역"
+msgstr "전체 지역"
+
+msgid "전체 카테고리"
+msgstr "전체 카테고리"
+
+msgid "전체/주간/월간 랭킹에서 상위 기여자를 확인할 수 있습니다."
+msgstr "전체/주간/월간 랭킹에서 상위 기여자를 확인할 수 있습니다."
+
+msgid "점"
+msgstr "점"
+
+msgid "점수 계산 방식"
+msgstr "점수 계산 방식"
+
+msgid "접근 권한이 없습니다."
+msgstr "접근 권한이 없습니다."
+
+msgid "정렬"
+msgstr "정렬"
+
+msgid "정말로 이 농사 일지를 삭제하시겠습니까?"
+msgstr "정말로 이 농사 일지를 삭제하시겠습니까?"
+
+msgid "정말로 이 좌표를 삭제하시겠습니까?"
+msgstr "정말로 이 좌표를 삭제하시겠습니까?"
+
+msgid "정지"
+msgstr "정지"
+
+msgid "정지 기간"
+msgstr "정지 기간"
+
+msgid "정지 만료"
+msgstr "정지 만료"
+
+msgid "정지 목록"
+msgstr "정지 목록"
+
+msgid "정지 사유"
+msgstr "정지 사유"
+
+msgid "정지 시작"
+msgstr "정지 시작"
+
+msgid "정지 해제 시간"
+msgstr "정지 해제 시간"
+
+msgid "정지 해제한 관리자"
+msgstr "정지 해제한 관리자"
+
+msgid "정지된 사용자"
+msgstr "정지된 사용자"
+
+msgid "정지한 관리자"
+msgstr "정지한 관리자"
+
+msgid "제목"
+msgstr "제목"
+
+msgid "제목, 설명, 작성자 닉네임으로 검색"
+msgstr "제목, 설명, 작성자 닉네임으로 검색"
+
+msgid "제목, 엽서이름, 닉네임 검색..."
+msgstr "제목, 엽서이름, 닉네임 검색..."
+
+msgid "제목과 내용을 입력해주세요."
+msgstr "제목과 내용을 입력해주세요."
+
+msgid "제목을 입력해주세요"
+msgstr "제목을 입력해주세요"
+
+msgid "제보하기"
+msgstr "제보하기"
+
+msgid "제출 후"
+msgstr "제출 후"
+
+msgid "제출하기"
+msgstr "제출하기"
+
+msgid "조회수"
+msgstr "조회수"
+
+msgid "좋아요"
+msgstr "좋아요"
+
+msgid "좋아요 수"
+msgstr "좋아요 수"
+
+msgid "좋아요들"
+msgstr "좋아요들"
+
+msgid "좋아요순"
+msgstr "좋아요순"
+
+msgid "좋아요와 댓글은 업로더분에게 큰 힘이 됩니다!"
+msgstr "좋아요와 댓글은 업로더분에게 큰 힘이 됩니다!"
+
+msgid "좌표"
+msgstr "좌표"
+
+msgid "좌표 검색 & 필터"
+msgstr "좌표 검색 & 필터"
+
+msgid "좌표 게시글에 댓글을 남겨보세요!"
+msgstr "좌표 게시글에 댓글을 남겨보세요!"
+
+msgid "좌표 둘러보기"
+msgstr "좌표 둘러보기"
+
+msgid "좌표 마스터"
+msgstr "좌표 마스터"
+
+msgid "좌표 목록"
+msgstr "좌표 목록"
+
+msgid "좌표 목록 보기"
+msgstr "좌표 목록 보기"
+
+msgid "좌표 목록으로"
+msgstr "좌표 목록으로"
+
+msgid "좌표 복사"
+msgstr "좌표 복사"
+
+msgid "좌표 삭제"
+msgstr "좌표 삭제"
+
+msgid "좌표 수정"
+msgstr "좌표 수정"
+
+msgid "좌표 신고"
+msgstr "좌표 신고"
+
+msgid "좌표 이미지"
+msgstr "좌표 이미지"
+
+msgid "좌표 이미지들"
+msgstr "좌표 이미지들"
+
+msgid "좌표 입력 방법:"
+msgstr "좌표 입력 방법:"
+
+msgid "좌표 제보 방법"
+msgstr "좌표 제보 방법"
+
+msgid "좌표 제보, 농사 봉사, 데코 정보 등을 서로 나누고 검증합니다."
+msgstr "좌표 제보, 농사 봉사, 데코 정보 등을 서로 나누고 검증합니다."
+
+msgid "좌표(위도, 경도) 입력"
+msgstr "좌표(위도, 경도) 입력"
+
+msgid "좌표가"
+msgstr "좌표가"
+
+msgid "좌표가 등록되었습니다."
+msgstr "좌표가 등록되었습니다."
+
+msgid "좌표가 복사되었습니다"
+msgstr "좌표가 복사되었습니다"
+
+msgid "좌표가 삭제되었습니다."
+msgstr "좌표가 삭제되었습니다."
+
+msgid "좌표가 수정되었습니다."
+msgstr "좌표가 수정되었습니다."
+
+msgid "좌표가 없습니다"
+msgstr "좌표가 없습니다"
+
+msgid "좌표가 클립보드에 복사되었습니다!"
+msgstr "좌표가 클립보드에 복사되었습니다!"
+
+msgid "좌표들"
+msgstr "좌표들"
+
+msgid "좌표를 제보하고 첫 번째 랭커가 되어보세요!"
+msgstr "좌표를 제보하고 첫 번째 랭커가 되어보세요!"
+
+msgid "주간"
+msgstr "주간"
+
+msgid "주의사항"
+msgstr "주의사항"
+
+msgid "주황"
+msgstr "주황"
+
+msgid "지금도 됨"
+msgstr "지금도 됨"
+
+msgid "지금도 유효한지"
+msgstr "지금도 유효한지"
+
+msgid "지도로 보기"
+msgstr "지도로 보기"
+
+msgid "지도를 이동하면 보이는 게시글이 표시됩니다."
+msgstr "지도를 이동하면 보이는 게시글이 표시됩니다."
+
+msgid "지도를 터치하여 위치를 선택하세요"
+msgstr "지도를 터치하여 위치를 선택하세요"
+
+msgid "지도에서 선택"
+msgstr "지도에서 선택"
+
+msgid "지도에서 위치 선택"
+msgstr "지도에서 위치 선택"
+
+msgid "지역"
+msgstr "지역"
+
+msgid "진행중"
+msgstr "진행중"
+
+msgid "참여 기록"
+msgstr "참여 기록"
+
+msgid "참여 완료"
+msgstr "참여 완료"
+
+msgid "참여일"
+msgstr "참여일"
+
+msgid "참여자"
+msgstr "참여자"
+
+msgid "참여하기"
+msgstr "참여하기"
+
+msgid "참여해주셔서 감사합니다! 🌸"
+msgstr "참여해주셔서 감사합니다! 🌸"
+
+msgid "처리 상태"
+msgstr "처리 상태"
+
+msgid "처리됨"
+msgstr "처리됨"
+
+msgid "처리일"
+msgstr "처리일"
+
+msgid "처리자"
+msgstr "처리자"
+
+msgid "첫 번째 농사 일지를 작성해보세요!"
+msgstr "첫 번째 농사 일지를 작성해보세요!"
+
+msgid "첫 번째 좌표를 제보해보세요!"
+msgstr "첫 번째 좌표를 제보해보세요!"
+
+msgid "첫 번째 좌표를 제보해주세요!"
+msgstr "첫 번째 좌표를 제보해주세요!"
+
+msgid "체크하면 기존 이미지 + 새 이미지 모두에 워터마크가 적용됩니다. (한번 적용하면 취소 불가)"
+msgstr "체크하면 기존 이미지 + 새 이미지 모두에 워터마크가 적용됩니다. (한번 적용하면 취소 불가)"
+
+msgid "체크하면 업로드된 모든 사진 좌상단/우하단에 닉네임이 반투명하게 표시됩니다."
+msgstr "체크하면 업로드된 모든 사진 좌상단/우하단에 닉네임이 반투명하게 표시됩니다."
+
+msgid "초록"
+msgstr "초록"
+
+msgid "총 점수"
+msgstr "총 점수"
+
+msgid "최근 건의사항"
+msgstr "최근 건의사항"
+
+msgid "최근 남긴 댓글"
+msgstr "최근 남긴 댓글"
+
+msgid "최근 농사 일지"
+msgstr "최근 농사 일지"
+
+msgid "최근 작성한 글"
+msgstr "최근 작성한 글"
+
+msgid "최대 5장까지 업로드 가능 (기존 이미지 포함)"
+msgstr "최대 5장까지 업로드 가능 (기존 이미지 포함)"
+
+msgid "최신순"
+msgstr "최신순"
+
+msgid "최신순, 좋아요순, 검증순"
+msgstr "최신순, 좋아요순, 검증순"
+
+msgid "추가 건의하기"
+msgstr "추가 건의하기"
+
+msgid "취소"
+msgstr "취소"
+
+msgid "칭호"
+msgstr "칭호"
+
+msgid "칭호 글자 색상"
+msgstr "칭호 글자 색상"
+
+msgid "칭호 배경 색상"
+msgstr "칭호 배경 색상"
+
+msgid "칭호 없음"
+msgstr "칭호 없음"
+
+msgid "카테고리"
+msgstr "카테고리"
+
+msgid "카테고리 선택 (버섯/빅플라워/모종/기타)"
+msgstr "카테고리 선택 (버섯/빅플라워/모종/기타)"
+
+msgid "테마 메뉴"
+msgstr "테마 메뉴"
+
+msgid "테마 선택"
+msgstr "테마 선택"
+
+msgid "테마 적용!"
+msgstr "테마 적용!"
+
+msgid "통계"
+msgstr "통계"
+
+msgid "통계 확인"
+msgstr "통계 확인"
+
+msgid "특별 칭호"
+msgstr "특별 칭호"
+
+msgid "파랑"
+msgstr "파랑"
+
+msgid "평가 유형"
+msgstr "평가 유형"
+
+msgid "평가가 많이 쌓인 좌표는"
+msgstr "평가가 많이 쌓인 좌표는"
+
+msgid "폭풍"
+msgstr "폭풍"
+
+msgid "프로필"
+msgstr "프로필"
+
+msgid "프로필 설정"
+msgstr "프로필 설정"
+
+msgid "프로필 이모지"
+msgstr "프로필 이모지"
+
+msgid "프로필 이미지"
+msgstr "프로필 이미지"
+
+msgid "피크민 관련 이모지 (랭킹 등록 사용자만)"
+msgstr "피크민 관련 이모지 (랭킹 등록 사용자만)"
+
+msgid "피크민 다이어리"
+msgstr "피크민 다이어리"
+
+msgid "피크민 다이어리 - 피크민 블룸 버섯, 모종, 엽서 좌표 커뮤니티"
+msgstr "피크민 다이어리 - 피크민 블룸 버섯, 모종, 엽서 좌표 커뮤니티"
+
+msgid "피크민 다이어리 - 피크민 블룸 좌표 공유 커뮤니티"
+msgstr "피크민 다이어리 - 피크민 블룸 좌표 공유 커뮤니티"
+
+msgid "피크민 다이어리 - 피크민 블룸 좌표 커뮤니티"
+msgstr "피크민 다이어리 - 피크민 블룸 좌표 커뮤니티"
+
+msgid "피크민 다이어리 커뮤니티"
+msgstr "피크민 다이어리 커뮤니티"
+
+msgid "피크민 다이어리에 가입하세요!"
+msgstr "피크민 다이어리에 가입하세요!"
+
+msgid "피크민 다이어리에 오신 것을 환영합니다!"
+msgstr "피크민 다이어리에 오신 것을 환영합니다!"
+
+msgid "피크민 블룸 버섯 좌표, 모종 좌표, 빅플라워 위치, 엽서 정보를 공유하는 유저 커뮤니티"
+msgstr "피크민 블룸 버섯 좌표, 모종 좌표, 빅플라워 위치, 엽서 정보를 공유하는 유저 커뮤니티"
+
+msgid ""
+"피크민 블룸 버섯 좌표, 모종 좌표, 빅플라워 위치, 엽서 정보를 함께 공유하는 유저 커뮤니티입니다. 피크민 좌표를 찾고 농사 정보를 "
+"나눠보세요!"
+msgstr ""
+"피크민 블룸 버섯 좌표, 모종 좌표, 빅플라워 위치, 엽서 정보를 함께 공유하는 유저 커뮤니티입니다. 피크민 좌표를 찾고 농사 정보를 "
+"나눠보세요!"
+
+msgid "피크민 블룸 버섯 좌표, 모종 좌표, 빅플라워 위치를 한눈에! 유저들이 공유한 피크민 엽서 좌표를 검색하고 복사하세요."
+msgstr "피크민 블룸 버섯 좌표, 모종 좌표, 빅플라워 위치를 한눈에! 유저들이 공유한 피크민 엽서 좌표를 검색하고 복사하세요."
+
+msgid "피크민 블룸 버섯, 모종, 빅플라워 좌표를 공유하고 농사 정보를 나눠요!"
+msgstr "피크민 블룸 버섯, 모종, 빅플라워 좌표를 공유하고 농사 정보를 나눠요!"
+
+msgid "피크민 블룸 좌표 공유 커뮤니티"
+msgstr "피크민 블룸 좌표 공유 커뮤니티"
+
+msgid "피크민 블룸 지도로 주변 버섯, 모종, 빅플라워 좌표를 한눈에 확인하세요. 피크민 엽서 위치를 쉽게 찾을 수 있습니다."
+msgstr "피크민 블룸 지도로 주변 버섯, 모종, 빅플라워 좌표를 한눈에 확인하세요. 피크민 엽서 위치를 쉽게 찾을 수 있습니다."
+
+msgid "피크민 블룸을 플레이하는 유저들이"
+msgstr "피크민 블룸을 플레이하는 유저들이"
+
+msgid "피크민 좌표 목록 - 버섯, 모종, 빅플라워 좌표 모음 | 피크민 다이어리"
+msgstr "피크민 좌표 목록 - 버섯, 모종, 빅플라워 좌표 모음 | 피크민 다이어리"
+
+msgid "피크민 좌표 목록 - 피크민 블룸 좌표 모음"
+msgstr "피크민 좌표 목록 - 피크민 블룸 좌표 모음"
+
+msgid "피크민 좌표 지도 - 버섯, 모종, 빅플라워 위치 지도 | 피크민 다이어리"
+msgstr "피크민 좌표 지도 - 버섯, 모종, 빅플라워 위치 지도 | 피크민 다이어리"
+
+msgid "피크민 좌표 지도 - 피크민 블룸 위치 지도"
+msgstr "피크민 좌표 지도 - 피크민 블룸 위치 지도"
+
+msgid "피크민 탐험가"
+msgstr "피크민 탐험가"
+
+msgid ""
+"피크민, 피크민 블룸, 피크민 좌표, 피크민 버섯, 피크민 버섯 좌표, 피크민 모종, 피크민 모종 좌표, 피크민 엽서, 피크민 엽서 "
+"좌표, 피크민 빅플라워, 피크민 농사, Pikmin Bloom"
+msgstr ""
+"피크민, 피크민 블룸, 피크민 좌표, 피크민 버섯, 피크민 버섯 좌표, 피크민 모종, 피크민 모종 좌표, 피크민 엽서, 피크민 엽서 "
+"좌표, 피크민 빅플라워, 피크민 농사, Pikmin Bloom"
+
+msgid "필요한 꽃"
+msgstr "필요한 꽃"
+
+msgid "한국 🇰🇷"
+msgstr "한국 🇰🇷"
+
+msgid "해당 기간의 시작 날짜"
+msgstr "해당 기간의 시작 날짜"
+
+msgid "허용되지 않는 파일 형식입니다. (JPG, PNG, WEBP만 가능)"
+msgstr "허용되지 않는 파일 형식입니다. (JPG, PNG, WEBP만 가능)"
+
+msgid "허위 좌표 제보 시 계정이 정지될 수 있습니다."
+msgstr "허위 좌표 제보 시 계정이 정지될 수 있습니다."
+
+msgid "현재 모집중인 요청이 없습니다."
+msgstr "현재 모집중인 요청이 없습니다."
+
+msgid "현재 순위"
+msgstr "현재 순위"
+
+msgid "현재 이미지"
+msgstr "현재 이미지"
+
+msgid "현재는 승인 없이 바로 게시됩니다! (당분간 운영)"
+msgstr "현재는 승인 없이 바로 게시됩니다! (당분간 운영)"
+
+msgid "홀로그램 언더라인"
+msgstr "홀로그램 언더라인"
+
+msgid "확인"
+msgstr "확인"
+
+msgid "활발한 기여자에게 점수가 부여됩니다!"
+msgstr "활발한 기여자에게 점수가 부여됩니다!"
+
+msgid "활성 상태"
+msgstr "활성 상태"
+
+msgid "회원 혜택"
+msgstr "회원 혜택"
+
+msgid "회원가입"
+msgstr "회원가입"
+
+msgid "회원가입 방법"
+msgstr "회원가입 방법"
+
+msgid "흐림"
+msgstr "흐림"
+
+msgid "📋 건의사항 '%(title)s'에 운영자가 답변했습니다!"
+msgstr "📋 건의사항 '%(title)s'에 운영자가 답변했습니다!"
+
+msgid "📋 건의사항 '%(title)s'이(가) '%(status)s'(으)로 변경되었습니다."
+msgstr "📋 건의사항 '%(title)s'이(가) '%(status)s'(으)로 변경되었습니다."

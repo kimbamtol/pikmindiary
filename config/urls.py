@@ -18,6 +18,9 @@ urlpatterns = [
     # Django Admin (기본 관리자)
     path(f'{DJANGO_ADMIN_URL}/', admin.site.urls),
     
+    # 언어 전환
+    path('i18n/', include('django.conf.urls.i18n')),
+
     # 랜딩 페이지 및 코어 기능
     path('', include('apps.core.urls')),
     

@@ -1,20 +1,21 @@
 {% extends 'base.html' %}
+{% load i18n %}
 
-{% block title %}농사 일지 - 피크민 다이어리{% endblock %}
+{% block title %}{% trans "농사 일지" %} - {% trans "피크민 다이어리" %}{% endblock %}
 
 {% block content %}
 <div class="container journal-list-page">
     <div class="page-header">
         <div>
-            <h1>📔 농사 일지</h1>
-            <p>나의 농사 기록을 공유해보세요!</p>
+            <h1>📔 {% trans "농사 일지" %}</h1>
+            <p>{% trans "나의 농사 기록을 공유해보세요!" %}</p>
         </div>
-        <a href="{% url 'farming:journal_create' %}" class="btn btn-primary">✏️ 일지 작성</a>
+        <a href="{% url 'farming:journal_create' %}" class="btn btn-primary">✏️ {% trans "일지 작성" %}</a>
     </div>
 
     <!-- 필터 -->
     <div class="filter-bar">
-        <a href="{% url 'farming:journal_list' %}" class="filter-btn {% if not flower_type %}active{% endif %}">전체</a>
+        <a href="{% url 'farming:journal_list' %}" class="filter-btn {% if not flower_type %}active{% endif %}">{% trans "전체" %}</a>
         {% for value, label in flower_choices %}
         <a href="?flower={{ value }}" class="filter-btn {% if flower_type == value %}active{% endif %}">{{ label }}</a>
         {% endfor %}
@@ -46,9 +47,9 @@
         {% empty %}
         <div class="empty-state">
             <div class="empty-state-icon">📔</div>
-            <h3 class="empty-state-title">아직 농사 일지가 없어요</h3>
-            <p class="empty-state-desc">첫 번째 농사 일지를 작성해보세요!</p>
-            <a href="{% url 'farming:journal_create' %}" class="btn btn-primary">일지 작성하기</a>
+            <h3 class="empty-state-title">{% trans "아직 농사 일지가 없어요" %}</h3>
+            <p class="empty-state-desc">{% trans "첫 번째 농사 일지를 작성해보세요!" %}</p>
+            <a href="{% url 'farming:journal_create' %}" class="btn btn-primary">{% trans "일지 작성하기" %}</a>
         </div>
         {% endfor %}
     </div>
@@ -58,11 +59,11 @@
     <div class="pagination">
         {% if journals.has_previous %}
         <a
-            href="?page={{ journals.previous_page_number }}{% if flower_type %}&flower={{ flower_type }}{% endif %}">이전</a>
+            href="?page={{ journals.previous_page_number }}{% if flower_type %}&flower={{ flower_type }}{% endif %}">{% trans "이전" %}</a>
         {% endif %}
         <span class="current">{{ journals.number }} / {{ journals.paginator.num_pages }}</span>
         {% if journals.has_next %}
-        <a href="?page={{ journals.next_page_number }}{% if flower_type %}&flower={{ flower_type }}{% endif %}">다음</a>
+        <a href="?page={{ journals.next_page_number }}{% if flower_type %}&flower={{ flower_type }}{% endif %}">{% trans "다음" %}</a>
         {% endif %}
     </div>
     {% endif %}

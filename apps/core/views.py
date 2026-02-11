@@ -3,6 +3,7 @@ from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.conf import settings
 from django.contrib import messages
+from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST, require_http_methods
 
 from .models import Suggestion
@@ -43,7 +44,7 @@ def suggestion_form(request):
         content = request.POST.get('content', '').strip()
         
         if not title or not content:
-            messages.error(request, '제목과 내용을 입력해주세요.')
+            messages.error(request, _('제목과 내용을 입력해주세요.'))
             return render(request, 'core/suggestion_form.html', {
                 'categories': Suggestion.Category.choices,
             })
@@ -62,8 +63,13 @@ def suggestion_form(request):
             suggestion_data['guest_nickname'] = guest_nickname or '익명'
             suggestion_data['email'] = email
         
-        Suggestion.objects.create(**suggestion_data)
-        messages.success(request, '건의사항이 성공적으로 접수되었습니다!')
+        suggestion = Suggestion.objects.create(**suggestion_data)
+
+        # 번역 생성
+        from apps.translations.services import translate_on_create
+        translate_on_create(suggestion, ['title', 'content'])
+
+        messages.success(request, _('건의사항이 성공적으로 접수되었습니다!'))
         return redirect('core:suggestion_done')
     
     return render(request, 'core/suggestion_form.html', {

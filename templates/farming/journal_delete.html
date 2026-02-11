@@ -1,25 +1,26 @@
 {% extends 'base.html' %}
+{% load i18n %}
 
-{% block title %}농사 일지 삭제 - 피크민 다이어리{% endblock %}
+{% block title %}{% trans "농사 일지 삭제" %} - {% trans "피크민 다이어리" %}{% endblock %}
 
 {% block content %}
 <div class="container">
     <div class="confirm-page">
-        <h1 class="page-title">🗑️ 농사 일지 삭제</h1>
+        <h1 class="page-title">🗑️ {% trans "농사 일지 삭제" %}</h1>
 
         <div class="confirm-box">
             <div class="journal-preview">
                 <h2>{{ journal.title }}</h2>
                 <p class="meta">
-                    <span>🌸 {{ journal.flower_type|default:"꽃" }}</span>
-                    <span>📍 {{ journal.location_name|default:"위치 미입력" }}</span>
+                    <span>🌸 {{ journal.flower_type|default:_("꽃") }}</span>
+                    <span>📍 {{ journal.location_name|default:_("위치 미입력") }}</span>
                 </p>
                 <p class="content-preview">{{ journal.content|truncatewords:30 }}</p>
             </div>
 
             <div class="warning-text">
-                <p>⚠️ 정말로 이 농사 일지를 삭제하시겠습니까?</p>
-                <p>삭제된 일지는 복구할 수 없습니다.</p>
+                <p>⚠️ {% trans "정말로 이 농사 일지를 삭제하시겠습니까?" %}</p>
+                <p>{% trans "삭제된 일지는 복구할 수 없습니다." %}</p>
             </div>
 
             <form method="post" class="delete-form">
@@ -28,17 +29,17 @@
                 <!-- 비회원 비밀번호 입력 -->
                 {% if not can_delete and journal.guest_password %}
                 <div class="password-notice">
-                    <p>🔒 비회원 글입니다. 작성 시 입력한 비밀번호를 입력해주세요.</p>
+                    <p>🔒 {% trans "비회원 글입니다. 작성 시 입력한 비밀번호를 입력해주세요." %}</p>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">비밀번호 *</label>
+                    <label class="form-label">{% trans "비밀번호" %} *</label>
                     <input type="password" name="password" class="form-control" required>
                 </div>
                 {% endif %}
 
                 <div class="form-actions">
-                    <a href="{% url 'farming:journal_detail' pk=journal.pk %}" class="btn btn-outline">취소</a>
-                    <button type="submit" class="btn btn-danger">삭제하기</button>
+                    <a href="{% url 'farming:journal_detail' pk=journal.pk %}" class="btn btn-outline">{% trans "취소" %}</a>
+                    <button type="submit" class="btn btn-danger">{% trans "삭제하기" %}</button>
                 </div>
             </form>
         </div>

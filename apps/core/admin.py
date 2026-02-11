@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.utils.translation import gettext as _
 from .models import SiteNotice, Suggestion, SiteSettings
 
 
@@ -62,7 +63,7 @@ class SuggestionAdmin(admin.ModelAdmin):
                     actor=None,
                     notification_type=Notification.NotificationType.SUGGESTION_REPLY,
                     coordinate=None,
-                    message=f"📋 건의사항 '{obj.title}'에 운영자가 답변했습니다!"
+                    message=_("📋 건의사항 '%(title)s'에 운영자가 답변했습니다!") % {'title': obj.title}
                 )
             # 상태가 변경된 경우 (답변 알림과 중복 방지)
             elif old_status and old_status != obj.status:
@@ -72,7 +73,7 @@ class SuggestionAdmin(admin.ModelAdmin):
                     actor=None,
                     notification_type=Notification.NotificationType.SUGGESTION_REPLY,
                     coordinate=None,
-                    message=f"📋 건의사항 '{obj.title}'이(가) '{status_label}'(으)로 변경되었습니다."
+                    message=_("📋 건의사항 '%(title)s'이(가) '%(status)s'(으)로 변경되었습니다.") % {'title': obj.title, 'status': status_label}
                 )
     
     def writer_name(self, obj):

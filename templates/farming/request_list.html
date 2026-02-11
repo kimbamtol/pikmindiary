@@ -1,23 +1,24 @@
 {% extends 'base.html' %}
+{% load i18n %}
 
-{% block title %}농사 요청 - 피크민 다이어리{% endblock %}
+{% block title %}{% trans "농사 요청" %} - {% trans "피크민 다이어리" %}{% endblock %}
 
 {% block content %}
 <div class="container">
     <div class="page-header">
         <div>
-            <h1>🙋 농사 요청</h1>
-            <p>빅플라워 농사를 도와주세요!</p>
+            <h1>🙋 {% trans "농사 요청" %}</h1>
+            <p>{% trans "빅플라워 농사를 도와주세요!" %}</p>
         </div>
-        <a href="{% url 'farming:request_create' %}" class="btn btn-primary">🆘 요청하기</a>
+        <a href="{% url 'farming:request_create' %}" class="btn btn-primary">🆘 {% trans "요청하기" %}</a>
     </div>
 
     <div class="filter-bar">
         <a href="{% url 'farming:request_list' %}"
-            class="filter-btn {% if not status or status == 'open' %}active{% endif %}">모집중</a>
-        <a href="?status=in_progress" class="filter-btn {% if status == 'in_progress' %}active{% endif %}">진행중</a>
-        <a href="?status=completed" class="filter-btn {% if status == 'completed' %}active{% endif %}">완료</a>
-        <a href="?status=all" class="filter-btn {% if status == 'all' %}active{% endif %}">전체</a>
+            class="filter-btn {% if not status or status == 'open' %}active{% endif %}">{% trans "모집중" %}</a>
+        <a href="?status=in_progress" class="filter-btn {% if status == 'in_progress' %}active{% endif %}">{% trans "진행중" %}</a>
+        <a href="?status=completed" class="filter-btn {% if status == 'completed' %}active{% endif %}">{% trans "완료" %}</a>
+        <a href="?status=all" class="filter-btn {% if status == 'all' %}active{% endif %}">{% trans "전체" %}</a>
     </div>
 
     <div class="request-grid">
@@ -32,17 +33,17 @@
                     <span>{{ req.created_at|date:"n/j H:i" }}</span>
                 </p>
                 {% if req.deadline %}
-                <p class="request-deadline">⏰ 마감: {{ req.deadline|date:"n/j H:i" }}</p>
+                <p class="request-deadline">⏰ {% trans "마감" %}: {{ req.deadline|date:"n/j H:i" }}</p>
                 {% endif %}
-                <p class="request-participants">🙋 {{ req.participations.count }}명 참여</p>
+                <p class="request-participants">🙋 {{ req.participations.count }}{% trans "명 참여" %}</p>
             </div>
         </a>
         {% empty %}
         <div class="empty-state">
             <div class="empty-state-icon">🙋</div>
-            <h3 class="empty-state-title">모집중인 요청이 없어요</h3>
-            <p class="empty-state-desc">농사 도움이 필요하면 요청해보세요!</p>
-            <a href="{% url 'farming:request_create' %}" class="btn btn-primary">요청하기</a>
+            <h3 class="empty-state-title">{% trans "모집중인 요청이 없어요" %}</h3>
+            <p class="empty-state-desc">{% trans "농사 도움이 필요하면 요청해보세요!" %}</p>
+            <a href="{% url 'farming:request_create' %}" class="btn btn-primary">{% trans "요청하기" %}</a>
         </div>
         {% endfor %}
     </div>
@@ -50,11 +51,11 @@
     {% if requests.has_other_pages %}
     <div class="pagination">
         {% if requests.has_previous %}
-        <a href="?page={{ requests.previous_page_number }}{% if status %}&status={{ status }}{% endif %}">이전</a>
+        <a href="?page={{ requests.previous_page_number }}{% if status %}&status={{ status }}{% endif %}">{% trans "이전" %}</a>
         {% endif %}
         <span class="current">{{ requests.number }} / {{ requests.paginator.num_pages }}</span>
         {% if requests.has_next %}
-        <a href="?page={{ requests.next_page_number }}{% if status %}&status={{ status }}{% endif %}">다음</a>
+        <a href="?page={{ requests.next_page_number }}{% if status %}&status={{ status }}{% endif %}">{% trans "다음" %}</a>
         {% endif %}
     </div>
     {% endif %}

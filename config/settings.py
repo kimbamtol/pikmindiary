@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django_htmx',
     
     # Local apps
+    'apps.translations',
     'apps.core',
     'apps.accounts',
     'apps.coordinates',
@@ -55,6 +56,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -126,10 +128,18 @@ AUTH_PASSWORD_VALIDATORS = [
 
 
 # Internationalization
-LANGUAGE_CODE = 'ko-kr'
+LANGUAGE_CODE = 'ko'
 TIME_ZONE = 'Asia/Seoul'
 USE_I18N = True
 USE_TZ = True
+
+LANGUAGES = [
+    ('ko', '한국어'),
+    ('ja', '日本語'),
+    ('en', 'English'),
+]
+
+LOCALE_PATHS = [BASE_DIR / 'locale']
 
 
 # Static files (CSS, JavaScript, Images)
@@ -196,6 +206,10 @@ SOCIALACCOUNT_PROVIDERS = {
 # 소셜 로그인 시 자동으로 닉네임 생성
 SOCIALACCOUNT_AUTO_SIGNUP = True
 
+
+# DeepL 번역 API
+DEEPL_API_KEY = os.getenv('DEEPL_API_KEY', '')
+DEEPL_API_URL = os.getenv('DEEPL_API_URL', 'https://api-free.deepl.com/v2/translate')
 
 # 서버 기본 위치 (한국 서울)
 DEFAULT_LOCATION = {

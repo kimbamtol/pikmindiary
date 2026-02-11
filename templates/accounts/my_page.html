@@ -1,11 +1,12 @@
 {% extends 'base.html' %}
+{% load i18n %}
 
-{% block title %}마이페이지 - 피크민 다이어리{% endblock %}
+{% block title %}{% trans "마이페이지" %} - {% trans "피크민 다이어리" %}{% endblock %}
 
 {% block content %}
 <div class="container">
     <div class="mypage">
-        <h1 class="page-title">👤 마이페이지</h1>
+        <h1 class="page-title">👤 {% trans "마이페이지" %}</h1>
 
         <!-- 프로필 카드 -->
         <div class="profile-card card">
@@ -24,7 +25,7 @@
                     <p class="profile-bio">{{ user.bio }}</p>
                     {% endif %}
                 </div>
-                <a href="{% url 'accounts:my_settings' %}" class="btn btn-primary">⚙️ 설정</a>
+                <a href="{% url 'accounts:my_settings' %}" class="btn btn-primary">⚙️ {% trans "설정" %}</a>
             </div>
         </div>
 
@@ -33,27 +34,27 @@
             <div class="stat-card card">
                 <span class="stat-icon">📝</span>
                 <span class="stat-value">{{ approved_count }}</span>
-                <span class="stat-label">승인된 글</span>
+                <span class="stat-label">{% trans "승인된 글" %}</span>
             </div>
             <div class="stat-card card">
                 <span class="stat-icon">⏳</span>
                 <span class="stat-value">{{ pending_count }}</span>
-                <span class="stat-label">대기 중</span>
+                <span class="stat-label">{% trans "대기 중" %}</span>
             </div>
             <div class="stat-card card">
                 <span class="stat-icon">❤️</span>
                 <span class="stat-value">{{ total_likes_received }}</span>
-                <span class="stat-label">받은 좋아요</span>
+                <span class="stat-label">{% trans "받은 좋아요" %}</span>
             </div>
             <div class="stat-card card">
                 <span class="stat-icon">✅</span>
                 <span class="stat-value">{{ total_valid_received }}</span>
-                <span class="stat-label">받은 검증</span>
+                <span class="stat-label">{% trans "받은 검증" %}</span>
             </div>
             <div class="stat-card card">
                 <span class="stat-icon">⭐</span>
                 <span class="stat-value">{{ bookmark_count }}</span>
-                <span class="stat-label">북마크</span>
+                <span class="stat-label">{% trans "북마크" %}</span>
             </div>
         </div>
 
@@ -61,30 +62,30 @@
         <div class="quick-actions">
             <a href="{% url 'accounts:my_posts' %}" class="action-btn card">
                 <span class="action-icon">📋</span>
-                <span>내가 쓴 글</span>
+                <span>{% trans "내가 쓴 글" %}</span>
                 <span class="action-arrow">→</span>
             </a>
             <a href="{% url 'accounts:my_comments' %}" class="action-btn card">
                 <span class="action-icon">💬</span>
-                <span>내가 남긴 댓글</span>
+                <span>{% trans "내가 남긴 댓글" %}</span>
                 <span class="action-arrow">→</span>
             </a>
             <a href="{% url 'accounts:my_bookmarks' %}" class="action-btn card">
                 <span class="action-icon">🔖</span>
-                <span>북마크한 글</span>
+                <span>{% trans "북마크한 글" %}</span>
                 <span class="action-arrow">→</span>
             </a>
             <a href="{% url 'accounts:my_suggestions' %}" class="action-btn card">
                 <span class="action-icon">📝</span>
-                <span>내 건의사항</span>
+                <span>{% trans "내 건의사항" %}</span>
                 {% if unread_replies %}
-                <span class="badge badge-primary">답변 {{ unread_replies }}</span>
+                <span class="badge badge-primary">{% trans "답변" %} {{ unread_replies }}</span>
                 {% endif %}
                 <span class="action-arrow">→</span>
             </a>
             <a href="{% url 'coordinates:create' %}" class="action-btn card">
                 <span class="action-icon">✏️</span>
-                <span>새 좌표 제보</span>
+                <span>{% trans "새 좌표 제보" %}</span>
                 <span class="action-arrow">→</span>
             </a>
         </div>
@@ -92,7 +93,7 @@
         <!-- 최근 글 -->
         {% if recent_posts %}
         <div class="recent-section">
-            <h3>📝 최근 작성한 글</h3>
+            <h3>📝 {% trans "최근 작성한 글" %}</h3>
             <div class="recent-list">
                 {% for post in recent_posts %}
                 <a href="{% url 'coordinates:detail' pk=post.pk %}" class="recent-item card">
@@ -107,21 +108,21 @@
                 </a>
                 {% endfor %}
             </div>
-            <a href="{% url 'accounts:my_posts' %}" class="view-all">전체 보기 →</a>
+            <a href="{% url 'accounts:my_posts' %}" class="view-all">{% trans "전체 보기" %} →</a>
         </div>
         {% endif %}
 
         <!-- 건의사항 -->
         {% if my_suggestions %}
         <div class="recent-section">
-            <h3>💬 최근 건의사항</h3>
+            <h3>💬 {% trans "최근 건의사항" %}</h3>
             <div class="recent-list">
                 {% for suggestion in my_suggestions %}
                 <a href="{% url 'accounts:my_suggestions' %}" class="recent-item card">
                     <div class="recent-info">
                         <span class="badge 
                             {% if suggestion.admin_reply %}badge-success{% else %}badge-secondary{% endif %}">
-                            {% if suggestion.admin_reply %}답변완료{% else %}대기중{% endif %}
+                            {% if suggestion.admin_reply %}{% trans "답변완료" %}{% else %}{% trans "대기중" %}{% endif %}
                         </span>
                         <span class="recent-title">{{ suggestion.title }}</span>
                     </div>
@@ -129,7 +130,7 @@
                 </a>
                 {% endfor %}
             </div>
-            <a href="{% url 'accounts:my_suggestions' %}" class="view-all">전체 보기 →</a>
+            <a href="{% url 'accounts:my_suggestions' %}" class="view-all">{% trans "전체 보기" %} →</a>
         </div>
         {% endif %}
     </div>

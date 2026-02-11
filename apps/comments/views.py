@@ -3,6 +3,7 @@ from django.shortcuts import get_object_or_404, redirect
 from django.contrib import messages
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
+from django.utils.translation import gettext as _
 from django.contrib.auth.hashers import make_password, check_password
 
 from .models import Comment
@@ -17,10 +18,10 @@ def _validate_photo(photo):
     if not photo:
         return None
     if photo.size > 5 * 1024 * 1024:
-        return '사진 파일 크기는 5MB를 초과할 수 없습니다.'
+        return _('사진 파일 크기는 5MB를 초과할 수 없습니다.')
     allowed_types = ['image/jpeg', 'image/png', 'image/webp']
     if photo.content_type not in allowed_types:
-        return '허용되지 않는 파일 형식입니다. (JPG, PNG, WEBP만 가능)'
+        return _('허용되지 않는 파일 형식입니다. (JPG, PNG, WEBP만 가능)')
     return None
 
 
@@ -42,7 +43,7 @@ def _create_comment(request, content, photo=None, parent=None, coordinate=None, 
         guest_nickname = request.POST.get('guest_nickname', '익명')
         guest_password = request.POST.get('guest_password', '')
         if not guest_password:
-            return None, '비회원은 비밀번호를 입력해야 합니다.', None
+            return None, _('비회원은 비밀번호를 입력해야 합니다.'), None
         kwargs['guest_nickname'] = guest_nickname
         kwargs['guest_password'] = make_password(guest_password)
         comment = Comment.objects.create(**kwargs)
@@ -73,7 +74,7 @@ def comment_create(request, coordinate_id):
     photo = request.FILES.get('photo')
 
     if not content and not photo:
-        messages.error(request, '댓글 내용이나 사진 중 하나는 입력해주세요.')
+        messages.error(request, _('댓글 내용이나 사진 중 하나는 입력해주세요.'))
         return redirect('coordinates:detail', pk=coordinate_id)
 
     photo_error = _validate_photo(photo)
@@ -96,8 +97,13 @@ def comment_create(request, coordinate_id):
             actor=actor,
             notification_type=Notification.NotificationType.COMMENT,
             coordinate=coordinate,
-            message=f"{actor_name}님이 '{coordinate.title}'에 {emoji} 댓글을 남겼어요"
+            message=_("%(name)s님이 '%(title)s'에 %(emoji)s 댓글을 남겼어요") % {'name': actor_name, 'title': coordinate.title, 'emoji': emoji}
         )
+
+    # 번역 생성
+    if content:
+        from apps.translations.services import translate_on_create
+        translate_on_create(comment, ['content'])
 
     _update_comment_count(coordinate=coordinate)
 
@@ -112,7 +118,7 @@ def comment_create(request, coordinate_id):
         }, request=request)
         return JsonResponse({'html': html})
 
-    messages.success(request, '댓글이 등록되었습니다.')
+    messages.success(request, _('댓글이 등록되었습니다.'))
     return redirect('coordinates:detail', pk=coordinate_id)
 
 
@@ -131,14 +137,14 @@ def comment_edit(request, pk):
             can_edit = True
 
     if not can_edit:
-        messages.error(request, '수정 권한이 없습니다.')
+        messages.error(request, _('수정 권한이 없습니다.'))
         return redirect('coordinates:detail', pk=coordinate_id)
 
     content = request.POST.get('content', '').strip()
     if content:
         comment.content = content
         comment.save()
-        messages.success(request, '댓글이 수정되었습니다.')
+        messages.success(request, _('댓글이 수정되었습니다.'))
 
     return redirect('coordinates:detail', pk=coordinate_id)
 
@@ -167,13 +173,13 @@ def comment_delete(request, pk):
             can_delete = True
 
     if not can_delete:
-        messages.error(request, '삭제 권한이 없습니다.')
+        messages.error(request, _('삭제 권한이 없습니다.'))
         if redirect_url[1]:
             return redirect(redirect_url[0], pk=redirect_url[1])
         return redirect(redirect_url[0])
 
     comment.is_deleted = True
-    comment.content = '삭제된 댓글입니다.'
+    comment.content = _('삭제된 댓글입니다.')
     comment.save()
 
     _update_comment_count(
@@ -181,7 +187,7 @@ def comment_delete(request, pk):
         farming_journal=comment.farming_journal
     )
 
-    messages.success(request, '댓글이 삭제되었습니다.')
+    messages.success(request, _('댓글이 삭제되었습니다.'))
     if redirect_url[1]:
         return redirect(redirect_url[0], pk=redirect_url[1])
     return redirect(redirect_url[0])
@@ -196,7 +202,7 @@ def comment_reply(request, pk):
     photo = request.FILES.get('photo')
 
     if not content and not photo:
-        messages.error(request, '댓글 내용이나 사진 중 하나는 입력해주세요.')
+        messages.error(request, _('댓글 내용이나 사진 중 하나는 입력해주세요.'))
         return redirect('coordinates:detail', pk=coordinate.pk)
 
     photo_error = _validate_photo(photo)
@@ -219,12 +225,17 @@ def comment_reply(request, pk):
             actor=actor,
             notification_type=Notification.NotificationType.COMMENT,
             coordinate=coordinate,
-            message=f"{actor_name}님이 회원님의 댓글에 {emoji} 답글을 남겼어요"
+            message=_("%(name)s님이 회원님의 댓글에 %(emoji)s 답글을 남겼어요") % {'name': actor_name, 'emoji': emoji}
         )
+
+    # 번역 생성
+    if content:
+        from apps.translations.services import translate_on_create
+        translate_on_create(comment, ['content'])
 
     _update_comment_count(coordinate=coordinate)
 
-    messages.success(request, '답글이 등록되었습니다.')
+    messages.success(request, _('답글이 등록되었습니다.'))
     return redirect('coordinates:detail', pk=coordinate.pk)
 
 
@@ -239,7 +250,7 @@ def journal_comment_create(request, journal_id):
     content = request.POST.get('content', '').strip()
 
     if not content:
-        messages.error(request, '댓글 내용을 입력해주세요.')
+        messages.error(request, _('댓글 내용을 입력해주세요.'))
         return redirect('farming:journal_detail', pk=journal_id)
 
     comment, actor_name, actor = _create_comment(
@@ -249,9 +260,14 @@ def journal_comment_create(request, journal_id):
         messages.error(request, actor_name)
         return redirect('farming:journal_detail', pk=journal_id)
 
+    # 번역 생성
+    if content:
+        from apps.translations.services import translate_on_create
+        translate_on_create(comment, ['content'])
+
     _update_comment_count(farming_journal=journal)
 
-    messages.success(request, '댓글이 등록되었습니다.')
+    messages.success(request, _('댓글이 등록되었습니다.'))
     return redirect('farming:journal_detail', pk=journal_id)
 
 
@@ -263,7 +279,7 @@ def journal_comment_reply(request, pk):
     content = request.POST.get('content', '').strip()
 
     if not content:
-        messages.error(request, '댓글 내용을 입력해주세요.')
+        messages.error(request, _('댓글 내용을 입력해주세요.'))
         return redirect('farming:journal_detail', pk=journal.pk)
 
     comment, actor_name, actor = _create_comment(
@@ -273,7 +289,12 @@ def journal_comment_reply(request, pk):
         messages.error(request, actor_name)
         return redirect('farming:journal_detail', pk=journal.pk)
 
+    # 번역 생성
+    if content:
+        from apps.translations.services import translate_on_create
+        translate_on_create(comment, ['content'])
+
     _update_comment_count(farming_journal=journal)
 
-    messages.success(request, '답글이 등록되었습니다.')
+    messages.success(request, _('답글이 등록되었습니다.'))
     return redirect('farming:journal_detail', pk=journal.pk)

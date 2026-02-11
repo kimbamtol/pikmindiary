@@ -1,22 +1,23 @@
 {% extends 'base.html' %}
+{% load i18n %}
 
-{% block title %}내 농사 활동 - 피크민 다이어리{% endblock %}
+{% block title %}{% trans "내 농사 활동" %} - {% trans "피크민 다이어리" %}{% endblock %}
 
 {% block content %}
 <div class="container">
-    <h1 class="page-title">👤 내 농사 활동</h1>
+    <h1 class="page-title">👤 {% trans "내 농사 활동" %}</h1>
 
     <div class="activity-tabs">
-        <button class="tab-btn active" onclick="showTab('journals')">📔 내 일지 ({{ my_journals.count }})</button>
-        <button class="tab-btn" onclick="showTab('requests')">🆘 내 요청 ({{ my_requests.count }})</button>
-        <button class="tab-btn" onclick="showTab('participations')">🙋 참여 기록 ({{ my_participations.count }})</button>
+        <button class="tab-btn active" onclick="showTab('journals')">📔 {% trans "내 일지" %} ({{ my_journals.count }})</button>
+        <button class="tab-btn" onclick="showTab('requests')">🆘 {% trans "내 요청" %} ({{ my_requests.count }})</button>
+        <button class="tab-btn" onclick="showTab('participations')">🙋 {% trans "참여 기록" %} ({{ my_participations.count }})</button>
     </div>
 
     <!-- 내 일지 -->
     <div id="journals-tab" class="tab-content active">
         <div class="section-header">
-            <h2>📔 내가 쓴 농사 일지</h2>
-            <a href="{% url 'farming:journal_create' %}" class="btn btn-primary btn-sm">일지 작성</a>
+            <h2>📔 {% trans "내가 쓴 농사 일지" %}</h2>
+            <a href="{% url 'farming:journal_create' %}" class="btn btn-primary btn-sm">{% trans "일지 작성" %}</a>
         </div>
         <div class="activity-grid">
             {% for journal in my_journals %}
@@ -28,7 +29,7 @@
                 {% endif %}
             </a>
             {% empty %}
-            <p class="empty-text">작성한 농사 일지가 없습니다.</p>
+            <p class="empty-text">{% trans "작성한 농사 일지가 없습니다." %}</p>
             {% endfor %}
         </div>
     </div>
@@ -36,8 +37,8 @@
     <!-- 내 요청 -->
     <div id="requests-tab" class="tab-content">
         <div class="section-header">
-            <h2>🆘 내가 올린 요청</h2>
-            <a href="{% url 'farming:request_create' %}" class="btn btn-primary btn-sm">요청하기</a>
+            <h2>🆘 {% trans "내가 올린 요청" %}</h2>
+            <a href="{% url 'farming:request_create' %}" class="btn btn-primary btn-sm">{% trans "요청하기" %}</a>
         </div>
         <div class="activity-grid">
             {% for req in my_requests %}
@@ -46,10 +47,10 @@
                 <h3>{{ req.title }}</h3>
                 <p>{{ req.created_at|date:"Y.n.j" }}</p>
                 <p class="location">📍 {{ req.location_name }}</p>
-                <p class="participants">🙋 {{ req.participations.count }}명 참여</p>
+                <p class="participants">🙋 {{ req.participations.count }}{% trans "명 참여" %}</p>
             </a>
             {% empty %}
-            <p class="empty-text">올린 요청이 없습니다.</p>
+            <p class="empty-text">{% trans "올린 요청이 없습니다." %}</p>
             {% endfor %}
         </div>
     </div>
@@ -57,18 +58,18 @@
     <!-- 참여 기록 -->
     <div id="participations-tab" class="tab-content">
         <div class="section-header">
-            <h2>🙋 내가 참여한 농사</h2>
+            <h2>🙋 {% trans "내가 참여한 농사" %}</h2>
         </div>
         <div class="activity-grid">
             {% for p in my_participations %}
             <a href="{% url 'farming:request_detail' p.request.pk %}" class="activity-card">
                 <span class="status-badge status-{{ p.request.status }}">{{ p.request.get_status_display }}</span>
                 <h3>{{ p.request.title }}</h3>
-                <p>참여일: {{ p.created_at|date:"Y.n.j" }}</p>
+                <p>{% trans "참여일" %}: {{ p.created_at|date:"Y.n.j" }}</p>
                 <p class="location">📍 {{ p.request.location_name }}</p>
             </a>
             {% empty %}
-            <p class="empty-text">아직 참여한 농사가 없습니다.</p>
+            <p class="empty-text">{% trans "아직 참여한 농사가 없습니다." %}</p>
             {% endfor %}
         </div>
     </div>

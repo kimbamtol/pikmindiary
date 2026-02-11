@@ -1,33 +1,34 @@
 {% extends 'base.html' %}
+{% load i18n %}
 
-{% block title %}랭킹 - 피크민 다이어리{% endblock %}
+{% block title %}{% trans "랭킹" %} - {% trans "피크민 다이어리" %}{% endblock %}
 
 {% block content %}
 <div class="container">
     <div class="ranking-page">
-        <h1 class="page-title">🏆 랭킹</h1>
+        <h1 class="page-title">🏆 {% trans "랭킹" %}</h1>
 
         <!-- 기간 선택 -->
         <div class="period-tabs">
-            <a href="{% url 'rankings:list' %}" class="tab {% if period_type == 'ALL' %}active{% endif %}">전체</a>
-            <a href="{% url 'rankings:weekly' %}" class="tab {% if period_type == 'WEEKLY' %}active{% endif %}">주간</a>
-            <a href="{% url 'rankings:monthly' %}" class="tab {% if period_type == 'MONTHLY' %}active{% endif %}">월간</a>
+            <a href="{% url 'rankings:list' %}" class="tab {% if period_type == 'ALL' %}active{% endif %}">{% trans "전체" %}</a>
+            <a href="{% url 'rankings:weekly' %}" class="tab {% if period_type == 'WEEKLY' %}active{% endif %}">{% trans "주간" %}</a>
+            <a href="{% url 'rankings:monthly' %}" class="tab {% if period_type == 'MONTHLY' %}active{% endif %}">{% trans "월간" %}</a>
         </div>
 
         <p class="period-label">{{ period_label }}</p>
 
         <!-- 점수 설명 -->
         <div class="score-info card">
-            <h3>📊 점수 계산 방식</h3>
+            <h3>📊 {% trans "점수 계산 방식" %}</h3>
             <ul>
-                <li>승인된 글 작성: <strong>+10점</strong></li>
-                <li>받은 좋아요 (좌표): <strong>+5점</strong></li>
-                <li>받은 복사: <strong>+2점</strong></li>
-                <li>🌱 농사 일지 좋아요: <strong>+10점</strong></li>
+                <li>{% trans "승인된 글 작성" %}: <strong>+10{% trans "점" %}</strong></li>
+                <li>{% trans "받은 좋아요 (좌표)" %}: <strong>+5{% trans "점" %}</strong></li>
+                <li>{% trans "받은 복사" %}: <strong>+2{% trans "점" %}</strong></li>
+                <li>🌱 {% trans "농사 일지 좋아요" %}: <strong>+10{% trans "점" %}</strong></li>
             </ul>
             <div class="period-info">
-                <p>📅 <strong>주간</strong>: 매주 월요일 00:00 ~ 일요일 24:00</p>
-                <p>📅 <strong>월간</strong>: 매월 1일 00:00 ~ 말일 24:00</p>
+                <p>📅 <strong>{% trans "주간" %}</strong>: {% trans "매주 월요일 00:00 ~ 일요일 24:00" %}</p>
+                <p>📅 <strong>{% trans "월간" %}</strong>: {% trans "매월 1일 00:00 ~ 말일 24:00" %}</p>
             </div>
         </div>
 
@@ -59,13 +60,13 @@
                 </a>
                 <div class="score">
                     <span class="score-value">{{ ranking.score }}</span>
-                    <span class="score-label">점</span>
+                    <span class="score-label">{% trans "점" %}</span>
                 </div>
                 <div class="score-detail">
-                    <span title="승인된 글">📝 {{ ranking.approved_posts_count }}</span>
-                    <span title="받은 좋아요 (좌표)">❤️ {{ ranking.likes_received_count }}</span>
-                    <span title="받은 복사">📋 {{ ranking.copy_received_count }}</span>
-                    <span title="농사 좋아요">🌱 {{ ranking.farming_likes_received_count }}</span>
+                    <span title="{% trans "승인된 글" %}">📝 {{ ranking.approved_posts_count }}</span>
+                    <span title="{% trans "받은 좋아요 (좌표)" %}">❤️ {{ ranking.likes_received_count }}</span>
+                    <span title="{% trans "받은 복사" %}">📋 {{ ranking.copy_received_count }}</span>
+                    <span title="{% trans "농사 좋아요" %}">🌱 {{ ranking.farming_likes_received_count }}</span>
                 </div>
             </div>
             {% endfor %}
@@ -73,8 +74,8 @@
         {% else %}
         <div class="empty-state">
             <div class="empty-state-icon">🏆</div>
-            <h2 class="empty-state-title">아직 랭킹이 없습니다</h2>
-            <p class="empty-state-desc">좌표를 제보하고 첫 번째 랭커가 되어보세요!</p>
+            <h2 class="empty-state-title">{% trans "아직 랭킹이 없습니다" %}</h2>
+            <p class="empty-state-desc">{% trans "좌표를 제보하고 첫 번째 랭커가 되어보세요!" %}</p>
         </div>
         {% endif %}
     </div>

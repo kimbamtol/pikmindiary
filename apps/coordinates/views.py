@@ -6,6 +6,7 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from django.http import JsonResponse
 from django.utils import timezone
+from django.utils.translation import gettext as _
 from django.contrib.auth.hashers import make_password, check_password
 
 from .models import Coordinate, CoordinateImage
@@ -142,10 +143,10 @@ def coordinate_detail(request, pk):
     # 미승인 글은 작성자 또는 관리자만 볼 수 있음
     if coordinate.status != Coordinate.Status.APPROVED:
         if not request.user.is_authenticated:
-            messages.error(request, '접근 권한이 없습니다.')
+            messages.error(request, _('접근 권한이 없습니다.'))
             return redirect('coordinates:list')
         if coordinate.author != request.user and not request.user.is_staff:
-            messages.error(request, '접근 권한이 없습니다.')
+            messages.error(request, _('접근 권한이 없습니다.'))
             return redirect('coordinates:list')
     
     # 조회수 증가
@@ -254,7 +255,7 @@ def coordinate_create(request):
         else:
             # 비회원 - 닉네임과 비밀번호 필수
             if not guest_nickname or not guest_password:
-                messages.error(request, '비회원은 닉네임과 비밀번호를 입력해야 합니다.')
+                messages.error(request, _('비회원은 닉네임과 비밀번호를 입력해야 합니다.'))
                 return render(request, 'coordinates/create.html', {
                     'categories': Coordinate.Category.choices,
                 })
@@ -308,7 +309,7 @@ def coordinate_create(request):
             
             if today_count >= DAILY_LIMIT:
                 category_label = dict(Coordinate.Category.choices).get(category, category)
-                messages.error(request, f'오늘 {category_label} 카테고리에 {DAILY_LIMIT}개를 이미 등록했습니다. 내일 다시 시도해주세요.')
+                messages.error(request, _('오늘 %(category)s 카테고리에 %(limit)s개를 이미 등록했습니다. 내일 다시 시도해주세요.') % {'category': category_label, 'limit': DAILY_LIMIT})
                 return render(request, 'coordinates/create.html', {
                     'categories': Coordinate.Category.choices,
                 })
@@ -352,11 +353,15 @@ def coordinate_create(request):
                 order=i
             )
         
+        # 번역 생성
+        from apps.translations.services import translate_on_create
+        translate_on_create(coordinate, ['title', 'description', 'postcard_name'])
+
         # 랭킹 갱신 (회원인 경우)
         if author:
             update_user_ranking(author)
-        
-        messages.success(request, '좌표가 등록되었습니다.')
+
+        messages.success(request, _('좌표가 등록되었습니다.'))
         return redirect('coordinates:detail', pk=coordinate.pk)
     
     context = {
@@ -382,7 +387,7 @@ def coordinate_edit(request, pk):
                 can_edit = True
         
         if not can_edit:
-            messages.error(request, '수정 권한이 없습니다.')
+            messages.error(request, _('수정 권한이 없습니다.'))
             return redirect('coordinates:detail', pk=pk)
         
         coordinate.title = request.POST.get('title', coordinate.title)
@@ -425,7 +430,7 @@ def coordinate_edit(request, pk):
                 order=current_image_count + i
             )
         
-        messages.success(request, '좌표가 수정되었습니다.')
+        messages.success(request, _('좌표가 수정되었습니다.'))
         return redirect('coordinates:detail', pk=pk)
     
     context = {
@@ -452,11 +457,11 @@ def coordinate_delete(request, pk):
                 can_delete = True
         
         if not can_delete:
-            messages.error(request, '삭제 권한이 없습니다.')
+            messages.error(request, _('삭제 권한이 없습니다.'))
             return redirect('coordinates:detail', pk=pk)
         
         coordinate.delete()
-        messages.success(request, '좌표가 삭제되었습니다.')
+        messages.success(request, _('좌표가 삭제되었습니다.'))
         return redirect('coordinates:list')
     
     return render(request, 'coordinates/delete_confirm.html', {
@@ -499,7 +504,7 @@ def copy_coords(request, pk):
                     actor=None,
                     notification_type=Notification.NotificationType.COPY_MILESTONE,
                     coordinate=coordinate,
-                    message=f"'{coordinate.title}'이(가) 📋 {milestone}회 복사되었어요!"
+                    message=_("'%(title)s'이(가) 📋 %(milestone)s회 복사되었어요!") % {'title': coordinate.title, 'milestone': milestone}
                 )
                 break  # 한 번에 하나의 마일스톤만
         

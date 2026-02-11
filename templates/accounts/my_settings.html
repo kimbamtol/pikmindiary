@@ -1,13 +1,14 @@
 {% extends 'base.html' %}
+{% load i18n %}
 
-{% block title %}계정 설정 - 피크민 다이어리{% endblock %}
+{% block title %}{% trans "계정 설정" %} - {% trans "피크민 다이어리" %}{% endblock %}
 
 {% block content %}
 <div class="container">
     <div class="settings-page">
         <div class="page-header">
-            <a href="{% url 'accounts:my_page' %}" class="back-link">← 마이페이지</a>
-            <h1 class="page-title">⚙️ 계정 설정</h1>
+            <a href="{% url 'accounts:my_page' %}" class="back-link">← {% trans "마이페이지" %}</a>
+            <h1 class="page-title">⚙️ {% trans "계정 설정" %}</h1>
         </div>
 
         <form method="post" enctype="multipart/form-data" class="settings-form card">
@@ -15,7 +16,7 @@
 
             <!-- 프로필 이미지 -->
             <div class="form-group">
-                <label class="form-label">프로필 이미지</label>
+                <label class="form-label">{% trans "프로필 이미지" %}</label>
                 <div class="avatar-upload">
                     <div class="current-avatar">
                         {% if user.profile_image %}
@@ -30,25 +31,25 @@
 
             <!-- 닉네임 -->
             <div class="form-group">
-                <label class="form-label">닉네임</label>
+                <label class="form-label">{% trans "닉네임" %}</label>
                 <input type="text" name="nickname" value="{{ user.nickname }}" class="form-control" maxlength="30"
                     required>
             </div>
 
             <!-- 자기소개 -->
             <div class="form-group">
-                <label class="form-label">자기소개</label>
+                <label class="form-label">{% trans "자기소개" %}</label>
                 <textarea name="bio" class="form-control" rows="3" maxlength="200">{{ user.bio }}</textarea>
             </div>
 
             <!-- 프로필 이모지 (랭킹 등록 사용자 또는 관리자) -->
             {% if user.has_ranking or can_customize %}
             <div class="form-group">
-                <label class="form-label">프로필 이모지 🏅</label>
+                <label class="form-label">{% trans "프로필 이모지" %} 🏅</label>
                 <div class="emoji-selector">
-                    <span class="emoji-preview" id="emoji-preview">{{ user.profile_emoji|default:"선택" }}</span>
+                    <span class="emoji-preview" id="emoji-preview">{{ user.profile_emoji|default:_("선택") }}</span>
                     <select name="profile_emoji" id="profile-emoji-select" class="form-control">
-                        <option value="">이모지 없음</option>
+                        <option value="">{% trans "이모지 없음" %}</option>
                         {% for emoji in pikmin_emojis %}
                             <option value="{{ emoji }}" {% if user.profile_emoji == emoji %}selected{% endif %}>
                                 {{ emoji }}
@@ -56,25 +57,25 @@
                         {% endfor %}
                     </select>
                 </div>
-                <small class="form-help">닉네임 왼쪽에 표시됩니다.</small>
+                <small class="form-help">{% trans "닉네임 왼쪽에 표시됩니다." %}</small>
             </div>
             {% endif %}
 
             <!-- 배지 커스터마이즈 (랭커 또는 관리자) -->
             {% if can_customize %}
             <div class="form-group title-selection">
-                <label class="form-label">🎨 배지 커스터마이즈</label>
+                <label class="form-label">🎨 {% trans "배지 커스터마이즈" %}</label>
                 {% if user.special_title %}
                 <div class="admin-title-notice">
                     <span class="notice-icon">👑</span>
-                    관리자가 부여한 칭호가 있습니다: <strong>{{ user.get_special_title_display }}</strong>
-                    <br><small>관리자 부여 칭호가 우선 적용됩니다.</small>
+                    {% trans "관리자가 부여한 칭호가 있습니다" %}: <strong>{{ user.get_special_title_display }}</strong>
+                    <br><small>{% trans "관리자 부여 칭호가 우선 적용됩니다." %}</small>
                 </div>
                 {% endif %}
 
                 <!-- 미리보기 -->
                 <div class="title-preview-section">
-                    <label class="form-label-small">미리보기</label>
+                    <label class="form-label-small">{% trans "미리보기" %}</label>
                     <div class="title-preview-box">
                         <span class="author-badge" id="title-preview-badge"
                               data-style="{{ user.badge_style }}"
@@ -90,9 +91,9 @@
 
                 <!-- 칭호 선택 -->
                 <div class="customize-row">
-                    <label class="form-label-small">칭호</label>
+                    <label class="form-label-small">{% trans "칭호" %}</label>
                     <select name="selected_title" id="title-select" class="form-control">
-                        <option value="" data-label="">칭호 없음</option>
+                        <option value="" data-label="">{% trans "칭호 없음" %}</option>
                         {% for code, label in available_titles %}
                         <option value="{{ code }}"
                                 {% if user.selected_title == code %}selected{% endif %}
@@ -106,7 +107,7 @@
 
                 <!-- 스타일 선택 -->
                 <div class="customize-row">
-                    <label class="form-label-small">스타일</label>
+                    <label class="form-label-small">{% trans "스타일" %}</label>
                     <select name="badge_style" id="badge-style-select" class="form-control">
                         {% for code, label in badge_styles %}
                         <option value="{{ code }}" {% if user.badge_style == code %}selected{% endif %}>
@@ -118,7 +119,7 @@
 
                 <!-- 닉네임 색상 -->
                 <div class="customize-row">
-                    <label class="form-label-small">닉네임 색상</label>
+                    <label class="form-label-small">{% trans "닉네임 색상" %}</label>
                     <select name="nickname_color" id="nickname-color-select" class="form-control">
                         {% for code, label in color_choices %}
                         <option value="{{ code }}" {% if user.nickname_color == code %}selected{% endif %}>
@@ -130,7 +131,7 @@
 
                 <!-- 닉네임 배경 색상 -->
                 <div class="customize-row">
-                    <label class="form-label-small">닉네임 배경 색상</label>
+                    <label class="form-label-small">{% trans "닉네임 배경 색상" %}</label>
                     <select name="nickname_bg_color" id="nickname-bg-color-select" class="form-control">
                         {% for code, label in color_choices %}
                         <option value="{{ code }}" {% if user.nickname_bg_color == code %}selected{% endif %}>
@@ -142,7 +143,7 @@
 
                 <!-- 칭호 글자 색상 -->
                 <div class="customize-row">
-                    <label class="form-label-small">칭호 글자 색상</label>
+                    <label class="form-label-small">{% trans "칭호 글자 색상" %}</label>
                     <select name="title_color" id="title-color-select" class="form-control">
                         {% for code, label in color_choices %}
                         <option value="{{ code }}" {% if user.title_color == code %}selected{% endif %}>
@@ -154,44 +155,44 @@
 
                 <!-- 색상 경고 메시지 -->
                 <div class="color-warning" id="color-warning" style="display: none;">
-                    ⚠️ 글자색과 배경색이 같으면 글자가 보이지 않을 수 있어요!
+                    ⚠️ {% trans "글자색과 배경색이 같으면 글자가 보이지 않을 수 있어요!" %}
                 </div>
 
                 <small class="form-help">
                     {% if user.is_admin_user %}
-                    👑 관리자 - 모든 옵션 사용 가능
+                    👑 {% trans "관리자 - 모든 옵션 사용 가능" %}
                     {% elif ranking_position %}
-                    🥇 현재 순위: {{ ranking_position }}위 |
-                    {% if ranking_position == 1 %}모든 칭호 선택 가능{% else %}일반 칭호만 선택 가능{% endif %}
+                    🥇 {% trans "현재 순위" %}: {{ ranking_position }}{% trans "위" %} |
+                    {% if ranking_position == 1 %}{% trans "모든 칭호 선택 가능" %}{% else %}{% trans "일반 칭호만 선택 가능" %}{% endif %}
                     {% endif %}
                 </small>
             </div>
             {% elif ranking_position %}
             <div class="form-group">
-                <label class="form-label">🏆 특별 칭호</label>
-                <p class="form-hint">상위 3위 내에 들면 특별 칭호를 선택할 수 있습니다.</p>
+                <label class="form-label">🏆 {% trans "특별 칭호" %}</label>
+                <p class="form-hint">{% trans "상위 3위 내에 들면 특별 칭호를 선택할 수 있습니다." %}</p>
             </div>
             {% endif %}
 
             <!-- 이메일 (읽기 전용) -->
             <div class="form-group">
-                <label class="form-label">이메일</label>
+                <label class="form-label">{% trans "이메일" %}</label>
                 <input type="email" value="{{ user.email }}" class="form-control" disabled>
-                <small class="form-help">이메일은 변경할 수 없습니다.</small>
+                <small class="form-help">{% trans "이메일은 변경할 수 없습니다." %}</small>
             </div>
 
             <div class="form-actions">
-                <a href="{% url 'accounts:my_page' %}" class="btn btn-outline">취소</a>
-                <button type="submit" class="btn btn-primary">저장</button>
+                <a href="{% url 'accounts:my_page' %}" class="btn btn-outline">{% trans "취소" %}</a>
+                <button type="submit" class="btn btn-primary">{% trans "저장" %}</button>
             </div>
         </form>
 
         <!-- 위험 영역 -->
         <div class="danger-zone card">
-            <h3>⚠️ 계정 관리</h3>
-            <p>로그아웃하거나 계정을 관리합니다.</p>
+            <h3>⚠️ {% trans "계정 관리" %}</h3>
+            <p>{% trans "로그아웃하거나 계정을 관리합니다." %}</p>
             <div class="danger-actions">
-                <a href="{% url 'account_logout' %}" class="btn btn-outline">로그아웃</a>
+                <a href="{% url 'account_logout' %}" class="btn btn-outline">{% trans "로그아웃" %}</a>
             </div>
         </div>
     </div>

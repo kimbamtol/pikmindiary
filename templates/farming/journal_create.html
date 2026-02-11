@@ -1,12 +1,13 @@
 {% extends 'base.html' %}
+{% load i18n %}
 
-{% block title %}농사 일지 작성 - 피크민 다이어리{% endblock %}
+{% block title %}{% trans "농사 일지 작성" %} - {% trans "피크민 다이어리" %}{% endblock %}
 
 {% block content %}
 <div class="container">
     <div class="form-container">
-        <h1>📔 농사 일지 작성</h1>
-        <p class="form-desc">나의 농사 기록을 공유해보세요!</p>
+        <h1>📔 {% trans "농사 일지 작성" %}</h1>
+        <p class="form-desc">{% trans "나의 농사 기록을 공유해보세요!" %}</p>
 
         <form method="post" enctype="multipart/form-data" class="farming-form">
             {% csrf_token %}
@@ -14,66 +15,66 @@
             <!-- 비회원 필드 -->
             {% if not user.is_authenticated %}
             <div class="guest-notice">
-                <p>💡 비회원으로 글을 작성합니다. 닉네임과 비밀번호를 입력해주세요.</p>
+                <p>💡 {% trans "비회원으로 글을 작성합니다. 닉네임과 비밀번호를 입력해주세요." %}</p>
             </div>
             <div class="form-row">
                 <div class="form-group">
-                    <label class="form-label">닉네임 *</label>
+                    <label class="form-label">{% trans "닉네임" %} *</label>
                     <input type="text" name="guest_nickname" class="form-control" required>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">비밀번호 * <small>(수정/삭제용)</small></label>
+                    <label class="form-label">{% trans "비밀번호" %} * <small>({% trans "수정/삭제용" %})</small></label>
                     <input type="password" name="guest_password" class="form-control" required>
                 </div>
             </div>
             {% endif %}
 
             <div class="form-group">
-                <label class="form-label">제목 *</label>
-                <input type="text" name="title" class="form-control" placeholder="예: 시부야역 빅플라워 농사 완료!" required>
+                <label class="form-label">{% trans "제목" %} *</label>
+                <input type="text" name="title" class="form-control" placeholder="{% trans "예: 시부야역 빅플라워 농사 완료!" %}" required>
             </div>
 
             <div class="form-group">
-                <label class="form-label">내용 *</label>
-                <textarea name="content" class="form-control" rows="6" placeholder="농사 과정이나 후기를 작성해주세요."
+                <label class="form-label">{% trans "내용" %} *</label>
+                <textarea name="content" class="form-control" rows="6" placeholder="{% trans "농사 과정이나 후기를 작성해주세요." %}"
                     required></textarea>
             </div>
 
             <div class="form-row">
                 <div class="form-group">
-                    <label class="form-label">꽃 종류</label>
-                    <input type="text" name="flower_type" class="form-control" placeholder="예: 빨간 꽃, 노란 꽃">
+                    <label class="form-label">{% trans "꽃 종류" %}</label>
+                    <input type="text" name="flower_type" class="form-control" placeholder="{% trans "예: 빨간 꽃, 노란 꽃" %}">
                 </div>
                 <div class="form-group">
-                    <label class="form-label">심은 꽃 수</label>
+                    <label class="form-label">{% trans "심은 꽃 수" %}</label>
                     <input type="number" name="flower_count" class="form-control" value="0" min="0">
                 </div>
             </div>
 
             <div class="form-group">
-                <label class="form-label">장소명</label>
-                <input type="text" name="location_name" class="form-control" placeholder="예: 시부야역 앞">
+                <label class="form-label">{% trans "장소명" %}</label>
+                <input type="text" name="location_name" class="form-control" placeholder="{% trans "예: 시부야역 앞" %}">
             </div>
 
             <div class="form-row">
                 <div class="form-group">
-                    <label class="form-label">위도</label>
+                    <label class="form-label">{% trans "위도" %}</label>
                     <input type="text" name="latitude" id="latitude" class="form-control" placeholder="35.6595">
                 </div>
                 <div class="form-group">
-                    <label class="form-label">경도</label>
+                    <label class="form-label">{% trans "경도" %}</label>
                     <input type="text" name="longitude" id="longitude" class="form-control" placeholder="139.7004">
                 </div>
             </div>
 
             <div class="form-group">
-                <label class="form-label">사진</label>
+                <label class="form-label">{% trans "사진" %}</label>
                 <input type="file" name="image" class="form-control" accept="image/*">
             </div>
 
             <div class="form-actions">
-                <a href="{% url 'farming:journal_list' %}" class="btn btn-outline">취소</a>
-                <button type="submit" class="btn btn-primary">등록하기</button>
+                <a href="{% url 'farming:journal_list' %}" class="btn btn-outline">{% trans "취소" %}</a>
+                <button type="submit" class="btn btn-primary">{% trans "등록하기" %}</button>
             </div>
         </form>
     </div>

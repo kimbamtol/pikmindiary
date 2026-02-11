@@ -1,3 +1,4 @@
+{% load i18n %}
 {% for coord in coords %}
 <article class="card coord-card">
     <a href="{% url 'coordinates:detail' pk=coord.pk %}">
@@ -11,7 +12,7 @@
                 {{ coord.get_category_display }}
             </span>
             {% if coord.is_outdated %}
-            <span class="badge badge-warning coord-card-badge">오래됨</span>
+            <span class="badge badge-warning coord-card-badge">{% trans "오래됨" %}</span>
             {% endif %}
         </div>
 
@@ -29,7 +30,7 @@
                     {% if coord.author.profile_emoji %}
                         <span class="profile-emoji">{{ coord.author.profile_emoji }}</span>
                     {% endif %}
-                    <span class="author-name">{{ coord.author.nickname|default:"익명" }}</span>
+                    <span class="author-name">{{ coord.author.nickname|default:_("익명") }}</span>
                     {% if coord.author.special_title %}
                     <span class="special-title-tag">{{ coord.author.get_special_title_display }}</span>
                     {% endif %}

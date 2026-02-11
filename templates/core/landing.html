@@ -1,12 +1,12 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load i18n %}
 
-{% block title %}피크민 다이어리 - 피크민 블룸 버섯, 모종, 엽서 좌표 커뮤니티{% endblock %}
-{% block description %}피크민 블룸 버섯 좌표, 모종 좌표, 빅플라워 위치, 엽서 정보를 함께 공유하는 유저 커뮤니티입니다. 피크민 좌표를 찾고 농사 정보를 나눠보세요!{% endblock %}
-{% block keywords %}피크민, 피크민 블룸, 피크민 좌표, 피크민 버섯, 피크민 버섯 좌표, 피크민 모종, 피크민 모종 좌표, 피크민 엽서, 피크민 엽서 좌표, 피크민 빅플라워, 피크민 농사,
-Pikmin Bloom{% endblock %}
-{% block og_title %}피크민 다이어리 - 피크민 블룸 좌표 공유 커뮤니티{% endblock %}
-{% block og_description %}피크민 블룸 버섯, 모종, 빅플라워 좌표를 공유하고 농사 정보를 나눠요!{% endblock %}
+{% block title %}{% trans "피크민 다이어리 - 피크민 블룸 버섯, 모종, 엽서 좌표 커뮤니티" %}{% endblock %}
+{% block description %}{% trans "피크민 블룸 버섯 좌표, 모종 좌표, 빅플라워 위치, 엽서 정보를 함께 공유하는 유저 커뮤니티입니다. 피크민 좌표를 찾고 농사 정보를 나눠보세요!" %}{% endblock %}
+{% block keywords %}{% trans "피크민, 피크민 블룸, 피크민 좌표, 피크민 버섯, 피크민 버섯 좌표, 피크민 모종, 피크민 모종 좌표, 피크민 엽서, 피크민 엽서 좌표, 피크민 빅플라워, 피크민 농사, Pikmin Bloom" %}{% endblock %}
+{% block og_title %}{% trans "피크민 다이어리 - 피크민 블룸 좌표 공유 커뮤니티" %}{% endblock %}
+{% block og_description %}{% trans "피크민 블룸 버섯, 모종, 빅플라워 좌표를 공유하고 농사 정보를 나눠요!" %}{% endblock %}
 
 {% block header %}
 <!-- 랜딩 페이지는 헤더 없음 -->
@@ -20,46 +20,46 @@ Pikmin Bloom{% endblock %}
             <span class="landing-logo-icon">🌱</span>
         </div>
 
-        <h1 class="landing-title">피크민 다이어리 커뮤니티</h1>
+        <h1 class="landing-title">{% trans "피크민 다이어리 커뮤니티" %}</h1>
 
         <p class="landing-description">
-            유저들이 함께 하는 버섯, 빅플라워, 농사 정보
+            {% trans "유저들이 함께 하는 버섯, 빅플라워, 농사 정보" %}
         </p>
 
         <!-- 위치 안내 박스 -->
         <div class="location-notice">
             <span class="location-notice-icon">📍</span>
             <p>
-                위치를 허용하면 입장 후<br>
-                <strong>내 지역 계절에 맞는 화면</strong>이 펼쳐집니다!
+                {% trans "위치를 허용하면 입장 후" %}<br>
+                <strong>{% trans "내 지역 계절에 맞는 화면" %}</strong>{% trans "이 펼쳐집니다!" %}
             </p>
         </div>
 
         <!-- 입장/지도 버튼 -->
         <div class="landing-main-buttons">
             <button class="btn btn-primary btn-lg btn-enter" onclick="weatherTheme.handleEnterClick()">
-                🚀 입장하기
+                🚀 {% trans "입장하기" %}
             </button>
             <a href="{% url 'coordinates:map' %}" class="btn btn-secondary btn-lg btn-map">
-                🗺️ 지도로 보기
+                🗺️ {% trans "지도로 보기" %}
             </a>
         </div>
 
         <!-- 안내 버튼 -->
         <div class="landing-links">
             <a href="{% url 'core:guide' %}" class="btn btn-outline">
-                📖 사이트 안내
+                📖 {% trans "사이트 안내" %}
             </a>
             <a href="{% url 'core:mypage_guide' %}" class="btn btn-outline">
-                👤 마이페이지 안내
+                👤 {% trans "마이페이지 안내" %}
             </a>
         </div>
     </div>
 
     <!-- 하단 정보 -->
     <div class="landing-footer">
-        <p>© {% now "Y" %} 피크민 다이어리</p>
-        <p class="landing-disclaimer">Nintendo 또는 Niantic과 관련이 없습니다.</p>
+        <p>© {% now "Y" %} {% trans "피크민 다이어리" %}</p>
+        <p class="landing-disclaimer">{% trans "Nintendo 또는 Niantic과 관련이 없습니다." %}</p>
     </div>
 </div>
 

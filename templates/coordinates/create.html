@@ -1,11 +1,12 @@
 {% extends 'base.html' %}
+{% load i18n %}
 
-{% block title %}새 좌표 제보 - 피크민 다이어리{% endblock %}
+{% block title %}{% trans "새 좌표 제보" %} - {% trans "피크민 다이어리" %}{% endblock %}
 
 {% block content %}
 <div class="container">
     <div class="form-page">
-        <h1 class="page-title">✏️ 새 좌표 제보</h1>
+        <h1 class="page-title">✏️ {% trans "새 좌표 제보" %}</h1>
 
         <form method="post" enctype="multipart/form-data" class="coord-form">
             {% csrf_token %}
@@ -13,15 +14,15 @@
             <!-- 비회원 필드 -->
             {% if not user.is_authenticated %}
             <div class="guest-notice">
-                <p>💡 비회원으로 글을 작성합니다. 닉네임과 비밀번호를 입력해주세요.</p>
+                <p>💡 {% trans "비회원으로 글을 작성합니다. 닉네임과 비밀번호를 입력해주세요." %}</p>
             </div>
             <div class="form-row">
                 <div class="form-group">
-                    <label class="form-label">닉네임 *</label>
+                    <label class="form-label">{% trans "닉네임" %} *</label>
                     <input type="text" name="guest_nickname" class="form-control" required>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">비밀번호 * <small>(수정/삭제용)</small></label>
+                    <label class="form-label">{% trans "비밀번호" %} * <small>({% trans "수정/삭제용" %})</small></label>
                     <input type="password" name="guest_password" class="form-control" required>
                 </div>
             </div>
@@ -29,18 +30,18 @@
 
             <!-- 기본 정보 -->
             <div class="form-group">
-                <label class="form-label">제목 *</label>
-                <input type="text" name="title" class="form-control" placeholder="예: 강남역 근처 버섯" required
+                <label class="form-label">{% trans "제목" %} *</label>
+                <input type="text" name="title" class="form-control" placeholder="{% trans "예: 강남역 근처 버섯" %}" required
                     maxlength="100">
             </div>
 
             <div class="form-group">
-                <label class="form-label">엽서이름</label>
-                <input type="text" name="postcard_name" class="form-control" placeholder="예: 강남역 엽서" maxlength="100">
+                <label class="form-label">{% trans "엽서이름" %}</label>
+                <input type="text" name="postcard_name" class="form-control" placeholder="{% trans "예: 강남역 엽서" %}" maxlength="100">
             </div>
 
             <div class="form-group">
-                <label class="form-label">카테고리 *</label>
+                <label class="form-label">{% trans "카테고리" %} *</label>
                 <select name="category" class="form-control" required>
                     {% for value, label in categories %}
                     <option value="{{ value }}">{{ label }}</option>
@@ -51,12 +52,12 @@
             <!-- 좌표 입력 -->
             <div class="form-row">
                 <div class="form-group">
-                    <label class="form-label">위도 (Latitude) *</label>
+                    <label class="form-label">{% trans "위도 (Latitude)" %} *</label>
                     <input type="text" name="latitude" id="latitude" class="form-control" placeholder="예: 37.498095"
                         required>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">경도 (Longitude) *</label>
+                    <label class="form-label">{% trans "경도 (Longitude)" %} *</label>
                     <input type="text" name="longitude" id="longitude" class="form-control" placeholder="예: 127.027610"
                         required>
                 </div>
@@ -64,35 +65,35 @@
 
             <div class="location-btn-row">
                 <button type="button" class="btn btn-location" id="useMyLocationBtn">
-                    📍 내 위치 입력하기
+                    📍 {% trans "내 위치 입력하기" %}
                 </button>
                 <button type="button" class="btn btn-map-picker" id="openMapPickerBtn">
-                    🗺️ 지도에서 선택
+                    🗺️ {% trans "지도에서 선택" %}
                 </button>
                 <span id="locationStatus"></span>
             </div>
 
             <div class="coords-help">
-                <p>💡 좌표 입력 방법:</p>
+                <p>💡 {% trans "좌표 입력 방법:" %}</p>
                 <ol>
-                    <li><strong>📍 내 위치 입력하기</strong> 버튼으로 현재 위치 자동 입력</li>
-                    <li><strong>🗺️ 지도에서 선택</strong> 버튼으로 지도에서 직접 위치 선택</li>
-                    <li>또는 게임 내에서 공유하기 → 좌표 확인</li>
+                    <li><strong>📍 {% trans "내 위치 입력하기" %}</strong> {% trans "버튼으로 현재 위치 자동 입력" %}</li>
+                    <li><strong>🗺️ {% trans "지도에서 선택" %}</strong> {% trans "버튼으로 지도에서 직접 위치 선택" %}</li>
+                    <li>{% trans "또는 게임 내에서 공유하기 → 좌표 확인" %}</li>
                 </ol>
             </div>
 
             <!-- 설명 -->
             <div class="form-group">
-                <label class="form-label">설명</label>
-                <textarea name="description" class="form-control" rows="4" placeholder="위치에 대한 추가 설명 (선택사항)"></textarea>
+                <label class="form-label">{% trans "설명" %}</label>
+                <textarea name="description" class="form-control" rows="4" placeholder="{% trans "위치에 대한 추가 설명 (선택사항)" %}"></textarea>
             </div>
 
             <!-- 이미지 업로드 -->
             <div class="form-group">
-                <label class="form-label">이미지 (최대 5장)</label>
+                <label class="form-label">{% trans "이미지 (최대 5장)" %}</label>
                 <input type="file" name="images" id="images" class="form-control"
                     accept="image/jpeg,image/png,image/webp" multiple onchange="previewImages(this)">
-                <small class="form-help">JPEG, PNG, WebP 형식, 각 최대 5MB</small>
+                <small class="form-help">{% trans "JPEG, PNG, WebP 형식, 각 최대 5MB" %}</small>
                 <div id="image-preview" class="image-preview"></div>
             </div>
 
@@ -100,32 +101,32 @@
             <div class="form-group watermark-option">
                 <label class="checkbox-label">
                     <input type="checkbox" name="watermark_enabled" id="watermark_enabled" onchange="toggleWatermarkName()">
-                    <span class="checkbox-text">🔒 사진에 닉네임 워터마크 표시</span>
+                    <span class="checkbox-text">🔒 {% trans "사진에 닉네임 워터마크 표시" %}</span>
                 </label>
-                <small class="form-help">체크하면 업로드된 모든 사진 좌상단/우하단에 닉네임이 반투명하게 표시됩니다.</small>
+                <small class="form-help">{% trans "체크하면 업로드된 모든 사진 좌상단/우하단에 닉네임이 반투명하게 표시됩니다." %}</small>
 
                 <div id="watermark-name-field" class="watermark-name-field" style="display: none;">
-                    <label class="form-label">워터마크 닉네임 (선택)</label>
+                    <label class="form-label">{% trans "워터마크 닉네임 (선택)" %}</label>
                     <input type="text" name="watermark_name" class="form-control"
-                           placeholder="비워두면 작성자 닉네임 사용" maxlength="50">
-                    <small class="form-help">워터마크에 표시될 이름을 직접 지정할 수 있습니다.</small>
+                           placeholder="{% trans "비워두면 작성자 닉네임 사용" %}" maxlength="50">
+                    <small class="form-help">{% trans "워터마크에 표시될 이름을 직접 지정할 수 있습니다." %}</small>
                 </div>
             </div>
 
             <!-- 주의사항 -->
             <div class="notice-box">
-                <h3>⚠️ 주의사항</h3>
+                <h3>⚠️ {% trans "주의사항" %}</h3>
                 <ul>
-                    <li>허위 좌표 제보 시 계정이 정지될 수 있습니다.</li>
-                    <li>📢 현재는 승인 없이 바로 게시됩니다! (당분간 운영)</li>
-                    <li>개인정보가 포함된 스크린샷은 사용하지 마세요.</li>
+                    <li>{% trans "허위 좌표 제보 시 계정이 정지될 수 있습니다." %}</li>
+                    <li>📢 {% trans "현재는 승인 없이 바로 게시됩니다! (당분간 운영)" %}</li>
+                    <li>{% trans "개인정보가 포함된 스크린샷은 사용하지 마세요." %}</li>
                 </ul>
             </div>
 
             <!-- 버튼 -->
             <div class="form-actions">
-                <a href="{% url 'coordinates:list' %}" class="btn btn-outline">취소</a>
-                <button type="submit" class="btn btn-primary btn-lg">제출하기</button>
+                <a href="{% url 'coordinates:list' %}" class="btn btn-outline">{% trans "취소" %}</a>
+                <button type="submit" class="btn btn-primary btn-lg">{% trans "제출하기" %}</button>
             </div>
         </form>
     </div>
@@ -133,22 +134,22 @@
 <!-- 지도 선택 모달 -->
 <div id="mapPickerModal" class="map-picker-modal">
     <div class="map-picker-header">
-        <h2>📍 지도에서 위치 선택</h2>
+        <h2>📍 {% trans "지도에서 위치 선택" %}</h2>
         <button type="button" class="map-picker-close" id="closeMapPickerBtn">&times;</button>
     </div>
     <div class="map-search-bar">
-        <input type="text" id="mapSearchInput" class="map-search-input" placeholder="🔍 장소, 주소, 건물명 검색...">
-        <button type="button" class="btn btn-search" id="mapSearchBtn">검색</button>
+        <input type="text" id="mapSearchInput" class="map-search-input" placeholder="🔍 {% trans "장소, 주소, 건물명 검색..." %}">
+        <button type="button" class="btn btn-search" id="mapSearchBtn">{% trans "검색" %}</button>
     </div>
     <div id="mapSearchResults" class="map-search-results"></div>
     <div id="mapPickerContainer" class="map-picker-container"></div>
     <div class="map-picker-footer">
         <div class="map-picker-coords">
-            <span id="selectedCoordsDisplay">지도를 터치하여 위치를 선택하세요</span>
+            <span id="selectedCoordsDisplay">{% trans "지도를 터치하여 위치를 선택하세요" %}</span>
         </div>
         <div class="map-picker-actions">
-            <button type="button" class="btn btn-outline" id="cancelMapPickerBtn">취소</button>
-            <button type="button" class="btn btn-primary" id="confirmMapPickerBtn" disabled>선택 완료</button>
+            <button type="button" class="btn btn-outline" id="cancelMapPickerBtn">{% trans "취소" %}</button>
+            <button type="button" class="btn btn-primary" id="confirmMapPickerBtn" disabled>{% trans "선택 완료" %}</button>
         </div>
     </div>
 </div>

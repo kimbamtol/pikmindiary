@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.core.paginator import Paginator
 from django.http import JsonResponse
 from django.utils import timezone
+from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
 from .models import FarmingJournal, FarmingRequest, FarmingParticipation, FarmingJournalLike
@@ -64,11 +65,11 @@ def journal_create(request):
         else:
             # 비회원 - 닉네임과 비밀번호 필수
             if not guest_nickname or not guest_password:
-                messages.error(request, '비회원은 닉네임과 비밀번호를 입력해야 합니다.')
+                messages.error(request, _('비회원은 닉네임과 비밀번호를 입력해야 합니다.'))
                 return render(request, 'farming/journal_create.html', {})
             author = None
             hashed_password = make_password(guest_password)
-        
+
         journal = FarmingJournal(
             author=author,
             guest_nickname=guest_nickname,
@@ -79,20 +80,25 @@ def journal_create(request):
             flower_type=flower_type,
             flower_count=flower_count,
         )
-        
+
         # 좌표 처리
         lat = request.POST.get('latitude')
         lng = request.POST.get('longitude')
         if lat and lng:
             journal.latitude = lat
             journal.longitude = lng
-        
+
         # 이미지 처리
         if 'image' in request.FILES:
             journal.image = request.FILES['image']
-        
+
         journal.save()
-        messages.success(request, '농사 일지가 등록되었습니다!')
+
+        # 번역 생성
+        from apps.translations.services import translate_on_create
+        translate_on_create(journal, ['title', 'content'])
+
+        messages.success(request, _('농사 일지가 등록되었습니다!'))
         return redirect('farming:journal_detail', pk=journal.pk)
     
     context = {}
@@ -134,7 +140,7 @@ def toggle_journal_like(request, pk):
     
     # 본인 글은 좋아요 불가
     if request.user.is_authenticated and journal.author == request.user:
-        return JsonResponse({'error': '본인 글에는 좋아요를 누를 수 없습니다.'}, status=400)
+        return JsonResponse({'error': _('본인 글에는 좋아요를 누를 수 없습니다.')}, status=400)
     
     if request.user.is_authenticated:
         # 로그인 사용자: DB에서 관리
@@ -229,7 +235,7 @@ def request_create(request):
         else:
             # 비회원 - 닉네임과 비밀번호 필수
             if not guest_nickname or not guest_password:
-                messages.error(request, '비회원은 닉네임과 비밀번호를 입력해야 합니다.')
+                messages.error(request, _('비회원은 닉네임과 비밀번호를 입력해야 합니다.'))
                 return render(request, 'farming/request_create.html', {})
             author = None
             hashed_password = make_password(guest_password)
@@ -252,7 +258,12 @@ def request_create(request):
             farming_request.deadline = deadline
         
         farming_request.save()
-        messages.success(request, '농사 요청이 등록되었습니다!')
+
+        # 번역 생성
+        from apps.translations.services import translate_on_create
+        translate_on_create(farming_request, ['title', 'content'])
+
+        messages.success(request, _('농사 요청이 등록되었습니다!'))
         return redirect('farming:request_detail', pk=farming_request.pk)
     
     context = {}
@@ -290,7 +301,7 @@ def participate(request, pk):
         ).first()
         
         if existing:
-            messages.warning(request, '이미 참여하셨습니다.')
+            messages.warning(request, _('이미 참여하셨습니다.'))
         else:
             FarmingParticipation.objects.create(
                 request=farming_request,
@@ -302,7 +313,7 @@ def participate(request, pk):
                 farming_request.status = 'in_progress'
                 farming_request.save()
             
-            messages.success(request, '참여해주셔서 감사합니다! 🌸')
+            messages.success(request, _('참여해주셔서 감사합니다! 🌸'))
     
     return redirect('farming:request_detail', pk=pk)
 
@@ -314,12 +325,12 @@ def complete_request(request, pk):
     
     # 작성자만 완료 가능
     if farming_request.author != request.user:
-        messages.error(request, '권한이 없습니다.')
+        messages.error(request, _('권한이 없습니다.'))
         return redirect('farming:request_detail', pk=pk)
-    
+
     farming_request.status = 'completed'
     farming_request.save()
-    messages.success(request, '농사 요청이 완료되었습니다!')
+    messages.success(request, _('농사 요청이 완료되었습니다!'))
     
     return redirect('farming:request_detail', pk=pk)
 
@@ -361,26 +372,26 @@ def journal_edit(request, pk):
                 can_edit = True
         
         if not can_edit:
-            messages.error(request, '수정 권한이 없습니다.')
+            messages.error(request, _('수정 권한이 없습니다.'))
             return redirect('farming:journal_detail', pk=pk)
-        
+
         journal.title = request.POST.get('title', journal.title)
         journal.content = request.POST.get('content', journal.content)
         journal.location_name = request.POST.get('location_name', journal.location_name)
         journal.flower_type = request.POST.get('flower_type', journal.flower_type)
         journal.flower_count = int(request.POST.get('flower_count', journal.flower_count) or 0)
-        
+
         lat = request.POST.get('latitude')
         lng = request.POST.get('longitude')
         if lat and lng:
             journal.latitude = lat
             journal.longitude = lng
-        
+
         if 'image' in request.FILES:
             journal.image = request.FILES['image']
-        
+
         journal.save()
-        messages.success(request, '농사 일지가 수정되었습니다.')
+        messages.success(request, _('농사 일지가 수정되었습니다.'))
         return redirect('farming:journal_detail', pk=pk)
     
     context = {
@@ -407,11 +418,11 @@ def journal_delete(request, pk):
                 can_delete = True
         
         if not can_delete:
-            messages.error(request, '삭제 권한이 없습니다.')
+            messages.error(request, _('삭제 권한이 없습니다.'))
             return redirect('farming:journal_detail', pk=pk)
-        
+
         journal.delete()
-        messages.success(request, '농사 일지가 삭제되었습니다.')
+        messages.success(request, _('농사 일지가 삭제되었습니다.'))
         return redirect('farming:journal_list')
     
     context = {
