@@ -126,7 +126,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // 위치 기반 언어 자동 감지 (첫 방문 시)
-    autoDetectLanguageByLocation();
 });
 
 // 낮/밤 시간대 설정 (6시~18시 낮, 나머지 밤) - 자동 모드일 때만
@@ -153,74 +152,6 @@ function setTimeMode(mode) {
     showToast(mode === 'day' ? t('dayMode') : t('nightMode'));
 }
 
-// ============================================
-// 위치 기반 언어 자동 감지
-// ============================================
-function autoDetectLanguageByLocation() {
-    // 이미 수동 선택한 적이 있으면 스킵
-    if (localStorage.getItem('langManuallySet')) return;
-    // 쿠키에 django_language가 있으면 스킵 (이미 설정됨)
-    if (getCookie('django_language')) return;
-
-    // 위치 권한이 허용되어 있을 때만 (landing에서 이미 요청한 상태)
-    if (!navigator.geolocation) return;
-
-    navigator.geolocation.getCurrentPosition(function(position) {
-        var lat = position.coords.latitude;
-        var lng = position.coords.longitude;
-        var detectedLang = detectLanguageFromCoords(lat, lng);
-
-        // 현재 언어와 다르면 자동 전환
-        var htmlLang = document.documentElement.lang || 'ko';
-        if (detectedLang && detectedLang !== htmlLang) {
-            // CSRF 토큰으로 언어 변경 POST
-            var csrfToken = getCookie('csrftoken');
-            if (csrfToken) {
-                var form = document.createElement('form');
-                form.method = 'POST';
-                form.action = '/i18n/setlang/';
-                form.style.display = 'none';
-
-                var csrfInput = document.createElement('input');
-                csrfInput.type = 'hidden';
-                csrfInput.name = 'csrfmiddlewaretoken';
-                csrfInput.value = csrfToken;
-                form.appendChild(csrfInput);
-
-                var langInput = document.createElement('input');
-                langInput.type = 'hidden';
-                langInput.name = 'language';
-                langInput.value = detectedLang;
-                form.appendChild(langInput);
-
-                var nextInput = document.createElement('input');
-                nextInput.type = 'hidden';
-                nextInput.name = 'next';
-                nextInput.value = window.location.pathname;
-                form.appendChild(nextInput);
-
-                document.body.appendChild(form);
-                localStorage.setItem('langManuallySet', 'auto');
-                form.submit();
-            }
-        }
-    }, function() {
-        // 위치 권한 거부 - 무시
-    }, { timeout: 5000, maximumAge: 300000 });
-}
-
-function detectLanguageFromCoords(lat, lng) {
-    // 한국 영역 먼저 체크 (일본 범위에 포함되므로 우선 판별)
-    if (lat >= 33 && lat <= 43 && lng >= 124 && lng <= 132) {
-        return 'ko';
-    }
-    // 일본 영역
-    if (lat >= 24 && lat <= 46 && lng >= 122 && lng <= 154) {
-        return 'ja';
-    }
-    // 그 외 영어
-    return 'en';
-}
 
 // ============================================
 // CSRF 토큰 가져오기
@@ -467,12 +398,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 언어 수동 선택 시 localStorage에 기록
-    document.querySelectorAll('.lang-option').forEach(btn => {
-        btn.addEventListener('click', () => {
-            localStorage.setItem('langManuallySet', 'true');
-        });
-    });
 });
 
 // 이미지 미리보기
