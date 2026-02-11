@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load i18n %}
+{% load translate_content %}
 
 {% block title %}{% trans "농사 일지" %} - {% trans "피크민 다이어리" %}{% endblock %}
 
@@ -26,7 +27,7 @@
         {% for journal in journals %}
         <a href="{% url 'farming:journal_detail' journal.pk %}" class="journal-card card">
             {% if journal.image %}
-            <img src="{{ journal.image.url }}" alt="{{ journal.title }}" class="journal-img">
+            <img src="{{ journal.image.url }}" alt="{{ journal|translate_field:"title" }}" class="journal-img">
             {% else %}
             <div class="journal-placeholder">🌻</div>
             {% endif %}
@@ -34,7 +35,7 @@
                 {% if journal.flower_type %}
                 <span class="badge badge-{{ journal.flower_type }}">{{ journal.get_flower_type_display }}</span>
                 {% endif %}
-                <h3>{{ journal.title }}</h3>
+                <h3>{{ journal|translate_field:"title" }}</h3>
                 <p class="journal-meta">
                     <span>{{ journal.author.nickname }}</span>
                     <span>{{ journal.created_at|date:"n/j" }}</span>

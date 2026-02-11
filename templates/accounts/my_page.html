@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load i18n %}
+{% load translate_content %}
 
 {% block title %}{% trans "마이페이지" %} - {% trans "피크민 다이어리" %}{% endblock %}
 
@@ -102,7 +103,7 @@
                             class="badge badge-{% if post.status == 'APPROVED' %}success{% elif post.status == 'PENDING' %}pending{% else %}danger{% endif %}">
                             {{ post.get_status_display }}
                         </span>
-                        <span class="recent-title">{{ post.title }}</span>
+                        <span class="recent-title">{{ post|translate_field:"title" }}</span>
                     </div>
                     <span class="recent-date">{{ post.created_at|date:"m/d" }}</span>
                 </a>
@@ -124,7 +125,7 @@
                             {% if suggestion.admin_reply %}badge-success{% else %}badge-secondary{% endif %}">
                             {% if suggestion.admin_reply %}{% trans "답변완료" %}{% else %}{% trans "대기중" %}{% endif %}
                         </span>
-                        <span class="recent-title">{{ suggestion.title }}</span>
+                        <span class="recent-title">{{ suggestion|translate_field:"title" }}</span>
                     </div>
                     <span class="recent-date">{{ suggestion.created_at|date:"m/d" }}</span>
                 </a>

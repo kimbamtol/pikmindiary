@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load i18n %}
+{% load translate_content %}
 
 {% block title %}{% trans "북마크" %} - {% trans "피크민 다이어리" %}{% endblock %}
 
@@ -18,7 +19,7 @@
                 <a href="{% url 'coordinates:detail' pk=coord.pk %}">
                     <div class="coord-card-image">
                         {% if coord.images.first %}
-                        <img src="{{ coord.images.first.image.url }}" alt="{{ coord.title }}">
+                        <img src="{{ coord.images.first.image.url }}" alt="{{ coord|translate_field:"title" }}">
                         {% else %}
                         <div class="coord-card-placeholder">🗺️</div>
                         {% endif %}
@@ -28,7 +29,7 @@
                     </div>
 
                     <div class="coord-card-content">
-                        <h3 class="coord-card-title">{{ coord.title }}</h3>
+                        <h3 class="coord-card-title">{{ coord|translate_field:"title" }}</h3>
                         <div class="coord-card-meta">
                             <span>{{ coord.author.nickname|default:_("익명") }}</span>
                             <span>{{ coord.created_at|date:"m/d" }}</span>

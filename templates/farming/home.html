@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load i18n %}
+{% load translate_content %}
 
 {% block title %}{% trans "농사 게시판" %} - {% trans "피크민 다이어리" %}{% endblock %}
 
@@ -40,7 +41,7 @@
                 {% for journal in recent_journals %}
                 <a href="{% url 'farming:journal_detail' journal.pk %}" class="farming-card">
                     <div class="farming-card-content">
-                        <h3>{{ journal.title }}</h3>
+                        <h3>{{ journal|translate_field:"title" }}</h3>
                         <p>{{ journal.author.nickname }} · {{ journal.created_at|date:"n/j" }}</p>
                     </div>
                 </a>

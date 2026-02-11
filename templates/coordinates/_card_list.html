@@ -1,10 +1,11 @@
 {% load i18n %}
+{% load translate_content %}
 {% for coord in coords %}
 <article class="card coord-card">
     <a href="{% url 'coordinates:detail' pk=coord.pk %}">
         <div class="coord-card-image">
             {% if coord.images.first %}
-            <img src="{{ coord.images.first.image.url }}" alt="{{ coord.title }}">
+            <img src="{{ coord.images.first.image.url }}" alt="{{ coord|translate_field:"title" }}">
             {% else %}
             <div class="coord-card-placeholder">🗺️</div>
             {% endif %}
@@ -17,9 +18,9 @@
         </div>
 
         <div class="coord-card-content">
-            <h3 class="coord-card-title">{{ coord.title }}</h3>
+            <h3 class="coord-card-title">{{ coord|translate_field:"title" }}</h3>
             {% if coord.postcard_name %}
-            <div class="coord-card-postcard">🏷️ {{ coord.postcard_name }}</div>
+            <div class="coord-card-postcard">🏷️ {{ coord|translate_field:"postcard_name" }}</div>
             {% endif %}
             <div class="coord-card-meta">
                 <span>📍 {{ coord.latitude }}, {{ coord.longitude }}</span>

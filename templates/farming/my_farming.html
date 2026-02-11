@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load i18n %}
+{% load translate_content %}
 
 {% block title %}{% trans "내 농사 활동" %} - {% trans "피크민 다이어리" %}{% endblock %}
 
@@ -22,7 +23,7 @@
         <div class="activity-grid">
             {% for journal in my_journals %}
             <a href="{% url 'farming:journal_detail' journal.pk %}" class="activity-card">
-                <h3>{{ journal.title }}</h3>
+                <h3>{{ journal|translate_field:"title" }}</h3>
                 <p>{{ journal.created_at|date:"Y.n.j" }}</p>
                 {% if journal.location_name %}
                 <p class="location">📍 {{ journal.location_name }}</p>
@@ -44,7 +45,7 @@
             {% for req in my_requests %}
             <a href="{% url 'farming:request_detail' req.pk %}" class="activity-card">
                 <span class="status-badge status-{{ req.status }}">{{ req.get_status_display }}</span>
-                <h3>{{ req.title }}</h3>
+                <h3>{{ req|translate_field:"title" }}</h3>
                 <p>{{ req.created_at|date:"Y.n.j" }}</p>
                 <p class="location">📍 {{ req.location_name }}</p>
                 <p class="participants">🙋 {{ req.participations.count }}{% trans "명 참여" %}</p>
@@ -64,7 +65,7 @@
             {% for p in my_participations %}
             <a href="{% url 'farming:request_detail' p.request.pk %}" class="activity-card">
                 <span class="status-badge status-{{ p.request.status }}">{{ p.request.get_status_display }}</span>
-                <h3>{{ p.request.title }}</h3>
+                <h3>{{ p.request|translate_field:"title" }}</h3>
                 <p>{% trans "참여일" %}: {{ p.created_at|date:"Y.n.j" }}</p>
                 <p class="location">📍 {{ p.request.location_name }}</p>
             </a>

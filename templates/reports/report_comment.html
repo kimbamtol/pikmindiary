@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load i18n %}
+{% load translate_content %}
 
 {% block title %}{% trans "댓글 신고" %} - {% trans "피크민 다이어리" %}{% endblock %}
 
@@ -13,7 +14,7 @@
 
             <div class="target-info">
                 <strong>{% trans "신고 대상 댓글" %}:</strong>
-                <p class="target-content">"{{ comment.content|truncatewords:20 }}"</p>
+                <p class="target-content">"{{ comment|translate_field:"content"|truncatewords:20 }}"</p>
                 <span class="target-author">- {{ comment.display_name }}</span>
             </div>
 

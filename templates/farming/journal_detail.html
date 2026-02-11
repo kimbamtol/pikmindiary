@@ -1,7 +1,8 @@
 {% extends 'base.html' %}
 {% load i18n %}
+{% load translate_content %}
 
-{% block title %}{{ journal.title }} - {% trans "피크민 다이어리" %}{% endblock %}
+{% block title %}{{ journal|translate_field:"title" }} - {% trans "피크민 다이어리" %}{% endblock %}
 
 {% block content %}
 <div class="container">
@@ -10,7 +11,7 @@
             {% if journal.flower_type %}
             <span class="badge badge-{{ journal.flower_type }}">{{ journal.get_flower_type_display }}</span>
             {% endif %}
-            <h1>{{ journal.title }}</h1>
+            <h1>{{ journal|translate_field:"title" }}</h1>
             <div class="journal-meta">
                 <span><a href="{% url 'accounts:user_profile' user_id=journal.author.pk %}" class="author-link">{{ journal.author.nickname }}</a></span>
                 <span>{{ journal.created_at|date:"Y.n.j H:i" }}</span>
@@ -19,12 +20,12 @@
 
         {% if journal.image %}
         <div class="journal-image">
-            <img src="{{ journal.image.url }}" alt="{{ journal.title }}">
+            <img src="{{ journal.image.url }}" alt="{{ journal|translate_field:"title" }}">
         </div>
         {% endif %}
 
         <div class="journal-content">
-            {{ journal.content|linebreaks }}
+            {{ journal|translate_field:"content"|linebreaks }}
         </div>
 
         <div class="journal-info">
@@ -103,7 +104,7 @@
                     <span class="comment-date">{{ comment.created_at|date:"m/d H:i" }}</span>
                 </div>
                 <div class="comment-content">
-                    {{ comment.content|linebreaks }}
+                    {{ comment|translate_field:"content"|linebreaks }}
                 </div>
 
                 {% if not comment.is_deleted %}

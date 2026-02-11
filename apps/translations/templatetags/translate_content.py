@@ -6,16 +6,11 @@ from apps.translations.services import get_translated_field, detect_source_langu
 register = template.Library()
 
 
-@register.simple_tag
-def translated_field(obj, field_name):
-    """
-    캐시된 번역 반환. 현재 언어가 원문 언어와 같으면 원문 반환.
-    사용법: {% translated_field coordinate "title" %}
-    """
+def _get_translated(obj, field_name):
+    """공통 번역 로직"""
     current_lang = get_language()
     if not current_lang:
         current_lang = 'ko'
-    # 2자리 코드로 통일
     current_lang = current_lang[:2]
 
     original = getattr(obj, field_name, '')
@@ -27,3 +22,22 @@ def translated_field(obj, field_name):
         return original
 
     return get_translated_field(obj, field_name, current_lang)
+
+
+@register.simple_tag
+def translated_field(obj, field_name):
+    """
+    캐시된 번역 반환. 현재 언어가 원문 언어와 같으면 원문 반환.
+    사용법: {% translated_field coordinate "title" %}
+    """
+    return _get_translated(obj, field_name)
+
+
+@register.filter
+def translate_field(obj, field_name):
+    """
+    필터 버전. 다른 필터와 체이닝 가능.
+    사용법: {{ coordinate|translate_field:"title" }}
+           {{ coordinate|translate_field:"description"|linebreaks }}
+    """
+    return _get_translated(obj, field_name)

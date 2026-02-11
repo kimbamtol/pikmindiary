@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load i18n %}
+{% load translate_content %}
 
 {% block title %}{% trans "내가 쓴 글" %} - {% trans "피크민 다이어리" %}{% endblock %}
 
@@ -34,7 +35,7 @@
                     </span>
                 </div>
                 <div class="post-content">
-                    <h3 class="post-title">{{ post.title }}</h3>
+                    <h3 class="post-title">{{ post|translate_field:"title" }}</h3>
                     <div class="post-meta">
                         <span>{{ post.get_category_display }}</span>
                         <span>{{ post.created_at|date:"Y.m.d" }}</span>

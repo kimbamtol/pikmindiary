@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load i18n %}
+{% load translate_content %}
 
 {% block title %}{% trans "신고하기" %} - {% trans "피크민 다이어리" %}{% endblock %}
 
@@ -12,7 +13,7 @@
             <h1 class="form-title">🚨 {% trans "좌표 신고" %}</h1>
 
             <div class="target-info">
-                <strong>{% trans "신고 대상" %}:</strong> {{ coordinate.title }}
+                <strong>{% trans "신고 대상" %}:</strong> {{ coordinate|translate_field:"title" }}
             </div>
 
             <form method="post">

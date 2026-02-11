@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load i18n %}
+{% load translate_content %}
 
 {% block title %}{% trans "농사 일지 삭제" %} - {% trans "피크민 다이어리" %}{% endblock %}
 
@@ -10,12 +11,12 @@
 
         <div class="confirm-box">
             <div class="journal-preview">
-                <h2>{{ journal.title }}</h2>
+                <h2>{{ journal|translate_field:"title" }}</h2>
                 <p class="meta">
                     <span>🌸 {{ journal.flower_type|default:_("꽃") }}</span>
                     <span>📍 {{ journal.location_name|default:_("위치 미입력") }}</span>
                 </p>
-                <p class="content-preview">{{ journal.content|truncatewords:30 }}</p>
+                <p class="content-preview">{{ journal|translate_field:"content"|truncatewords:30 }}</p>
             </div>
 
             <div class="warning-text">

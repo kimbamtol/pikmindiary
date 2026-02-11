@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load i18n %}
+{% load translate_content %}
 
 {% block title %}{% trans "좌표 삭제" %} - {% trans "피크민 다이어리" %}{% endblock %}
 
@@ -10,13 +11,13 @@
 
         <div class="confirm-box">
             <div class="coordinate-preview">
-                <h2>{{ coordinate.title }}</h2>
+                <h2>{{ coordinate|translate_field:"title" }}</h2>
                 <p class="meta">
                     <span class="badge">{{ coordinate.get_category_display }}</span>
                     <span>{{ coordinate.latitude }}, {{ coordinate.longitude }}</span>
                 </p>
                 {% if coordinate.description %}
-                <p class="description">{{ coordinate.description|truncatewords:30 }}</p>
+                <p class="description">{{ coordinate|translate_field:"description"|truncatewords:30 }}</p>
                 {% endif %}
             </div>
 

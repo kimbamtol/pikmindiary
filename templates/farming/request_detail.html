@@ -1,7 +1,8 @@
 {% extends 'base.html' %}
 {% load i18n %}
+{% load translate_content %}
 
-{% block title %}{{ request.title }} - {% trans "피크민 다이어리" %}{% endblock %}
+{% block title %}{{ request|translate_field:"title" }} - {% trans "피크민 다이어리" %}{% endblock %}
 
 {% block content %}
 <div class="container">
@@ -9,7 +10,7 @@
         <div class="request-header">
             <div class="status-badge status-{{ request.status }}">{{ request.get_status_display }}</div>
             <span class="badge badge-{{ request.flower_type }}">{{ request.get_flower_type_display }}</span>
-            <h1>{{ request.title }}</h1>
+            <h1>{{ request|translate_field:"title" }}</h1>
             <div class="request-meta">
                 <span>{{ request.author.nickname }}</span>
                 <span>{{ request.created_at|date:"Y.n.j H:i" }}</span>
@@ -26,7 +27,7 @@
         {% if request.content %}
         <div class="request-content">
             <h3>📝 {% trans "설명" %}</h3>
-            {{ request.content|linebreaks }}
+            {{ request|translate_field:"content"|linebreaks }}
         </div>
         {% endif %}
 

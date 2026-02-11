@@ -1,8 +1,9 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load i18n %}
+{% load translate_content %}
 
-{% block title %}{{ coordinate.title }} - {% trans "피크민 다이어리" %}{% endblock %}
+{% block title %}{{ coordinate|translate_field:"title" }} - {% trans "피크민 다이어리" %}{% endblock %}
 
 {% block content %}
 <div class="container">
@@ -16,7 +17,7 @@
             <div class="detail-images">
                 {% if images %}
                 <div class="image-main">
-                    <img src="{{ images.0.image.url }}" alt="{{ coordinate.title }}" id="mainImage">
+                    <img src="{{ images.0.image.url }}" alt="{{ coordinate|translate_field:"title" }}" id="mainImage">
                 </div>
                 {% if images.count > 1 %}
                 <div class="image-thumbs">
@@ -44,7 +45,7 @@
                     {% endif %}
                 </div>
 
-                <h1 class="detail-title">{{ coordinate.title }}</h1>
+                <h1 class="detail-title">{{ coordinate|translate_field:"title" }}</h1>
 
                 <div class="detail-meta">
                     <span>{% trans "작성자" %}: {% if coordinate.author %}<a href="{% url 'accounts:user_profile' user_id=coordinate.author.pk %}" class="author-link"><strong>{{ coordinate.author.nickname }}</strong></a>{% else %}<strong>{% trans "익명" %}</strong>{% endif %}</span>
@@ -66,7 +67,7 @@
                 {% if coordinate.description %}
                 <div class="detail-description">
                     <h3>{% trans "설명" %}</h3>
-                    <p>{{ coordinate.description|linebreaks }}</p>
+                    <p>{{ coordinate|translate_field:"description"|linebreaks }}</p>
                 </div>
                 {% endif %}
 
@@ -237,7 +238,7 @@
                     </div>
                     <div class="comment-content">
                         {% if comment.content %}
-                            {{ comment.content|linebreaks }}
+                            {{ comment|translate_field:"content"|linebreaks }}
                         {% endif %}
 
                         {% if comment.has_photo %}

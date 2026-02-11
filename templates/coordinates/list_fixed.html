@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load i18n %}
+{% load translate_content %}
 
 {% block title %}{% trans "피크민 좌표 목록 - 버섯, 모종, 빅플라워 좌표 모음 | 피크민 다이어리" %}{% endblock %}
 {% block description %}{% trans "피크민 블룸 버섯 좌표, 모종 좌표, 빅플라워 위치를 한눈에! 유저들이 공유한 피크민 엽서 좌표를 검색하고 복사하세요." %}{% endblock %}
@@ -107,7 +108,7 @@
                     <a href="{% url 'coordinates:detail' pk=coord.pk %}">
                         <div class="coord-card-image">
                             {% if coord.images.first %}
-                            <img src="{{ coord.images.first.image.url }}" alt="{{ coord.title }}">
+                            <img src="{{ coord.images.first.image.url }}" alt="{{ coord|translate_field:"title" }}">
                             {% else %}
                             <div class="coord-card-placeholder">🗺️</div>
                             {% endif %}
@@ -120,9 +121,9 @@
                         </div>
 
                         <div class="coord-card-content">
-                            <h3 class="coord-card-title">{{ coord.title }}</h3>
+                            <h3 class="coord-card-title">{{ coord|translate_field:"title" }}</h3>
                             {% if coord.postcard_name %}
-                            <div class="coord-card-postcard">🏷️ {{ coord.postcard_name }}</div>
+                            <div class="coord-card-postcard">🏷️ {{ coord|translate_field:"postcard_name" }}</div>
                             {% endif %}
                             <div class="coord-card-meta">
                                 <span>📍 {{ coord.latitude }}, {{ coord.longitude }}</span>

@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load i18n %}
+{% load translate_content %}
 
 {% block title %}{% trans "내가 남긴 댓글" %} - {% trans "피크민 다이어리" %}{% endblock %}
 
@@ -23,15 +24,15 @@
                     <div class="comment-target">
                         {% if comment.coordinate %}
                         <span class="target-type">{% trans "좌표" %}</span>
-                        <span class="target-title">{{ comment.coordinate.title }}</span>
+                        <span class="target-title">{{ comment.coordinate|translate_field:"title" }}</span>
                         {% elif comment.farming_journal %}
                         <span class="target-type">{% trans "일지" %}</span>
-                        <span class="target-title">{{ comment.farming_journal.title }}</span>
+                        <span class="target-title">{{ comment.farming_journal|translate_field:"title" }}</span>
                         {% endif %}
                     </div>
                     <p class="comment-content">
                         {% if comment.content %}
-                        {{ comment.content|truncatechars:100 }}
+                        {{ comment|translate_field:"content"|truncatechars:100 }}
                         {% else %}
                         <em>({% trans "사진 댓글" %})</em>
                         {% endif %}

@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load i18n %}
+{% load translate_content %}
 
 {% block title %}{% trans "내 건의사항" %} - {% trans "피크민 다이어리" %}{% endblock %}
 
@@ -25,8 +26,8 @@
                     <span class="suggestion-date">{{ suggestion.created_at|date:"Y.m.d H:i" }}</span>
                 </div>
 
-                <h3 class="suggestion-title">{{ suggestion.title }}</h3>
-                <p class="suggestion-content">{{ suggestion.content|linebreaksbr }}</p>
+                <h3 class="suggestion-title">{{ suggestion|translate_field:"title" }}</h3>
+                <p class="suggestion-content">{{ suggestion|translate_field:"content"|linebreaksbr }}</p>
 
                 {% if suggestion.admin_reply %}
                 <div class="admin-reply">
