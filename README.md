@@ -11,10 +11,11 @@
 - **파밍 일지** - 파밍 활동 기록 및 도움 요청
 - **댓글 & 대댓글** - 사진 첨부 지원 (엽서 자랑)
 - **좋아요 & 북마크** - 관심 좌표 저장
-- **유효성 평가** - 커뮤니티 기반 좌표 검증
+- **다국어 지원** - 한국어/일본어/영어 UI + DeepL API 자동 번역
 - **랭킹 시스템** - 기여도 기반 점수 및 순위
 - **워터마크** - 업로드 이미지에 자동 워터마크 적용
 - **지역 자동 감지** - 위도/경도로 지역 자동 분류
+- **IP 기반 언어 감지** - 접속 국가에 따라 자동 언어 설정
 - **비회원 지원** - 로그인 없이도 등록, 댓글, 좋아요 가능
 
 ## 기술 스택
@@ -24,6 +25,7 @@
 | Backend | Python 3.12, Django 6.0 |
 | Frontend | HTML/CSS/JS, HTMX |
 | Auth | django-allauth (Google OAuth) |
+| i18n | Django i18n + DeepL API |
 | Image | Pillow |
 | Deploy | Nginx + Gunicorn + Systemd |
 
@@ -56,6 +58,7 @@ ALLOWED_HOSTS=localhost,127.0.0.1
 GOOGLE_CLIENT_ID=your-google-client-id
 GOOGLE_CLIENT_SECRET=your-google-client-secret
 ADMIN_URL=your-admin-url
+DEEPL_API_KEY=your-deepl-api-key
 ```
 
 ## 라이선스
