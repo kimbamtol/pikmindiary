@@ -63,13 +63,16 @@ def call_deepl_api(text, source_lang, target_lang):
     try:
         response = requests.post(
             api_url,
-            data={
-                'auth_key': api_key,
-                'text': text,
+            headers={
+                'Authorization': f'DeepL-Auth-Key {api_key}',
+                'Content-Type': 'application/json',
+            },
+            json={
+                'text': [text],
                 'source_lang': DEEPL_LANG_MAP.get(source_lang, source_lang.upper()),
                 'target_lang': DEEPL_LANG_MAP.get(target_lang, target_lang.upper()),
             },
-            timeout=10,
+            timeout=30,
         )
         response.raise_for_status()
         result = response.json()

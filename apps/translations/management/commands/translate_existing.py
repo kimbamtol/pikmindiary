@@ -5,6 +5,8 @@
     python manage.py translate_existing --model comments.Comment --fields content --batch 50
     python manage.py translate_existing --model farming.FarmingJournal --fields title,content --batch 50
 """
+import time
+
 from django.core.management.base import BaseCommand
 from django.apps import apps
 from django.contrib.contenttypes.models import ContentType
@@ -64,6 +66,7 @@ class Command(BaseCommand):
                 translate_on_create(obj, fields)
                 translated += 1
                 self.stdout.write(f"  [{translated}/{min(total, batch_size)}] {obj} 번역 완료")
+                time.sleep(0.5)  # API 속도 제한 방지
             except Exception as e:
                 self.stderr.write(f"  오류: {obj} - {e}")
 
