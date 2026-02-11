@@ -1,0 +1,215 @@
+{% extends 'base.html' %}
+
+{% block title %}사용자 관리 - 관리자{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="admin-page">
+        <div class="page-header">
+            <a href="{% url 'admin_panel:dashboard' %}" class="back-link">← 대시보드</a>
+            <h1 class="page-title">👥 사용자 관리</h1>
+        </div>
+
+        <div class="notice-box">
+            <p>⚠️ 이 페이지는 <strong>슈퍼관리자</strong>만 접근할 수 있습니다.</p>
+            <p>일반 관리자는 좌표 승인과 신고 처리만 가능합니다.</p>
+        </div>
+
+        <!-- 검색 -->
+        <form method="get" class="search-form">
+            <input type="text" name="q" value="{{ query }}" placeholder="닉네임 또는 이메일 검색..." class="form-control">
+            <button type="submit" class="btn btn-primary">🔍</button>
+        </form>
+
+        {% if page_obj %}
+        <div class="user-list">
+            {% for user in page_obj %}
+            <div class="user-item card">
+                <div class="user-avatar">
+                    {% if user.profile_image %}
+                    <img src="{{ user.profile_image.url }}" alt="{{ user.nickname }}">
+                    {% else %}
+                    <div class="avatar-placeholder">{{ user.nickname|slice:":1" }}</div>
+                    {% endif %}
+                </div>
+                <div class="user-info">
+                    <div class="user-name">
+                        {{ user.nickname }}
+                        {% if user.is_superuser %}
+                        <span class="badge badge-danger">슈퍼관리자</span>
+                        {% elif user.is_staff %}
+                        <span class="badge badge-success">관리자</span>
+                        {% endif %}
+                    </div>
+                    <div class="user-email">{{ user.email }}</div>
+                    <div class="user-meta">
+                        가입일: {{ user.date_joined|date:"Y.m.d" }} ·
+                        작성글: {{ user.total_posts }}
+                    </div>
+                </div>
+                <div class="user-actions">
+                    {% if user.is_superuser %}
+                    <span class="action-disabled">변경 불가</span>
+                    {% elif user == request.user %}
+                    <span class="action-disabled">본인</span>
+                    {% else %}
+                    <form action="{% url 'admin_panel:toggle_staff' pk=user.pk %}" method="post">
+                        {% csrf_token %}
+                        {% if user.is_staff %}
+                        <button type="submit" class="btn btn-outline btn-sm">관리자 해제</button>
+                        {% else %}
+                        <button type="submit" class="btn btn-primary btn-sm">관리자 지정</button>
+                        {% endif %}
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% if page_obj.has_other_pages %}
+        <nav class="pagination">
+            {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}&q={{ query }}">← 이전</a>
+            {% endif %}
+            <span>{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+            {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}&q={{ query }}">다음 →</a>
+            {% endif %}
+        </nav>
+        {% endif %}
+
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">👥</div>
+            <h2 class="empty-state-title">사용자가 없습니다</h2>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    .admin-page {
+        max-width: 900px;
+        margin: var(--spacing-xl) auto;
+    }
+
+    .page-header {
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .back-link {
+        display: inline-block;
+        margin-bottom: var(--spacing-md);
+        color: var(--text-secondary);
+    }
+
+    .notice-box {
+        padding: var(--spacing-md);
+        background: #FFF3E0;
+        border-radius: var(--radius-md);
+        margin-bottom: var(--spacing-lg);
+        color: #E65100;
+    }
+
+    .notice-box p {
+        margin: 0;
+    }
+
+    .search-form {
+        display: flex;
+        gap: var(--spacing-sm);
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .search-form .form-control {
+        flex: 1;
+    }
+
+    .user-list {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-md);
+    }
+
+    .user-item {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-md);
+        padding: var(--spacing-md);
+    }
+
+    .user-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        overflow: hidden;
+        flex-shrink: 0;
+    }
+
+    .user-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .avatar-placeholder {
+        width: 100%;
+        height: 100%;
+        background: var(--primary);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 1.2rem;
+    }
+
+    .user-info {
+        flex: 1;
+    }
+
+    .user-name {
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+    }
+
+    .user-email {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+    }
+
+    .user-meta {
+        font-size: 0.85rem;
+        color: var(--text-light);
+    }
+
+    .action-disabled {
+        font-size: 0.85rem;
+        color: var(--text-light);
+    }
+
+    .btn-sm {
+        padding: var(--spacing-xs) var(--spacing-md);
+        font-size: 0.85rem;
+    }
+
+    .badge-danger {
+        background: #F44336;
+        color: white;
+    }
+
+    @media (max-width: 600px) {
+        .user-item {
+            flex-wrap: wrap;
+        }
+
+        .user-actions {
+            width: 100%;
+            margin-top: var(--spacing-sm);
+        }
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+
+{% block title %}승인 대기 목록 - 관리자{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="admin-page">
+        <div class="page-header">
+            <a href="{% url 'admin_panel:dashboard' %}" class="back-link">← 대시보드</a>
+            <h1 class="page-title">⏳ 승인 대기 목록</h1>
+        </div>
+
+        {% if page_obj %}
+        <div class="item-list">
+            {% for item in page_obj %}
+            <div class="pending-item card">
+                <div class="item-preview">
+                    {% if item.images.first %}
+                    <img src="{{ item.images.first.image.url }}" alt="{{ item.title }}">
+                    {% else %}
+                    <div class="no-image">🗺️</div>
+                    {% endif %}
+                </div>
+                <div class="item-content">
+                    <h3>{{ item.title }}</h3>
+                    <div class="item-meta">
+                        <span class="badge badge-primary">{{ item.get_category_display }}</span>
+                        <span>{{ item.author.nickname|default:"익명" }}</span>
+                        <span>{{ item.created_at|date:"Y.m.d H:i" }}</span>
+                    </div>
+                    <p class="item-coords">📍 {{ item.latitude }}, {{ item.longitude }}</p>
+                    {% if item.description %}
+                    <p class="item-desc">{{ item.description|truncatewords:30 }}</p>
+                    {% endif %}
+                </div>
+                <div class="item-actions">
+                    <form action="{% url 'admin_panel:approve' pk=item.pk %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-success">✓ 승인</button>
+                    </form>
+                    <form action="{% url 'admin_panel:reject' pk=item.pk %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">✗ 거절</button>
+                    </form>
+                    <a href="{% url 'coordinates:detail' pk=item.pk %}" class="btn btn-outline">상세 보기</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% if page_obj.has_other_pages %}
+        <nav class="pagination">
+            {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}">← 이전</a>
+            {% endif %}
+            <span>{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+            {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}">다음 →</a>
+            {% endif %}
+        </nav>
+        {% endif %}
+
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">✅</div>
+            <h2 class="empty-state-title">모든 글이 처리되었습니다</h2>
+            <p class="empty-state-desc">승인 대기 중인 글이 없습니다.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    .admin-page {
+        max-width: 900px;
+        margin: var(--spacing-xl) auto;
+    }
+
+    .page-header {
+        margin-bottom: var(--spacing-xl);
+    }
+
+    .back-link {
+        display: inline-block;
+        margin-bottom: var(--spacing-md);
+        color: var(--text-secondary);
+    }
+
+    .item-list {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-lg);
+    }
+
+    .pending-item {
+        display: grid;
+        grid-template-columns: 150px 1fr auto;
+        gap: var(--spacing-lg);
+        padding: var(--spacing-lg);
+    }
+
+    .item-preview {
+        width: 150px;
+        height: 100px;
+        border-radius: var(--radius-md);
+        overflow: hidden;
+        background: var(--bg-tertiary);
+    }
+
+    .item-preview img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .no-image {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+    }
+
+    .item-content h3 {
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .item-meta {
+        display: flex;
+        gap: var(--spacing-md);
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .item-coords {
+        font-family: monospace;
+        font-size: 0.9rem;
+        color: var(--primary);
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .item-desc {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+    }
+
+    .item-actions {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-sm);
+    }
+
+    .btn-success {
+        background: #4CAF50;
+        color: white;
+    }
+
+    .btn-danger {
+        background: #F44336;
+        color: white;
+    }
+
+    @media (max-width: 768px) {
+        .pending-item {
+            grid-template-columns: 1fr;
+        }
+
+        .item-preview {
+            width: 100%;
+            height: 150px;
+        }
+
+        .item-actions {
+            flex-direction: row;
+            flex-wrap: wrap;
+        }
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,1285 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ coordinate.title }} - 피크민 다이어리{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="detail-page">
+        <!-- 뒤로가기 -->
+        <a href="{% url 'coordinates:list' %}" class="back-link">← 목록으로</a>
+
+        <!-- 메인 카드 -->
+        <div class="detail-card">
+            <!-- 이미지 갤러리 -->
+            <div class="detail-images">
+                {% if images %}
+                <div class="image-main">
+                    <img src="{{ images.0.image.url }}" alt="{{ coordinate.title }}" id="mainImage">
+                </div>
+                {% if images.count > 1 %}
+                <div class="image-thumbs">
+                    {% for img in images %}
+                    <img src="{{ img.image.url }}" alt="썸네일 {{ forloop.counter }}"
+                        onclick="document.getElementById('mainImage').src='{{ img.image.url }}'"
+                        class="{% if forloop.first %}active{% endif %}">
+                    {% endfor %}
+                </div>
+                {% endif %}
+                {% else %}
+                <div class="image-placeholder">🗺️ 이미지 없음</div>
+                {% endif %}
+            </div>
+
+            <!-- 정보 -->
+            <div class="detail-info">
+                <div class="detail-header">
+                    <span class="badge badge-primary">{{ coordinate.get_category_display }}</span>
+                    {% if coordinate.status == 'PENDING' %}
+                    <span class="badge badge-pending">승인 대기</span>
+                    {% endif %}
+                    {% if coordinate.is_outdated %}
+                    <span class="badge badge-warning">오래됨</span>
+                    {% endif %}
+                </div>
+
+                <h1 class="detail-title">{{ coordinate.title }}</h1>
+
+                <div class="detail-meta">
+                    <span>작성자: {% if coordinate.author %}<a href="{% url 'accounts:user_profile' user_id=coordinate.author.pk %}" class="author-link"><strong>{{ coordinate.author.nickname }}</strong></a>{% else %}<strong>익명</strong>{% endif %}</span>
+                    <span>{{ coordinate.created_at|date:"Y.m.d H:i" }}</span>
+                </div>
+
+                <!-- 좌표 -->
+                <div class="coords-box">
+                    <div class="coords-value">
+                        <span class="coords-label">📍 좌표</span>
+                        <code id="coordsText">{{ coordinate.latitude }}, {{ coordinate.longitude }}</code>
+                    </div>
+                    <button class="btn btn-primary" onclick="copyCoords({{ coordinate.pk }})">
+                        📋 복사
+                    </button>
+                </div>
+
+                <!-- 설명 -->
+                {% if coordinate.description %}
+                <div class="detail-description">
+                    <h3>설명</h3>
+                    <p>{{ coordinate.description|linebreaks }}</p>
+                </div>
+                {% endif %}
+
+                <!-- 상호작용 버튼 -->
+                <div class="interaction-buttons">
+                    {% if user.is_authenticated and user == coordinate.author %}
+                    <!-- 본인 글 -->
+                    <span class="btn-interaction disabled">🤍 {{ coordinate.like_count }}</span>
+                    <button class="btn-interaction {% if user_bookmarked %}active{% endif %}"
+                        onclick="toggleBookmark({{ coordinate.pk }}, this)">
+                        <span class="bookmark-icon">{% if user_bookmarked %}⭐{% else %}☆{% endif %}</span>
+                        <span>북마크</span>
+                    </button>
+                    {% else %}
+                    <!-- 다른 사람 글 (비회원 포함) -->
+                    <button class="btn-interaction {% if user_liked %}active{% endif %}"
+                        onclick="toggleLike({{ coordinate.pk }}, this)">
+                        <span class="like-icon">{% if user_liked %}❤️{% else %}🤍{% endif %}</span>
+                        <span class="like-count">{{ coordinate.like_count }}</span>
+                    </button>
+                    {% if user.is_authenticated %}
+                    <button class="btn-interaction {% if user_bookmarked %}active{% endif %}"
+                        onclick="toggleBookmark({{ coordinate.pk }}, this)">
+                        <span class="bookmark-icon">{% if user_bookmarked %}⭐{% else %}☆{% endif %}</span>
+                        <span>북마크</span>
+                    </button>
+                    {% endif %}
+                    {% endif %}
+
+                    <a href="{% url 'reports:report_coordinate' coordinate_id=coordinate.pk %}"
+                        class="btn-interaction btn-report">
+                        🚨 신고
+                    </a>
+                </div>
+
+                <!-- 유효성 평가 -->
+                <div class="validity-section">
+                    <h3>📊 유효성 평가</h3>
+                    <p>이 좌표가 지금도 유효한가요?</p>
+
+                    {% if user.is_authenticated and user == coordinate.author %}
+                    <!-- 본인 글 - 평가 불가 -->
+                    <div class="validity-display">
+                        <span class="validity-stat valid">✅ {{ coordinate.valid_count }}</span>
+                        <span class="validity-stat invalid">❌ {{ coordinate.invalid_count }}</span>
+                    </div>
+                    <p class="owner-notice">본인 글은 평가할 수 없습니다.</p>
+                    {% else %}
+                    <!-- 다른 사람 글 (비회원 포함) -->
+                    {% if can_submit_validity %}
+                    <div class="validity-buttons">
+                        <button class="btn-validity validity-valid {% if user_validity == 'VALID' %}active{% endif %}"
+                            onclick="submitValidity({{ coordinate.pk }}, 'VALID', this)">
+                            ✅ 지금도 됨 (<span class="valid-count">{{ coordinate.valid_count }}</span>)
+                        </button>
+                        <button
+                            class="btn-validity validity-invalid {% if user_validity == 'INVALID' %}active{% endif %}"
+                            onclick="submitValidity({{ coordinate.pk }}, 'INVALID', this)">
+                            ❌ 이제 안 됨 (<span class="invalid-count">{{ coordinate.invalid_count }}</span>)
+                        </button>
+                    </div>
+                    {% else %}
+                    <!-- 1개월 미만 - 평가 불가 -->
+                    <div class="validity-display">
+                        <span class="validity-stat valid">✅ {{ coordinate.valid_count }}</span>
+                        <span class="validity-stat invalid">❌ {{ coordinate.invalid_count }}</span>
+                    </div>
+                    <div class="validity-buttons">
+                        <button class="btn-validity validity-valid disabled" disabled
+                            title="작성 후 1개월이 지난 게시글만 평가할 수 있습니다.">
+                            ✅ 지금도 됨 ({{ coordinate.valid_count }})
+                        </button>
+                        <button class="btn-validity validity-invalid disabled" disabled
+                            title="작성 후 1개월이 지난 게시글만 평가할 수 있습니다.">
+                            ❌ 이제 안 됨 ({{ coordinate.invalid_count }})
+                        </button>
+                    </div>
+                    <p class="validity-notice">⏰ 작성 후 1개월이 지난 게시글만 평가할 수 있습니다. ({{ days_until_validity }}일 후 활성화)</p>
+                    {% endif %}
+                    {% endif %}
+
+                    {% if coordinate.last_verified_at %}
+                    <p class="last-verified">
+                        마지막 검증: {{ coordinate.last_verified_at|date:"Y.m.d H:i" }}
+                    </p>
+                    {% endif %}
+                </div>
+
+                <!-- 수정/삭제 버튼 (작성자, 관리자, 또는 비회원 글) -->
+                {% if user.is_authenticated and user == coordinate.author or user.is_staff or coordinate.guest_password %}
+                <div class="owner-actions">
+                    <a href="{% url 'coordinates:edit' pk=coordinate.pk %}" class="btn btn-outline">수정</a>
+                    <a href="{% url 'coordinates:delete' pk=coordinate.pk %}" class="btn btn-danger-text">삭제</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- 댓글 섹션 -->
+        <div class="comments-section">
+            <h2>💬 댓글 ({{ coordinate.comment_count }})</h2>
+
+            <!-- 댓글 작성 -->
+            <form action="{% url 'comments:create' coordinate_id=coordinate.pk %}" method="post" enctype="multipart/form-data" class="comment-form">
+                {% csrf_token %}
+
+                {% if not user.is_authenticated %}
+                <div class="guest-fields">
+                    <input type="text" name="guest_nickname" placeholder="닉네임" class="form-control" required>
+                    <input type="password" name="guest_password" placeholder="비밀번호 (수정/삭제용)" class="form-control"
+                        required>
+                </div>
+                {% endif %}
+
+                <div class="comment-input">
+                    <textarea name="content" placeholder="댓글을 입력하세요... (사진만 올릴 경우 비워둬도 됩니다)" class="form-control"></textarea>
+                    <button type="submit" class="btn btn-primary">등록</button>
+                </div>
+
+                <!-- 사진 첨부 -->
+                <div class="photo-upload-section">
+                    <label for="photo-input" class="photo-upload-btn">
+                        📷 엽서 사진 첨부 (선택)
+                    </label>
+                    <input
+                        type="file"
+                        id="photo-input"
+                        name="photo"
+                        accept="image/jpeg,image/png,image/webp"
+                        style="display: none;"
+                        onchange="previewPhoto(this)"
+                    >
+
+                    <!-- 미리보기 -->
+                    <div id="photo-preview" style="display: none;">
+                        <img id="preview-image" src="" alt="미리보기">
+                        <button type="button" id="remove-photo" onclick="removePhoto()">✕ 제거</button>
+                    </div>
+                </div>
+            </form>
+
+            <!-- 댓글 정렬 -->
+            <div class="comment-sort">
+                <a href="?sort=likes" class="sort-option {% if comment_sort == 'likes' %}active{% endif %}">❤️ 좋아요순</a>
+                <a href="?sort=newest" class="sort-option {% if comment_sort == 'newest' %}active{% endif %}">🆕 최신순</a>
+                <a href="?sort=oldest" class="sort-option {% if comment_sort == 'oldest' %}active{% endif %}">🕐 오래된순</a>
+            </div>
+
+            <!-- 댓글 목록 -->
+            <div class="comment-list" id="commentList">
+                {% for comment in comments %}
+                <div class="comment {% if comment.is_deleted %}deleted{% endif %} {% if comment.has_photo %}comment-with-photo{% endif %}">
+                    <div class="comment-header">
+                        {% if comment.author %}
+                        <a href="{% url 'accounts:user_profile' user_id=comment.author.pk %}" class="author-badge {{ comment.author.get_badge_class }}">
+                            {% if comment.author.profile_emoji %}
+                            <span class="profile-emoji">{{ comment.author.profile_emoji }}</span>
+                            {% endif %}
+                            <span class="author-name"><strong>{{ comment.author.nickname }}</strong></span>
+                            {% if comment.author.special_title %}
+                            <span class="special-title-tag">{{ comment.author.get_special_title_display }}</span>
+                            {% endif %}
+                        </a>
+                        {% else %}
+                        <strong>{{ comment.display_name }}</strong>
+                        {% endif %}
+                        <span class="comment-date">{{ comment.created_at|date:"m/d H:i" }}</span>
+                    </div>
+                    <div class="comment-content">
+                        {% if comment.content %}
+                            {{ comment.content|linebreaks }}
+                        {% endif %}
+
+                        {% if comment.has_photo %}
+                        <div class="comment-photo">
+                            <img
+                                src="{{ comment.photo.url }}"
+                                alt="댓글 사진"
+                                class="photo-thumbnail"
+                                onclick="openPhotoModal('{{ comment.photo.url }}')"
+                                loading="lazy"
+                            >
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    {% if not comment.is_deleted %}
+                    <div class="comment-actions">
+                        <!-- 좋아요 버튼 -->
+                        <button
+                            class="btn-text comment-like-btn {% if comment.pk in user_liked_comments %}liked{% endif %}"
+                            onclick="toggleCommentLike({{ comment.pk }})"
+                            data-comment-id="{{ comment.pk }}"
+                            {% if user == comment.author %}disabled title="본인 댓글에는 좋아요를 누를 수 없습니다"{% endif %}
+                        >
+                            <span class="like-icon">{% if comment.pk in user_liked_comments %}❤️{% else %}🤍{% endif %}</span>
+                            <span class="like-count">{{ comment.like_count }}</span>
+                        </button>
+
+                        <!-- 답글 버튼 (비회원도 가능) -->
+                        <button class="btn-text reply-btn" onclick="toggleReplyForm({{ comment.pk }})">답글</button>
+
+                        {% if user == comment.author or user.is_staff %}
+                        <!-- 로그인 사용자: 바로 삭제 가능 -->
+                        <form action="{% url 'comments:delete' pk=comment.pk %}" method="post" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-text" onclick="return confirm('삭제하시겠습니까?')">삭제</button>
+                        </form>
+                        {% elif comment.guest_password %}
+                        <!-- 비회원 댓글: 비밀번호 입력 후 삭제 -->
+                        <button class="btn-text" onclick="toggleDeleteForm({{ comment.pk }})">삭제</button>
+                        <form action="{% url 'comments:delete' pk=comment.pk %}" method="post"
+                            class="delete-form hidden" id="deleteForm{{ comment.pk }}">
+                            {% csrf_token %}
+                            <div class="delete-password-input">
+                                <input type="password" name="password" placeholder="비밀번호" class="form-control" required>
+                                <button type="submit" class="btn btn-sm">확인</button>
+                            </div>
+                        </form>
+                        {% endif %}
+                    </div>
+
+                    <!-- 답글 폼 -->
+                    <form action="{% url 'comments:reply' pk=comment.pk %}" method="post" enctype="multipart/form-data" class="reply-form hidden"
+                        id="replyForm{{ comment.pk }}">
+                        {% csrf_token %}
+                        {% if not user.is_authenticated %}
+                        <div class="guest-fields">
+                            <input type="text" name="guest_nickname" placeholder="닉네임" class="form-control" required>
+                            <input type="password" name="guest_password" placeholder="비밀번호" class="form-control"
+                                required>
+                        </div>
+                        {% endif %}
+                        <div class="comment-input">
+                            <textarea name="content" placeholder="답글을 입력하세요... (사진만 올릴 경우 비워둬도 됩니다)" class="form-control"></textarea>
+                            <button type="submit" class="btn btn-primary btn-sm">등록</button>
+                        </div>
+
+                        <!-- 사진 첨부 -->
+                        <div class="photo-upload-section">
+                            <label for="photo-input-reply-{{ comment.pk }}" class="photo-upload-btn">
+                                📷 엽서 사진 첨부 (선택)
+                            </label>
+                            <input
+                                type="file"
+                                id="photo-input-reply-{{ comment.pk }}"
+                                name="photo"
+                                accept="image/jpeg,image/png,image/webp"
+                                style="display: none;"
+                                onchange="previewReplyPhoto(this, {{ comment.pk }})"
+                            >
+
+                            <!-- 미리보기 -->
+                            <div id="photo-preview-reply-{{ comment.pk }}" style="display: none;">
+                                <img id="preview-image-reply-{{ comment.pk }}" src="" alt="미리보기">
+                                <button type="button" onclick="removeReplyPhoto({{ comment.pk }})">✕ 제거</button>
+                            </div>
+                        </div>
+                    </form>
+                    {% endif %}
+
+                    <!-- 대댓글 -->
+                    {% for reply in comment.replies.all %}
+                    {% if not reply.is_deleted or reply.is_deleted %}
+                    <div class="comment reply {% if reply.has_photo %}comment-with-photo{% endif %}">
+                        <div class="comment-header">
+                            {% if reply.author %}
+                            <a href="{% url 'accounts:user_profile' user_id=reply.author.pk %}" class="author-badge {{ reply.author.get_badge_class }}">
+                                {% if reply.author.profile_emoji %}
+                                <span class="profile-emoji">{{ reply.author.profile_emoji }}</span>
+                                {% endif %}
+                                <span class="author-name"><strong>{{ reply.author.nickname }}</strong></span>
+                                {% if reply.author.special_title %}
+                                <span class="special-title-tag">{{ reply.author.get_special_title_display }}</span>
+                                {% endif %}
+                            </a>
+                            {% else %}
+                            <strong>{{ reply.display_name }}</strong>
+                            {% endif %}
+                            <span class="comment-date">{{ reply.created_at|date:"m/d H:i" }}</span>
+                        </div>
+                        <div class="comment-content">
+                            {% if reply.content %}
+                                {{ reply.content|linebreaks }}
+                            {% endif %}
+
+                            {% if reply.has_photo %}
+                            <div class="comment-photo">
+                                <img
+                                    src="{{ reply.photo.url }}"
+                                    alt="댓글 사진"
+                                    class="photo-thumbnail"
+                                    onclick="openPhotoModal('{{ reply.photo.url }}')"
+                                    loading="lazy"
+                                >
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        {% if not reply.is_deleted %}
+                        <div class="comment-actions">
+                            <!-- 좋아요 버튼 -->
+                            <button
+                                class="btn-text comment-like-btn {% if reply.pk in user_liked_comments %}liked{% endif %}"
+                                onclick="toggleCommentLike({{ reply.pk }})"
+                                data-comment-id="{{ reply.pk }}"
+                                {% if user == reply.author %}disabled title="본인 댓글에는 좋아요를 누를 수 없습니다"{% endif %}
+                            >
+                                <span class="like-icon">{% if reply.pk in user_liked_comments %}❤️{% else %}🤍{% endif %}</span>
+                                <span class="like-count">{{ reply.like_count }}</span>
+                            </button>
+
+                            {% if user == reply.author or user.is_staff %}
+                            <!-- 로그인 사용자: 바로 삭제 가능 -->
+                            <form action="{% url 'comments:delete' pk=reply.pk %}" method="post" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn-text" onclick="return confirm('삭제하시겠습니까?')">삭제</button>
+                            </form>
+                            {% elif reply.guest_password %}
+                            <!-- 비회원 댓글: 비밀번호 입력 후 삭제 -->
+                            <button class="btn-text" onclick="toggleDeleteForm({{ reply.pk }})">삭제</button>
+                            <form action="{% url 'comments:delete' pk=reply.pk %}" method="post"
+                                class="delete-form hidden" id="deleteForm{{ reply.pk }}">
+                                {% csrf_token %}
+                                <div class="delete-password-input">
+                                    <input type="password" name="password" placeholder="비밀번호" class="form-control" required>
+                                    <button type="submit" class="btn btn-sm">확인</button>
+                                </div>
+                            </form>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+                {% empty %}
+                <p class="no-comments">아직 댓글이 없습니다. 첫 댓글을 남겨보세요!</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .detail-page {
+        max-width: 900px;
+        margin: var(--spacing-xl) auto;
+    }
+
+    .back-link {
+        display: inline-block;
+        margin-bottom: var(--spacing-md);
+        color: var(--text-secondary);
+    }
+
+    .detail-card {
+        background: var(--bg-primary);
+        border-radius: var(--radius-xl);
+        overflow: hidden;
+        box-shadow: var(--shadow-md);
+    }
+
+    .detail-images {
+        background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-secondary) 100%);
+    }
+
+    .image-main {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 200px;
+        max-height: 70vh;
+        overflow: hidden;
+    }
+
+    .image-main img {
+        max-width: 100%;
+        max-height: 70vh;
+        width: auto;
+        height: auto;
+        object-fit: contain;
+        border-radius: var(--radius-md);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .image-thumbs {
+        display: flex;
+        gap: var(--spacing-sm);
+        padding: var(--spacing-sm);
+        overflow-x: auto;
+    }
+
+    .image-thumbs img {
+        width: 80px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        opacity: 0.6;
+        transition: opacity var(--transition-fast);
+    }
+
+    .image-thumbs img:hover,
+    .image-thumbs img.active {
+        opacity: 1;
+    }
+
+    .image-placeholder {
+        aspect-ratio: 16/9;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        color: var(--text-light);
+    }
+
+    .detail-info {
+        padding: var(--spacing-xl);
+    }
+
+    .detail-header {
+        display: flex;
+        gap: var(--spacing-sm);
+        margin-bottom: var(--spacing-md);
+    }
+
+    .detail-title {
+        font-size: 1.8rem;
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .detail-meta {
+        display: flex;
+        gap: var(--spacing-lg);
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .coords-box {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--spacing-md);
+        padding: var(--spacing-md);
+        background: var(--bg-secondary);
+        border-radius: var(--radius-md);
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .coords-label {
+        display: block;
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin-bottom: var(--spacing-xs);
+    }
+
+    .coords-value code {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--primary);
+    }
+
+    .detail-description {
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .detail-description h3 {
+        font-size: 1rem;
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .detail-description p {
+        color: var(--text-secondary);
+        line-height: 1.8;
+    }
+
+    .interaction-buttons {
+        display: flex;
+        gap: var(--spacing-md);
+        margin-bottom: var(--spacing-lg);
+        flex-wrap: wrap;
+    }
+
+    .btn-interaction {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+        padding: var(--spacing-sm) var(--spacing-md);
+        border: 2px solid var(--bg-tertiary);
+        border-radius: var(--radius-full);
+        background: var(--bg-primary);
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all var(--transition-fast);
+    }
+
+    .btn-interaction:hover {
+        border-color: var(--primary);
+    }
+
+    .btn-interaction.active {
+        border-color: var(--primary);
+        background: var(--primary-light);
+    }
+
+    .btn-report {
+        color: var(--text-secondary);
+    }
+
+    .login-notice {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+    }
+
+    .validity-section {
+        padding: var(--spacing-lg);
+        background: var(--bg-secondary);
+        border-radius: var(--radius-lg);
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .validity-section h3 {
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .validity-section>p {
+        color: var(--text-secondary);
+        margin-bottom: var(--spacing-md);
+    }
+
+    .validity-buttons {
+        display: flex;
+        gap: var(--spacing-md);
+        flex-wrap: wrap;
+    }
+
+    .btn-validity {
+        flex: 1;
+        min-width: 150px;
+        padding: var(--spacing-md);
+        border: 2px solid var(--bg-tertiary);
+        border-radius: var(--radius-md);
+        background: var(--bg-primary);
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all var(--transition-fast);
+    }
+
+    .btn-validity:hover {
+        transform: translateY(-2px);
+    }
+
+    .validity-valid:hover,
+    .validity-valid.active {
+        border-color: #4CAF50;
+        background: #E8F5E9;
+        color: #2E7D32;
+    }
+
+    .validity-invalid:hover,
+    .validity-invalid.active {
+        border-color: #F44336;
+        background: #FFEBEE;
+        color: #C62828;
+    }
+
+    .validity-display {
+        display: flex;
+        gap: var(--spacing-lg);
+        margin-bottom: var(--spacing-md);
+    }
+
+    .validity-stat {
+        font-size: 1.2rem;
+        font-weight: 600;
+    }
+
+    .last-verified {
+        font-size: 0.85rem;
+        color: var(--text-light);
+        margin-top: var(--spacing-md);
+    }
+
+    .btn-validity.disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        background: var(--bg-tertiary);
+    }
+
+    .btn-validity.disabled:hover {
+        transform: none;
+    }
+
+    .validity-notice {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin-top: var(--spacing-md);
+        padding: var(--spacing-sm) var(--spacing-md);
+        background: var(--bg-tertiary);
+        border-radius: var(--radius-sm);
+    }
+
+    .owner-actions {
+        display: flex;
+        gap: var(--spacing-sm);
+        padding-top: var(--spacing-lg);
+        border-top: 1px solid var(--bg-tertiary);
+    }
+
+    /* 댓글 */
+    .comments-section {
+        margin-top: var(--spacing-xl);
+        padding: var(--spacing-xl);
+        background: var(--bg-primary);
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .comments-section h2 {
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .comment-form {
+        margin-bottom: var(--spacing-xl);
+    }
+
+    .guest-fields {
+        display: flex;
+        gap: var(--spacing-sm);
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .comment-input {
+        display: flex;
+        gap: var(--spacing-sm);
+    }
+
+    .comment-input textarea {
+        flex: 1;
+        min-height: 80px;
+    }
+
+    .comment {
+        padding: var(--spacing-md);
+        border-bottom: 1px solid var(--bg-tertiary);
+    }
+
+    .comment.reply {
+        margin-left: var(--spacing-xl);
+        background: var(--bg-secondary);
+        border-radius: var(--radius-md);
+        border: none;
+        margin-top: var(--spacing-sm);
+    }
+
+    .comment.deleted {
+        opacity: 0.5;
+    }
+
+    .comment-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .author-link {
+        color: var(--text-primary);
+    }
+
+    .author-link:hover {
+        color: var(--primary);
+    }
+
+    a.author-badge {
+        text-decoration: none;
+        color: inherit;
+    }
+
+    a.author-badge:hover {
+        opacity: 0.8;
+    }
+
+    .comment-date {
+        font-size: 0.85rem;
+        color: var(--text-light);
+    }
+
+    .comment-content {
+        color: var(--text-secondary);
+        line-height: 1.6;
+    }
+
+    .comment-sort {
+        display: flex;
+        gap: var(--spacing-sm);
+        margin-bottom: var(--spacing-md);
+        padding: var(--spacing-sm);
+        background: var(--bg-secondary);
+        border-radius: var(--radius-md);
+    }
+
+    .sort-option {
+        padding: var(--spacing-xs) var(--spacing-md);
+        border-radius: var(--radius-sm);
+        text-decoration: none;
+        color: var(--text-secondary);
+        transition: all 0.2s;
+        cursor: pointer;
+    }
+
+    .sort-option:hover {
+        background: var(--bg-hover);
+        color: var(--text-primary);
+    }
+
+    .sort-option.active {
+        background: var(--primary);
+        color: white;
+        font-weight: bold;
+    }
+
+    .comment-actions {
+        margin-top: var(--spacing-sm);
+        display: flex;
+        gap: var(--spacing-sm);
+        align-items: center;
+    }
+
+    .comment-like-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 4px 8px;
+        border: none;
+        background: transparent;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .comment-like-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .comment-like-btn.liked .like-icon {
+        animation: heartbeat 0.3s ease;
+    }
+
+    @keyframes heartbeat {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.3); }
+    }
+
+    .reply-form {
+        margin-top: var(--spacing-md);
+        padding: var(--spacing-md);
+        background: var(--bg-secondary);
+        border-radius: var(--radius-md);
+    }
+
+    .reply-form.hidden {
+        display: none;
+    }
+
+    .no-comments {
+        text-align: center;
+        color: var(--text-light);
+        padding: var(--spacing-xl);
+    }
+
+    @media (max-width: 480px) {
+        .detail-info {
+            padding: var(--spacing-md);
+        }
+
+        .coords-box {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .validity-buttons {
+            flex-direction: column;
+        }
+
+        .guest-fields {
+            flex-direction: column;
+        }
+
+        .comment-input {
+            flex-direction: column;
+        }
+    }
+
+    /* 사진 댓글 스타일 */
+    .comment-with-photo {
+        border-left: 3px solid #4CAF50;
+    }
+
+    .comment-photo {
+        margin-top: var(--spacing-sm);
+    }
+
+    .photo-thumbnail {
+        max-width: 300px;
+        max-height: 300px;
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .photo-thumbnail:hover {
+        transform: scale(1.02);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    /* 사진 업로드 섹션 */
+    .photo-upload-section {
+        margin-top: var(--spacing-sm);
+    }
+
+    .photo-upload-btn {
+        display: inline-block;
+        padding: var(--spacing-sm) var(--spacing-md);
+        background: var(--bg-secondary);
+        border: 1px solid var(--bg-tertiary);
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        transition: all 0.2s;
+        font-size: 0.9rem;
+    }
+
+    .photo-upload-btn:hover {
+        background: var(--bg-tertiary);
+        border-color: var(--primary);
+    }
+
+    /* 사진 미리보기 */
+    #photo-preview,
+    [id^="photo-preview-reply-"] {
+        position: relative;
+        margin-top: var(--spacing-sm);
+        display: inline-block;
+    }
+
+    #preview-image,
+    [id^="preview-image-reply-"] {
+        max-width: 200px;
+        max-height: 200px;
+        border-radius: var(--radius-md);
+        border: 2px solid var(--bg-tertiary);
+    }
+
+    #remove-photo,
+    [id^="photo-preview-reply-"] button {
+        position: absolute;
+        top: 4px;
+        right: 4px;
+        background: rgba(0, 0, 0, 0.7);
+        color: white;
+        border: none;
+        border-radius: var(--radius-sm);
+        padding: 4px 8px;
+        cursor: pointer;
+        font-size: 12px;
+    }
+
+    /* 사진 확대 모달 */
+    .photo-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 9999;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .photo-modal.active {
+        display: flex;
+    }
+
+    .modal-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.85);
+    }
+
+    .modal-content {
+        position: relative;
+        max-width: 90%;
+        max-height: 90%;
+        z-index: 10000;
+    }
+
+    .modal-close {
+        position: absolute;
+        top: -40px;
+        right: 0;
+        background: white;
+        border: none;
+        border-radius: 50%;
+        width: 32px;
+        height: 32px;
+        font-size: 20px;
+        cursor: pointer;
+        z-index: 10001;
+    }
+
+    .modal-image {
+        max-width: 100%;
+        max-height: 90vh;
+        border-radius: var(--radius-md);
+    }
+
+    @media (max-width: 768px) {
+        .photo-thumbnail {
+            max-width: 100%;
+        }
+
+        .modal-content {
+            max-width: 95%;
+            max-height: 95%;
+        }
+
+        .modal-image {
+            max-height: 80vh;
+        }
+    }
+</style>
+
+<!-- 사진 확대 모달 -->
+<div id="photoModal" class="photo-modal" onclick="closePhotoModal()">
+    <div class="modal-overlay"></div>
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <button class="modal-close" onclick="closePhotoModal()">✕</button>
+        <img id="modalImage" class="modal-image" src="" alt="사진 확대보기">
+    </div>
+</div>
+
+<script>
+    // 사진 미리보기
+    function previewPhoto(input) {
+        const file = input.files[0];
+        if (!file) return;
+
+        // 파일 크기 검증 (5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            alert('파일 크기는 5MB를 초과할 수 없습니다.');
+            input.value = '';
+            return;
+        }
+
+        // 미리보기 표시
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('preview-image').src = e.target.result;
+            document.getElementById('photo-preview').style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function removePhoto() {
+        document.getElementById('photo-input').value = '';
+        document.getElementById('photo-preview').style.display = 'none';
+    }
+
+    // 답글 사진 미리보기
+    function previewReplyPhoto(input, commentId) {
+        const file = input.files[0];
+        if (!file) return;
+
+        // 파일 크기 검증 (5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            alert('파일 크기는 5MB를 초과할 수 없습니다.');
+            input.value = '';
+            return;
+        }
+
+        // 미리보기 표시
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('preview-image-reply-' + commentId).src = e.target.result;
+            document.getElementById('photo-preview-reply-' + commentId).style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function removeReplyPhoto(commentId) {
+        document.getElementById('photo-input-reply-' + commentId).value = '';
+        document.getElementById('photo-preview-reply-' + commentId).style.display = 'none';
+    }
+
+    // 사진 모달
+    function openPhotoModal(imageUrl) {
+        document.getElementById('modalImage').src = imageUrl;
+        document.getElementById('photoModal').classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closePhotoModal() {
+        document.getElementById('photoModal').classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
+    // ESC 키로 모달 닫기
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closePhotoModal();
+        }
+    });
+
+    function toggleReplyForm(commentId) {
+        const form = document.getElementById('replyForm' + commentId);
+        form.classList.toggle('hidden');
+    }
+
+    function toggleDeleteForm(commentId) {
+        const form = document.getElementById('deleteForm' + commentId);
+        form.classList.toggle('hidden');
+    }
+
+    function toggleCommentLike(commentId) {
+        const btn = document.querySelector(`.comment-like-btn[data-comment-id="${commentId}"]`);
+        if (!btn || btn.disabled) return;
+
+        fetch(`/interactions/comment-like/${commentId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                alert(data.error);
+                return;
+            }
+
+            const likeIcon = btn.querySelector('.like-icon');
+            const likeCount = btn.querySelector('.like-count');
+
+            if (data.liked) {
+                btn.classList.add('liked');
+                likeIcon.textContent = '❤️';
+            } else {
+                btn.classList.remove('liked');
+                likeIcon.textContent = '🤍';
+            }
+
+            likeCount.textContent = data.like_count;
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('좋아요 처리 중 오류가 발생했습니다.');
+        });
+    }
+
+    function copyCoords(pk) {
+        var coordsText = document.getElementById('coordsText');
+        if (!coordsText) return;
+
+        var text = coordsText.textContent.trim();
+        var copyBtn = document.querySelector('.coords-box .btn-primary');
+
+        function showSuccess() {
+            if (copyBtn) {
+                copyBtn.innerHTML = '✅ 복사됨';
+                setTimeout(function () {
+                    copyBtn.innerHTML = '📋 복사';
+                }, 2500);
+            }
+
+            var toast = document.getElementById('copy-toast');
+            if (toast) {
+                toast.classList.add('show');
+                setTimeout(function () {
+                    toast.classList.remove('show');
+                }, 2500);
+            }
+
+            // 복사 카운트 API 호출 (30분 제한 적용)
+            fetch('/coordinates/' + pk + '/copy-coords/')
+                .then(function (r) { return r.json(); })
+                .then(function (d) { console.log('Copy count:', d.copy_count); })
+                .catch(function () { });
+        }
+
+        // iOS/Safari 감지
+        var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+            (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        var isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+
+        if (isIOS || isSafari) {
+            copyTextForiOS(text, showSuccess);
+        } else if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(showSuccess).catch(function () {
+                copyTextFallback(text, showSuccess);
+            });
+        } else {
+            copyTextFallback(text, showSuccess);
+        }
+    }
+
+    function copyTextForiOS(text, callback) {
+        var input = document.createElement('input');
+        input.setAttribute('readonly', 'readonly');
+        input.setAttribute('contenteditable', 'true');
+        input.style.position = 'fixed';
+        input.style.top = '50%';
+        input.style.left = '50%';
+        input.style.opacity = '0';
+        input.style.fontSize = '16px';
+        input.value = text;
+        document.body.appendChild(input);
+
+        input.focus();
+        input.setSelectionRange(0, text.length);
+
+        var success = false;
+        try {
+            success = document.execCommand('copy');
+        } catch (err) {
+            success = false;
+        }
+
+        document.body.removeChild(input);
+
+        if (success) {
+            callback();
+        } else {
+            alert('복사됨: ' + text);
+        }
+    }
+
+    function copyTextFallback(text, callback) {
+        var textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed';
+        textarea.style.left = '-9999px';
+        textarea.style.top = '0';
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+
+        try {
+            document.execCommand('copy');
+            callback();
+        } catch (err) {
+            alert('복사됨: ' + text);
+        }
+
+        document.body.removeChild(textarea);
+    }
+</script>
+
+<div id="copy-toast" class="copy-toast">✅ 복사되었습니다<br><small>좋아요와 댓글은 업로더분에게 큰 힘이 됩니다!</small></div>
+
+<style>
+    .copy-toast {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        z-index: 9999;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        text-align: center;
+        line-height: 1.6;
+    }
+
+    .copy-toast.show {
+        opacity: 1;
+    }
+
+    .copy-toast small {
+        font-size: 0.78rem;
+        opacity: 0.85;
+    }
+
+    .delete-form {
+        margin-top: var(--spacing-sm);
+        padding: var(--spacing-sm);
+        background: var(--bg-secondary);
+        border-radius: var(--radius-sm);
+    }
+
+    .delete-form.hidden {
+        display: none;
+    }
+
+    .delete-password-input {
+        display: flex;
+        gap: var(--spacing-xs);
+        align-items: center;
+    }
+
+    .delete-password-input input {
+        width: 120px;
+        padding: var(--spacing-xs) var(--spacing-sm);
+        font-size: 0.85rem;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,243 @@
+{% extends 'base.html' %}
+
+{% block title %}관리자 대시보드 - 피크민 다이어리{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="admin-page">
+        <h1 class="page-title">🛠️ 관리자 대시보드</h1>
+
+        <!-- 요약 카드 -->
+        <div class="summary-grid">
+            <a href="{% url 'admin_panel:pending_list' %}" class="summary-card card">
+                <span class="summary-icon">⏳</span>
+                <span class="summary-value">{{ pending_count }}</span>
+                <span class="summary-label">승인 대기</span>
+            </a>
+            <a href="{% url 'admin_panel:report_list' %}" class="summary-card card">
+                <span class="summary-icon">🚨</span>
+                <span class="summary-value">{{ report_count }}</span>
+                <span class="summary-label">미처리 신고</span>
+            </a>
+            {% if request.user.is_superuser %}
+            <a href="{% url 'admin_panel:user_list' %}" class="summary-card card superuser-only">
+                <span class="summary-icon">👥</span>
+                <span class="summary-value">관리</span>
+                <span class="summary-label">사용자 관리</span>
+            </a>
+            <a href="{% url 'admin_panel:batch_post_management' %}" class="summary-card card superuser-only">
+                <span class="summary-icon">📋</span>
+                <span class="summary-value">일괄</span>
+                <span class="summary-label">게시글 일괄 관리</span>
+            </a>
+            <a href="{% url 'admin_panel:ban_list' %}" class="summary-card card superuser-only">
+                <span class="summary-icon">🚫</span>
+                <span class="summary-value">정지</span>
+                <span class="summary-label">정지 목록</span>
+            </a>
+            {% endif %}
+        </div>
+
+        <!-- 최근 대기 글 -->
+        <div class="section">
+            <div class="section-header">
+                <h2>⏳ 최근 승인 대기</h2>
+                <a href="{% url 'admin_panel:pending_list' %}" class="view-all">전체 보기 →</a>
+            </div>
+
+            {% if recent_pending %}
+            <div class="item-list">
+                {% for item in recent_pending %}
+                <div class="list-item card">
+                    <div class="item-info">
+                        <strong>{{ item.title }}</strong>
+                        <span class="item-meta">{{ item.author.nickname|default:"익명" }} · {{ item.created_at|date:"m/d
+                            H:i" }}</span>
+                    </div>
+                    <div class="item-actions">
+                        <form action="{% url 'admin_panel:approve' pk=item.pk %}" method="post" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-success">✓ 승인</button>
+                        </form>
+                        <form action="{% url 'admin_panel:reject' pk=item.pk %}" method="post" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-danger">✗ 거절</button>
+                        </form>
+                        <a href="{% url 'coordinates:detail' pk=item.pk %}" class="btn btn-sm btn-outline">보기</a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="no-items">대기 중인 글이 없습니다.</p>
+            {% endif %}
+        </div>
+
+        <!-- 최근 신고 -->
+        <div class="section">
+            <div class="section-header">
+                <h2>🚨 최근 신고</h2>
+                <a href="{% url 'admin_panel:report_list' %}" class="view-all">전체 보기 →</a>
+            </div>
+
+            {% if recent_reports %}
+            <div class="item-list">
+                {% for report in recent_reports %}
+                <div class="list-item card">
+                    <div class="item-info">
+                        <span class="badge badge-warning">{{ report.get_reason_display }}</span>
+                        <strong>
+                            {% if report.coordinate %}
+                            좌표: {{ report.coordinate.title }}
+                            {% else %}
+                            댓글
+                            {% endif %}
+                        </strong>
+                        <span class="item-meta">{{ report.reporter.nickname }} · {{ report.created_at|date:"m/d H:i"
+                            }}</span>
+                    </div>
+                    <div class="item-actions">
+                        <a href="{% url 'admin_panel:resolve_report' pk=report.pk %}"
+                            class="btn btn-sm btn-outline">처리</a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="no-items">미처리 신고가 없습니다.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .admin-page {
+        max-width: 900px;
+        margin: var(--spacing-xl) auto;
+    }
+
+    .page-title {
+        margin-bottom: var(--spacing-xl);
+    }
+
+    .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--spacing-lg);
+        margin-bottom: var(--spacing-xl);
+    }
+
+    .summary-card {
+        text-align: center;
+        padding: var(--spacing-xl);
+        color: var(--text-primary);
+    }
+
+    .summary-card:hover {
+        color: var(--primary);
+    }
+
+    .summary-icon {
+        font-size: 2.5rem;
+        display: block;
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .summary-value {
+        display: block;
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--primary);
+    }
+
+    .summary-label {
+        font-size: 0.95rem;
+        color: var(--text-secondary);
+    }
+
+    .section {
+        margin-bottom: var(--spacing-xl);
+    }
+
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: var(--spacing-md);
+    }
+
+    .section-header h2 {
+        font-size: 1.2rem;
+    }
+
+    .view-all {
+        color: var(--primary);
+        font-size: 0.9rem;
+    }
+
+    .item-list {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-sm);
+    }
+
+    .list-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: var(--spacing-md);
+    }
+
+    .item-info {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-xs);
+    }
+
+    .item-meta {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+    }
+
+    .item-actions {
+        display: flex;
+        gap: var(--spacing-sm);
+    }
+
+    .btn-sm {
+        padding: var(--spacing-xs) var(--spacing-sm);
+        font-size: 0.85rem;
+    }
+
+    .btn-success {
+        background: #4CAF50;
+        color: white;
+    }
+
+    .btn-danger {
+        background: #F44336;
+        color: white;
+    }
+
+    .no-items {
+        text-align: center;
+        color: var(--text-secondary);
+        padding: var(--spacing-lg);
+        background: var(--bg-secondary);
+        border-radius: var(--radius-md);
+    }
+
+    @media (max-width: 600px) {
+        .list-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: var(--spacing-md);
+        }
+
+        .item-actions {
+            width: 100%;
+            justify-content: flex-end;
+        }
+    }
+</style>
+{% endblock %}

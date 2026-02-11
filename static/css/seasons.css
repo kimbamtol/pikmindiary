@@ -1,0 +1,1730 @@
+/* ==============================================
+   계절/날씨 테마 스타일
+   ============================================== */
+
+/* 계절별 색상 팔레트 */
+:root {
+    /* 봄 (Spring) */
+    --spring-primary: #FFB7C5;
+    --spring-secondary: #98D8AA;
+    --spring-bg-start: #FFF0F5;
+    --spring-bg-end: #E8F5E9;
+
+    /* 여름 (Summer) */
+    --summer-primary: #4ECDC4;
+    --summer-secondary: #44CF6C;
+    --summer-bg-start: #E0F7FA;
+    --summer-bg-end: #C8E6C9;
+
+    /* 가을 (Fall) */
+    --fall-primary: #FF8C42;
+    --fall-secondary: #A0522D;
+    --fall-bg-start: #FFF3E0;
+    --fall-bg-end: #FFCCBC;
+
+    /* 겨울 (Winter) */
+    --winter-primary: #B3E5FC;
+    --winter-secondary: #E1F5FE;
+    --winter-bg-start: #E3F2FD;
+    --winter-bg-end: #F5F5F5;
+}
+
+/* ============================================
+   계절별 배경 그라데이션
+   ============================================ */
+body[data-season="spring"] {
+    background: linear-gradient(180deg, var(--spring-bg-start) 0%, var(--spring-bg-end) 100%);
+}
+
+body[data-season="summer"] {
+    background: linear-gradient(180deg, var(--summer-bg-start) 0%, var(--summer-bg-end) 100%);
+}
+
+body[data-season="fall"] {
+    background: linear-gradient(180deg, var(--fall-bg-start) 0%, var(--fall-bg-end) 100%);
+}
+
+body[data-season="winter"] {
+    background: linear-gradient(180deg, var(--winter-bg-start) 0%, var(--winter-bg-end) 100%);
+}
+
+/* ============================================
+   날씨 효과 컨테이너
+   ============================================ */
+.weather-effects {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -1;
+    overflow: hidden;
+}
+
+/* ============================================
+   태양/달 (낮/밤) - CSS로 스타일링
+   ============================================ */
+.sky-object {
+    position: absolute;
+    animation: sky-float 10s ease-in-out infinite;
+    display: none;
+}
+
+/* 태양 - CSS로 그리기 */
+.sun {
+    top: 8%;
+    right: 8%;
+    width: 60px;
+    height: 60px;
+    background: radial-gradient(circle, #FFD93D 0%, #FF9800 100%);
+    border-radius: 50%;
+    box-shadow:
+        0 0 30px rgba(255, 193, 7, 0.6),
+        0 0 60px rgba(255, 152, 0, 0.4),
+        0 0 100px rgba(255, 193, 7, 0.2);
+}
+
+/* 달 - CSS로 그리기 */
+.moon {
+    top: 8%;
+    right: 8%;
+    width: 50px;
+    height: 50px;
+    background: radial-gradient(circle at 30% 30%, #FFFDE7 0%, #FFF9C4 50%, #E0E0E0 100%);
+    border-radius: 50%;
+    box-shadow:
+        0 0 20px rgba(255, 255, 200, 0.6),
+        0 0 40px rgba(255, 255, 200, 0.3);
+}
+
+/* 달 표면 크레이터 효과 */
+.moon::before {
+    content: '';
+    position: absolute;
+    top: 20%;
+    left: 15%;
+    width: 12px;
+    height: 12px;
+    background: rgba(200, 200, 200, 0.4);
+    border-radius: 50%;
+}
+
+.moon::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 55%;
+    width: 8px;
+    height: 8px;
+    background: rgba(200, 200, 200, 0.3);
+    border-radius: 50%;
+}
+
+/* 낮: 태양 표시 */
+body[data-time="day"] .sun {
+    display: block;
+}
+
+/* 밤: 달 표시 */
+body[data-time="night"] .moon {
+    display: block;
+}
+
+/* 밤 배경 어둡게 - 헤더는 그대로 보이게 */
+body[data-time="night"] {
+    background: linear-gradient(180deg, #2D3748 0%, #1A202C 100%) !important;
+}
+
+/* 밤 시간 헤더 밝게 */
+body[data-time="night"] .main-header {
+    background: rgba(45, 55, 72, 0.95);
+    backdrop-filter: blur(10px);
+}
+
+body[data-time="night"] .logo,
+body[data-time="night"] .nav-link,
+body[data-time="night"] .btn-text {
+    color: #E2E8F0;
+}
+
+body[data-time="night"] .nav-link:hover {
+    color: #90CDF4;
+}
+
+/* ============================================
+   어두운 테마 전체 가시성 개선
+   (밤, 비, 폭풍)
+   ============================================ */
+
+/* 카드 배경 밝게 */
+body[data-time="night"] .card,
+body[data-time="night"] .coordinate-card,
+body[data-time="night"] .farming-card,
+body[data-time="night"] .form-container,
+body[data-weather="rain"] .card,
+body[data-weather="rain"] .coordinate-card,
+body[data-weather="rain"] .farming-card,
+body[data-weather="rain"] .form-container,
+body[data-weather="storm"] .card,
+body[data-weather="storm"] .coordinate-card,
+body[data-weather="storm"] .farming-card,
+body[data-weather="storm"] .form-container {
+    background: rgba(255, 255, 255, 0.95);
+}
+
+/* 텍스트 색상 강화 */
+body[data-time="night"] .page-title,
+body[data-time="night"] .page-desc,
+body[data-time="night"] .section-header h2,
+body[data-time="night"] .empty-text,
+body[data-weather="rain"] .page-title,
+body[data-weather="rain"] .page-desc,
+body[data-weather="rain"] .section-header h2,
+body[data-weather="storm"] .page-title,
+body[data-weather="storm"] .page-desc,
+body[data-weather="storm"] .section-header h2 {
+    color: #F7FAFC;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+/* 네비게이션 아이템 */
+body[data-time="night"] .farming-nav-item,
+body[data-weather="rain"] .farming-nav-item,
+body[data-weather="storm"] .farming-nav-item {
+    background: rgba(255, 255, 255, 0.95);
+}
+
+/* ============================================
+   헤더 가시성 개선
+   ============================================ */
+body[data-time="night"] .main-header,
+body[data-weather="rain"] .main-header,
+body[data-weather="storm"] .main-header {
+    background: rgba(26, 32, 44, 0.95) !important;
+}
+
+body[data-time="night"] .main-header .nav-link,
+body[data-time="night"] .main-header .logo-text,
+body[data-weather="rain"] .main-header .nav-link,
+body[data-weather="rain"] .main-header .logo-text,
+body[data-weather="storm"] .main-header .nav-link,
+body[data-weather="storm"] .main-header .logo-text {
+    color: #E2E8F0 !important;
+}
+
+body[data-time="night"] .main-header .nav-link:hover,
+body[data-weather="rain"] .main-header .nav-link:hover,
+body[data-weather="storm"] .main-header .nav-link:hover {
+    color: #90CDF4 !important;
+}
+
+/* 헤더의 마이페이지/로그아웃 버튼 */
+body[data-time="night"] .header-actions .btn-outline,
+body[data-weather="rain"] .header-actions .btn-outline,
+body[data-weather="storm"] .header-actions .btn-outline {
+    border-color: #90CDF4 !important;
+    color: #90CDF4 !important;
+    background: transparent !important;
+}
+
+body[data-time="night"] .header-actions .btn-outline:hover,
+body[data-weather="rain"] .header-actions .btn-outline:hover,
+body[data-weather="storm"] .header-actions .btn-outline:hover {
+    background: rgba(144, 205, 244, 0.2) !important;
+}
+
+body[data-time="night"] .header-actions .btn-text,
+body[data-weather="rain"] .header-actions .btn-text,
+body[data-weather="storm"] .header-actions .btn-text {
+    color: #CBD5E0 !important;
+}
+
+body[data-time="night"] .header-actions .btn-text:hover,
+body[data-weather="rain"] .header-actions .btn-text:hover,
+body[data-weather="storm"] .header-actions .btn-text:hover {
+    color: #F7FAFC !important;
+}
+
+/* ============================================
+   마이페이지 가시성 개선
+   ============================================ */
+body[data-time="night"] .mypage,
+body[data-weather="rain"] .mypage,
+body[data-weather="storm"] .mypage {
+    color: #F7FAFC;
+}
+
+body[data-time="night"] .mypage .page-title,
+body[data-time="night"] .mypage h2,
+body[data-time="night"] .mypage h3,
+body[data-weather="rain"] .mypage .page-title,
+body[data-weather="rain"] .mypage h2,
+body[data-weather="rain"] .mypage h3,
+body[data-weather="storm"] .mypage .page-title,
+body[data-weather="storm"] .mypage h2,
+body[data-weather="storm"] .mypage h3 {
+    color: #F7FAFC !important;
+}
+
+body[data-time="night"] .mypage .card,
+body[data-time="night"] .mypage .profile-card,
+body[data-time="night"] .mypage .stat-card,
+body[data-time="night"] .mypage .action-btn,
+body[data-time="night"] .mypage .recent-item,
+body[data-weather="rain"] .mypage .card,
+body[data-weather="rain"] .mypage .profile-card,
+body[data-weather="storm"] .mypage .card,
+body[data-weather="storm"] .mypage .profile-card {
+    background: rgba(255, 255, 255, 0.98) !important;
+}
+
+body[data-time="night"] .mypage .profile-info h2,
+body[data-time="night"] .mypage .action-btn span,
+body[data-time="night"] .mypage .recent-title,
+body[data-time="night"] .mypage .stat-label,
+body[data-weather="rain"] .mypage .profile-info h2,
+body[data-weather="storm"] .mypage .profile-info h2 {
+    color: var(--text-primary) !important;
+}
+
+/* 버튼 가시성 */
+body[data-time="night"] .btn-outline,
+body[data-weather="rain"] .btn-outline,
+body[data-weather="storm"] .btn-outline {
+    border-color: #E2E8F0;
+    color: #E2E8F0;
+}
+
+body[data-time="night"] .btn-outline:hover,
+body[data-weather="rain"] .btn-outline:hover,
+body[data-weather="storm"] .btn-outline:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* 폼 컨트롤 */
+body[data-time="night"] .form-control,
+body[data-weather="rain"] .form-control,
+body[data-weather="storm"] .form-control {
+    background: rgba(255, 255, 255, 0.95);
+    border-color: #A0AEC0;
+}
+
+/* 필터 버튼 */
+body[data-time="night"] .filter-btn,
+body[data-weather="rain"] .filter-btn,
+body[data-weather="storm"] .filter-btn {
+    background: rgba(255, 255, 255, 0.9);
+}
+
+/* 농사 요청 페이지 특정 요소 */
+body[data-time="night"] .request-detail,
+body[data-weather="rain"] .request-detail,
+body[data-weather="storm"] .request-detail {
+    background: rgba(255, 255, 255, 0.98);
+}
+
+body[data-time="night"] .request-detail .btn-outline,
+body[data-weather="rain"] .request-detail .btn-outline,
+body[data-weather="storm"] .request-detail .btn-outline {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+body[data-time="night"] .request-detail .btn-outline:hover,
+body[data-weather="rain"] .request-detail .btn-outline:hover,
+body[data-weather="storm"] .request-detail .btn-outline:hover {
+    background: var(--primary);
+    color: white;
+}
+
+body[data-time="night"] .empty-text,
+body[data-weather="rain"] .empty-text,
+body[data-weather="storm"] .empty-text {
+    color: var(--text-primary) !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+}
+
+/* 좌표 상세 페이지 */
+body[data-time="night"] .detail-card,
+body[data-weather="rain"] .detail-card,
+body[data-weather="storm"] .detail-card {
+    background: rgba(255, 255, 255, 0.98);
+}
+
+body[data-time="night"] .detail-card .btn-outline,
+body[data-weather="rain"] .detail-card .btn-outline,
+body[data-weather="storm"] .detail-card .btn-outline {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+/* 랭킹, 가이드, 마이페이지 등 주요 컨테이너 */
+body[data-time="night"] .guide-page,
+body[data-time="night"] .ranking-page,
+body[data-time="night"] .mypage-container,
+body[data-weather="rain"] .guide-page,
+body[data-weather="rain"] .ranking-page,
+body[data-weather="storm"] .guide-page,
+body[data-weather="storm"] .ranking-page {
+    background: rgba(255, 255, 255, 0.98);
+}
+
+/* ============================================
+   다크 모드 종합 가시성 수정
+   ============================================ */
+
+/* 모든 폼 페이지 */
+body[data-time="night"] .form-page,
+body[data-time="night"] .confirm-page,
+body[data-time="night"] .journal-detail,
+body[data-time="night"] .comments-section,
+body[data-weather="rain"] .form-page,
+body[data-weather="rain"] .confirm-page,
+body[data-weather="rain"] .journal-detail,
+body[data-weather="rain"] .comments-section,
+body[data-weather="storm"] .form-page,
+body[data-weather="storm"] .confirm-page,
+body[data-weather="storm"] .journal-detail,
+body[data-weather="storm"] .comments-section {
+    background: rgba(255, 255, 255, 0.98) !important;
+}
+
+/* 모든 outline 버튼 - 컨테이너 내부 */
+body[data-time="night"] .form-page .btn-outline,
+body[data-time="night"] .confirm-page .btn-outline,
+body[data-time="night"] .journal-detail .btn-outline,
+body[data-time="night"] .request-detail .btn-outline,
+body[data-time="night"] .detail-card .btn-outline,
+body[data-weather="rain"] .form-page .btn-outline,
+body[data-weather="rain"] .confirm-page .btn-outline,
+body[data-weather="rain"] .journal-detail .btn-outline,
+body[data-weather="rain"] .request-detail .btn-outline,
+body[data-weather="rain"] .detail-card .btn-outline,
+body[data-weather="storm"] .form-page .btn-outline,
+body[data-weather="storm"] .confirm-page .btn-outline,
+body[data-weather="storm"] .journal-detail .btn-outline,
+body[data-weather="storm"] .request-detail .btn-outline,
+body[data-weather="storm"] .detail-card .btn-outline {
+    border-color: var(--primary) !important;
+    color: var(--primary) !important;
+    background: transparent !important;
+}
+
+body[data-time="night"] .form-page .btn-outline:hover,
+body[data-time="night"] .confirm-page .btn-outline:hover,
+body[data-time="night"] .journal-detail .btn-outline:hover,
+body[data-weather="rain"] .form-page .btn-outline:hover,
+body[data-weather="rain"] .confirm-page .btn-outline:hover,
+body[data-weather="storm"] .form-page .btn-outline:hover,
+body[data-weather="storm"] .confirm-page .btn-outline:hover {
+    background: var(--primary) !important;
+    color: white !important;
+}
+
+/* 헤더/제목 텍스트 */
+body[data-time="night"] .page-title,
+body[data-time="night"] .confirm-page h1,
+body[data-time="night"] .form-page h1,
+body[data-weather="rain"] .page-title,
+body[data-weather="rain"] .confirm-page h1,
+body[data-weather="storm"] .page-title,
+body[data-weather="storm"] .confirm-page h1 {
+    color: var(--text-primary) !important;
+    text-shadow: none !important;
+}
+
+/* 모든 뱃지 */
+body[data-time="night"] .badge,
+body[data-weather="rain"] .badge,
+body[data-weather="storm"] .badge {
+    background: var(--bg-secondary) !important;
+    color: var(--text-primary) !important;
+}
+
+/* 좌표 목록 페이지 */
+body[data-time="night"] .coord-card,
+body[data-time="night"] .journal-card,
+body[data-weather="rain"] .coord-card,
+body[data-weather="rain"] .journal-card,
+body[data-weather="storm"] .coord-card,
+body[data-weather="storm"] .journal-card {
+    background: rgba(255, 255, 255, 0.98) !important;
+}
+
+body[data-time="night"] .coord-card-title,
+body[data-time="night"] .coord-card-meta,
+body[data-time="night"] .journal-content h3,
+body[data-time="night"] .journal-meta,
+body[data-weather="rain"] .coord-card-title,
+body[data-weather="rain"] .journal-content h3,
+body[data-weather="storm"] .coord-card-title,
+body[data-weather="storm"] .journal-content h3 {
+    color: var(--text-primary) !important;
+}
+
+/* 페이지 설명 텍스트 */
+body[data-time="night"] .page-desc,
+body[data-time="night"] .page-header p,
+body[data-time="night"] .section-desc,
+body[data-weather="rain"] .page-desc,
+body[data-weather="rain"] .page-header p,
+body[data-weather="storm"] .page-desc,
+body[data-weather="storm"] .page-header p {
+    color: #E2E8F0 !important;
+}
+
+/* 랜딩 페이지 */
+body[data-time="night"] .hero-title,
+body[data-time="night"] .hero-desc,
+body[data-time="night"] .feature-title,
+body[data-time="night"] .feature-desc,
+body[data-weather="rain"] .hero-title,
+body[data-weather="rain"] .hero-desc,
+body[data-weather="storm"] .hero-title,
+body[data-weather="storm"] .hero-desc {
+    color: #F7FAFC !important;
+}
+
+/* 랜딩 페이지 버튼 */
+body[data-time="night"] .hero-actions .btn-outline,
+body[data-weather="rain"] .hero-actions .btn-outline,
+body[data-weather="storm"] .hero-actions .btn-outline {
+    border-color: #E2E8F0 !important;
+    color: #E2E8F0 !important;
+}
+
+body[data-time="night"] .hero-actions .btn-outline:hover,
+body[data-weather="rain"] .hero-actions .btn-outline:hover,
+body[data-weather="storm"] .hero-actions .btn-outline:hover {
+    background: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* 알림/공지 박스 */
+body[data-time="night"] .notice-box,
+body[data-time="night"] .guest-notice,
+body[data-time="night"] .warning-text,
+body[data-time="night"] .coords-help,
+body[data-weather="rain"] .notice-box,
+body[data-weather="rain"] .guest-notice,
+body[data-weather="storm"] .notice-box,
+body[data-weather="storm"] .guest-notice {
+    background: #FFF3E0 !important;
+    color: #E65100 !important;
+}
+
+body[data-time="night"] .notice-box ul,
+body[data-time="night"] .notice-box li,
+body[data-weather="rain"] .notice-box ul,
+body[data-weather="storm"] .notice-box ul {
+    color: #B71C1C !important;
+}
+
+/* 댓글 섹션 */
+body[data-time="night"] .comment,
+body[data-time="night"] .comment-header,
+body[data-time="night"] .comment-content,
+body[data-weather="rain"] .comment,
+body[data-weather="storm"] .comment {
+    color: var(--text-primary) !important;
+}
+
+/* 인풋 필드 */
+body[data-time="night"] input.form-control,
+body[data-time="night"] textarea.form-control,
+body[data-time="night"] select.form-control,
+body[data-weather="rain"] input.form-control,
+body[data-weather="rain"] textarea.form-control,
+body[data-weather="storm"] input.form-control,
+body[data-weather="storm"] textarea.form-control {
+    background: white !important;
+    color: var(--text-primary) !important;
+    border-color: #A0AEC0 !important;
+}
+
+/* 비밀번호 필드 라벨 */
+body[data-time="night"] .form-label,
+body[data-weather="rain"] .form-label,
+body[data-weather="storm"] .form-label {
+    color: var(--text-primary) !important;
+}
+
+/* 삭제 버튼 */
+body[data-time="night"] .btn-danger,
+body[data-weather="rain"] .btn-danger,
+body[data-weather="storm"] .btn-danger {
+    background: #F44336 !important;
+    color: white !important;
+}
+
+/* 스코어 정보 카드 */
+body[data-time="night"] .score-info,
+body[data-time="night"] .ranking-card,
+body[data-weather="rain"] .score-info,
+body[data-weather="rain"] .ranking-card,
+body[data-weather="storm"] .score-info,
+body[data-weather="storm"] .ranking-card {
+    background: rgba(255, 255, 255, 0.98) !important;
+}
+
+/* 탭 버튼 */
+body[data-time="night"] .tab-btn,
+body[data-weather="rain"] .tab-btn,
+body[data-weather="storm"] .tab-btn {
+    background: rgba(255, 255, 255, 0.9) !important;
+    color: var(--text-primary) !important;
+}
+
+body[data-time="night"] .tab-btn.active,
+body[data-weather="rain"] .tab-btn.active,
+body[data-weather="storm"] .tab-btn.active {
+    background: var(--primary) !important;
+    color: white !important;
+}
+
+/* 농사 네비게이션 */
+body[data-time="night"] .farming-nav,
+body[data-weather="rain"] .farming-nav,
+body[data-weather="storm"] .farming-nav {
+    background: rgba(255, 255, 255, 0.98) !important;
+}
+
+body[data-time="night"] .farming-nav-item,
+body[data-weather="rain"] .farming-nav-item,
+body[data-weather="storm"] .farming-nav-item {
+    background: rgba(255, 255, 255, 0.95) !important;
+    color: var(--text-primary) !important;
+}
+
+/* 페이지 헤더 카드 */
+body[data-time="night"] .page-header,
+body[data-time="night"] .filter-bar,
+body[data-weather="rain"] .page-header,
+body[data-weather="rain"] .filter-bar,
+body[data-weather="storm"] .page-header,
+body[data-weather="storm"] .filter-bar {
+    background: rgba(255, 255, 255, 0.98) !important;
+}
+
+body[data-time="night"] .page-header h1,
+body[data-weather="rain"] .page-header h1,
+body[data-weather="storm"] .page-header h1 {
+    color: var(--text-primary) !important;
+}
+
+/* ============================================
+   좌표 목록/농사 게시판 가시성 개선
+   ============================================ */
+
+/* 좌표 목록 페이지 제목 */
+body[data-time="night"] .list-header .page-title,
+body[data-weather="rain"] .list-header .page-title,
+body[data-weather="storm"] .list-header .page-title {
+    color: #FFFFFF !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* 농사 게시판 제목 및 설명 */
+body[data-time="night"] .farming-header,
+body[data-time="night"] .farming-home .page-header,
+body[data-weather="rain"] .farming-header,
+body[data-weather="rain"] .farming-home .page-header,
+body[data-weather="storm"] .farming-header,
+body[data-weather="storm"] .farming-home .page-header {
+    background: rgba(255, 255, 255, 0.95) !important;
+    padding: var(--spacing-lg);
+    border-radius: var(--radius-lg);
+}
+
+body[data-time="night"] .farming-home .page-title,
+body[data-time="night"] .farming-home .page-desc,
+body[data-time="night"] .farming-home h1,
+body[data-time="night"] .farming-home p,
+body[data-weather="rain"] .farming-home .page-title,
+body[data-weather="rain"] .farming-home .page-desc,
+body[data-weather="rain"] .farming-home h1,
+body[data-weather="rain"] .farming-home p,
+body[data-weather="storm"] .farming-home .page-title,
+body[data-weather="storm"] .farming-home .page-desc,
+body[data-weather="storm"] .farming-home h1,
+body[data-weather="storm"] .farming-home p {
+    color: var(--text-primary) !important;
+    text-shadow: none !important;
+}
+
+/* 농사 일지 목록 제목 */
+body[data-time="night"] .journal-header,
+body[data-time="night"] .journal-list-page .page-header,
+body[data-weather="rain"] .journal-header,
+body[data-weather="rain"] .journal-list-page .page-header,
+body[data-weather="storm"] .journal-header,
+body[data-weather="storm"] .journal-list-page .page-header {
+    background: rgba(255, 255, 255, 0.95) !important;
+    padding: var(--spacing-lg);
+    border-radius: var(--radius-lg);
+}
+
+body[data-time="night"] .journal-list-page h1,
+body[data-time="night"] .journal-list-page p,
+body[data-weather="rain"] .journal-list-page h1,
+body[data-weather="rain"] .journal-list-page p,
+body[data-weather="storm"] .journal-list-page h1,
+body[data-weather="storm"] .journal-list-page p {
+    color: var(--text-primary) !important;
+}
+
+/* 빈 상태 메시지 가시성 */
+body[data-time="night"] .empty-state,
+body[data-weather="rain"] .empty-state,
+body[data-weather="storm"] .empty-state {
+    background: rgba(255, 255, 255, 0.95) !important;
+    color: var(--text-primary) !important;
+    padding: var(--spacing-xl);
+    border-radius: var(--radius-lg);
+}
+
+body[data-time="night"] .empty-state-title,
+body[data-time="night"] .empty-state-desc,
+body[data-weather="rain"] .empty-state-title,
+body[data-weather="rain"] .empty-state-desc,
+body[data-weather="storm"] .empty-state-title,
+body[data-weather="storm"] .empty-state-desc {
+    color: var(--text-primary) !important;
+}
+
+/* 농사 섹션 헤더 (최근 농사 일지, 모집중인 요청) */
+body[data-time="night"] .farming-section,
+body[data-weather="rain"] .farming-section,
+body[data-weather="storm"] .farming-section {
+    background: rgba(255, 255, 255, 1) !important;
+    border: 2px solid rgba(0, 0, 0, 0.1) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* 섹션 제목 강화 */
+body[data-time="night"] .section-header h2,
+body[data-time="night"] .farming-section h2,
+body[data-weather="rain"] .section-header h2,
+body[data-weather="rain"] .farming-section h2,
+body[data-weather="storm"] .section-header h2,
+body[data-weather="storm"] .farming-section h2 {
+    color: #1a1a1a !important;
+    font-weight: 700;
+}
+
+/* 더보기 버튼 가시성 - 더 진한 색상 */
+body[data-time="night"] .section-header .btn-text,
+body[data-time="night"] .farming-section .btn-text,
+body[data-weather="rain"] .section-header .btn-text,
+body[data-weather="rain"] .farming-section .btn-text,
+body[data-weather="storm"] .section-header .btn-text,
+body[data-weather="storm"] .farming-section .btn-text {
+    color: #2E7D32 !important;
+    font-weight: 700;
+    background: rgba(46, 125, 50, 0.1);
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-md);
+}
+
+body[data-time="night"] .section-header .btn-text:hover,
+body[data-time="night"] .farming-section .btn-text:hover,
+body[data-weather="rain"] .section-header .btn-text:hover,
+body[data-weather="storm"] .section-header .btn-text:hover {
+    color: #1B5E20 !important;
+    background: rgba(46, 125, 50, 0.2);
+}
+
+/* 농사 카드 가시성 강화 */
+body[data-time="night"] .farming-card,
+body[data-weather="rain"] .farming-card,
+body[data-weather="storm"] .farming-card {
+    background: #FFFFFF !important;
+    border: 2px solid rgba(0, 0, 0, 0.1) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+}
+
+body[data-time="night"] .farming-card-content h3,
+body[data-time="night"] .farming-card-content p,
+body[data-weather="rain"] .farming-card-content h3,
+body[data-weather="rain"] .farming-card-content p,
+body[data-weather="storm"] .farming-card-content h3,
+body[data-weather="storm"] .farming-card-content p {
+    color: #1a1a1a !important;
+}
+
+/* 빈 텍스트 가시성 */
+body[data-time="night"] .empty-text,
+body[data-weather="rain"] .empty-text,
+body[data-weather="storm"] .empty-text {
+    color: #1a1a1a !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+    padding: 1.5rem;
+    border-radius: var(--radius-lg);
+}
+
+/* ============================================
+   필터 버튼 글자 색상 (농사 일지/요청)
+   ============================================ */
+body[data-time="night"] .filter-bar,
+body[data-weather="rain"] .filter-bar,
+body[data-weather="storm"] .filter-bar {
+    background: rgba(255, 255, 255, 0.98) !important;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+body[data-time="night"] .filter-btn,
+body[data-weather="rain"] .filter-btn,
+body[data-weather="storm"] .filter-btn {
+    color: #1a1a1a !important;
+    background: rgba(0, 0, 0, 0.05) !important;
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+}
+
+body[data-time="night"] .filter-btn:hover,
+body[data-time="night"] .filter-btn.active,
+body[data-weather="rain"] .filter-btn:hover,
+body[data-weather="rain"] .filter-btn.active,
+body[data-weather="storm"] .filter-btn:hover,
+body[data-weather="storm"] .filter-btn.active {
+    background: var(--primary) !important;
+    color: white !important;
+}
+
+/* ============================================
+   페이지 헤더 설명 (농사 요청 등)
+   ============================================ */
+body[data-time="night"] .page-header,
+body[data-weather="rain"] .page-header,
+body[data-weather="storm"] .page-header {
+    background: rgba(255, 255, 255, 0.98) !important;
+    padding: 1.5rem !important;
+    border-radius: var(--radius-xl) !important;
+    margin-bottom: 1.5rem !important;
+}
+
+body[data-time="night"] .page-header h1,
+body[data-time="night"] .page-header p,
+body[data-weather="rain"] .page-header h1,
+body[data-weather="rain"] .page-header p,
+body[data-weather="storm"] .page-header h1,
+body[data-weather="storm"] .page-header p {
+    color: #1a1a1a !important;
+}
+
+/* ============================================
+   내 농사 활동 페이지 가시성
+   ============================================ */
+body[data-time="night"] .page-title,
+body[data-weather="rain"] .page-title,
+body[data-weather="storm"] .page-title {
+    color: #FFFFFF !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+body[data-time="night"] .activity-tabs,
+body[data-weather="rain"] .activity-tabs,
+body[data-weather="storm"] .activity-tabs {
+    background: rgba(255, 255, 255, 0.98) !important;
+    padding: 1rem !important;
+    border-radius: var(--radius-xl) !important;
+}
+
+body[data-time="night"] .tab-btn,
+body[data-weather="rain"] .tab-btn,
+body[data-weather="storm"] .tab-btn {
+    color: #1a1a1a !important;
+    background: rgba(0, 0, 0, 0.05) !important;
+}
+
+body[data-time="night"] .tab-btn:hover,
+body[data-time="night"] .tab-btn.active,
+body[data-weather="rain"] .tab-btn:hover,
+body[data-weather="rain"] .tab-btn.active,
+body[data-weather="storm"] .tab-btn:hover,
+body[data-weather="storm"] .tab-btn.active {
+    background: var(--primary) !important;
+    color: white !important;
+}
+
+body[data-time="night"] .section-header,
+body[data-weather="rain"] .section-header,
+body[data-weather="storm"] .section-header {
+    background: rgba(255, 255, 255, 0.98) !important;
+    padding: 1rem 1.5rem !important;
+    border-radius: var(--radius-lg) !important;
+    margin-bottom: 1rem !important;
+}
+
+body[data-time="night"] .section-header h2,
+body[data-weather="rain"] .section-header h2,
+body[data-weather="storm"] .section-header h2 {
+    color: #1a1a1a !important;
+}
+
+body[data-time="night"] .activity-card,
+body[data-weather="rain"] .activity-card,
+body[data-weather="storm"] .activity-card {
+    background: rgba(255, 255, 255, 0.98) !important;
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+}
+
+body[data-time="night"] .activity-card h3,
+body[data-time="night"] .activity-card p,
+body[data-weather="rain"] .activity-card h3,
+body[data-weather="rain"] .activity-card p,
+body[data-weather="storm"] .activity-card h3,
+body[data-weather="storm"] .activity-card p {
+    color: #1a1a1a !important;
+}
+
+
+
+
+/* 푸터 */
+body[data-time="night"] .main-footer,
+body[data-weather="rain"] .main-footer,
+body[data-weather="storm"] .main-footer {
+    background: rgba(26, 32, 44, 0.95);
+    color: #E2E8F0;
+}
+
+body[data-time="night"] .main-footer a,
+body[data-weather="rain"] .main-footer a,
+body[data-weather="storm"] .main-footer a {
+    color: #90CDF4;
+}
+
+/* 흐림/비/폭풍일 때 태양/달 숨김 */
+body[data-weather="cloudy"] .sky-object,
+body[data-weather="rain"] .sky-object,
+body[data-weather="storm"] .sky-object {
+    display: none !important;
+}
+
+
+@keyframes sky-float {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+/* ============================================
+   비 올 때 꽃잎/낙엽 숨김
+   ============================================ */
+body[data-weather="rain"] .petals,
+body[data-weather="storm"] .petals,
+body[data-weather="rain"] .leaves,
+body[data-weather="storm"] .leaves {
+    display: none !important;
+}
+
+/* ============================================
+   눈 효과 (Winter)
+   ============================================ */
+.snowflakes {
+    display: none;
+}
+
+body[data-weather="snow"] .snowflakes,
+body[data-season="winter"] .snowflakes {
+    display: block;
+}
+
+.snowflake {
+    position: absolute;
+    top: -20px;
+    color: #fff;
+    font-size: 1rem;
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
+    animation: snowfall linear infinite;
+    opacity: 0.8;
+}
+
+.snowflake:nth-child(1) {
+    left: 5%;
+    animation-duration: 10s;
+    animation-delay: 0s;
+    font-size: 0.8rem;
+}
+
+.snowflake:nth-child(2) {
+    left: 15%;
+    animation-duration: 12s;
+    animation-delay: 1s;
+    font-size: 1.2rem;
+}
+
+.snowflake:nth-child(3) {
+    left: 25%;
+    animation-duration: 8s;
+    animation-delay: 2s;
+    font-size: 0.9rem;
+}
+
+.snowflake:nth-child(4) {
+    left: 35%;
+    animation-duration: 11s;
+    animation-delay: 0.5s;
+    font-size: 1.1rem;
+}
+
+.snowflake:nth-child(5) {
+    left: 45%;
+    animation-duration: 14s;
+    animation-delay: 3s;
+    font-size: 0.7rem;
+}
+
+.snowflake:nth-child(6) {
+    left: 55%;
+    animation-duration: 9s;
+    animation-delay: 1.5s;
+    font-size: 1rem;
+}
+
+.snowflake:nth-child(7) {
+    left: 65%;
+    animation-duration: 13s;
+    animation-delay: 2.5s;
+    font-size: 1.3rem;
+}
+
+.snowflake:nth-child(8) {
+    left: 75%;
+    animation-duration: 10s;
+    animation-delay: 0.8s;
+    font-size: 0.8rem;
+}
+
+.snowflake:nth-child(9) {
+    left: 85%;
+    animation-duration: 11s;
+    animation-delay: 3.5s;
+    font-size: 1rem;
+}
+
+.snowflake:nth-child(10) {
+    left: 95%;
+    animation-duration: 12s;
+    animation-delay: 1.2s;
+    font-size: 0.9rem;
+}
+
+.snowflake:nth-child(11) {
+    left: 10%;
+    animation-duration: 15s;
+    animation-delay: 4s;
+    font-size: 0.6rem;
+}
+
+.snowflake:nth-child(12) {
+    left: 20%;
+    animation-duration: 9s;
+    animation-delay: 0.3s;
+    font-size: 1.1rem;
+}
+
+.snowflake:nth-child(13) {
+    left: 30%;
+    animation-duration: 13s;
+    animation-delay: 2s;
+    font-size: 0.8rem;
+}
+
+.snowflake:nth-child(14) {
+    left: 40%;
+    animation-duration: 10s;
+    animation-delay: 3.2s;
+    font-size: 1rem;
+}
+
+.snowflake:nth-child(15) {
+    left: 50%;
+    animation-duration: 11s;
+    animation-delay: 1.8s;
+    font-size: 1.2rem;
+}
+
+.snowflake:nth-child(16) {
+    left: 60%;
+    animation-duration: 14s;
+    animation-delay: 0.7s;
+    font-size: 0.7rem;
+}
+
+.snowflake:nth-child(17) {
+    left: 70%;
+    animation-duration: 8s;
+    animation-delay: 2.8s;
+    font-size: 1rem;
+}
+
+.snowflake:nth-child(18) {
+    left: 80%;
+    animation-duration: 12s;
+    animation-delay: 1.3s;
+    font-size: 0.9rem;
+}
+
+.snowflake:nth-child(19) {
+    left: 90%;
+    animation-duration: 10s;
+    animation-delay: 3.8s;
+    font-size: 1.1rem;
+}
+
+.snowflake:nth-child(20) {
+    left: 3%;
+    animation-duration: 13s;
+    animation-delay: 0.2s;
+    font-size: 0.8rem;
+}
+
+@keyframes snowfall {
+    0% {
+        transform: translateY(-20px) rotate(0deg);
+        opacity: 0;
+    }
+
+    10% {
+        opacity: 0.8;
+    }
+
+    90% {
+        opacity: 0.8;
+    }
+
+    100% {
+        transform: translateY(100vh) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+/* ============================================
+   비 효과 (Rain) - 자연스럽게 떨어지는 빗방울
+   ============================================ */
+.raindrops {
+    display: none;
+}
+
+body[data-weather="rain"] .raindrops,
+body[data-weather="storm"] .raindrops {
+    display: block;
+}
+
+.raindrop {
+    position: absolute;
+    top: -20px;
+    width: 2px;
+    height: 15px;
+    background: linear-gradient(to bottom, transparent, rgba(174, 194, 224, 0.6));
+    border-radius: 0 0 2px 2px;
+    animation: raindrop-fall linear infinite;
+}
+
+/* 30개 빗방울 위치 및 타이밍 */
+.raindrop:nth-child(1) {
+    left: 3%;
+    animation-duration: 0.8s;
+    animation-delay: 0s;
+}
+
+.raindrop:nth-child(2) {
+    left: 7%;
+    animation-duration: 0.9s;
+    animation-delay: 0.2s;
+}
+
+.raindrop:nth-child(3) {
+    left: 11%;
+    animation-duration: 0.7s;
+    animation-delay: 0.4s;
+}
+
+.raindrop:nth-child(4) {
+    left: 15%;
+    animation-duration: 0.85s;
+    animation-delay: 0.1s;
+}
+
+.raindrop:nth-child(5) {
+    left: 19%;
+    animation-duration: 0.75s;
+    animation-delay: 0.3s;
+}
+
+.raindrop:nth-child(6) {
+    left: 23%;
+    animation-duration: 0.95s;
+    animation-delay: 0.5s;
+}
+
+.raindrop:nth-child(7) {
+    left: 27%;
+    animation-duration: 0.8s;
+    animation-delay: 0.15s;
+}
+
+.raindrop:nth-child(8) {
+    left: 31%;
+    animation-duration: 0.7s;
+    animation-delay: 0.35s;
+}
+
+.raindrop:nth-child(9) {
+    left: 35%;
+    animation-duration: 0.9s;
+    animation-delay: 0.55s;
+}
+
+.raindrop:nth-child(10) {
+    left: 39%;
+    animation-duration: 0.85s;
+    animation-delay: 0.05s;
+}
+
+.raindrop:nth-child(11) {
+    left: 43%;
+    animation-duration: 0.75s;
+    animation-delay: 0.25s;
+}
+
+.raindrop:nth-child(12) {
+    left: 47%;
+    animation-duration: 0.8s;
+    animation-delay: 0.45s;
+}
+
+.raindrop:nth-child(13) {
+    left: 51%;
+    animation-duration: 0.7s;
+    animation-delay: 0.6s;
+}
+
+.raindrop:nth-child(14) {
+    left: 55%;
+    animation-duration: 0.9s;
+    animation-delay: 0.08s;
+}
+
+.raindrop:nth-child(15) {
+    left: 59%;
+    animation-duration: 0.85s;
+    animation-delay: 0.28s;
+}
+
+.raindrop:nth-child(16) {
+    left: 63%;
+    animation-duration: 0.75s;
+    animation-delay: 0.48s;
+}
+
+.raindrop:nth-child(17) {
+    left: 67%;
+    animation-duration: 0.95s;
+    animation-delay: 0.12s;
+}
+
+.raindrop:nth-child(18) {
+    left: 71%;
+    animation-duration: 0.8s;
+    animation-delay: 0.32s;
+}
+
+.raindrop:nth-child(19) {
+    left: 75%;
+    animation-duration: 0.7s;
+    animation-delay: 0.52s;
+}
+
+.raindrop:nth-child(20) {
+    left: 79%;
+    animation-duration: 0.9s;
+    animation-delay: 0.18s;
+}
+
+.raindrop:nth-child(21) {
+    left: 83%;
+    animation-duration: 0.85s;
+    animation-delay: 0.38s;
+}
+
+.raindrop:nth-child(22) {
+    left: 87%;
+    animation-duration: 0.75s;
+    animation-delay: 0.58s;
+}
+
+.raindrop:nth-child(23) {
+    left: 91%;
+    animation-duration: 0.8s;
+    animation-delay: 0.22s;
+}
+
+.raindrop:nth-child(24) {
+    left: 95%;
+    animation-duration: 0.7s;
+    animation-delay: 0.42s;
+}
+
+.raindrop:nth-child(25) {
+    left: 5%;
+    animation-duration: 0.9s;
+    animation-delay: 0.65s;
+}
+
+.raindrop:nth-child(26) {
+    left: 17%;
+    animation-duration: 0.85s;
+    animation-delay: 0.7s;
+}
+
+.raindrop:nth-child(27) {
+    left: 33%;
+    animation-duration: 0.75s;
+    animation-delay: 0.75s;
+}
+
+.raindrop:nth-child(28) {
+    left: 53%;
+    animation-duration: 0.8s;
+    animation-delay: 0.68s;
+}
+
+.raindrop:nth-child(29) {
+    left: 73%;
+    animation-duration: 0.7s;
+    animation-delay: 0.72s;
+}
+
+.raindrop:nth-child(30) {
+    left: 93%;
+    animation-duration: 0.9s;
+    animation-delay: 0.78s;
+}
+
+@keyframes raindrop-fall {
+    0% {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+
+    10% {
+        opacity: 1;
+    }
+
+    90% {
+        opacity: 1;
+    }
+
+    100% {
+        transform: translateY(100vh);
+        opacity: 0;
+    }
+}
+
+/* 비 올 때 배경 어둡게 */
+body[data-weather="rain"] {
+    background: linear-gradient(180deg, #708090 0%, #536878 100%) !important;
+}
+
+body[data-weather="rain"] .main-header {
+    background: rgba(112, 128, 144, 0.95);
+}
+
+body[data-weather="rain"] .logo,
+body[data-weather="rain"] .nav-link,
+body[data-weather="rain"] .btn-text {
+    color: #F7FAFC;
+}
+
+/* ============================================
+   흐림 효과 (Cloudy)
+   ============================================ */
+body[data-weather="cloudy"] {
+    background: linear-gradient(180deg, #D1D5DB 0%, #9CA3AF 100%) !important;
+}
+
+body[data-weather="cloudy"] .main-header {
+    background: rgba(209, 213, 219, 0.95);
+}
+
+body[data-weather="cloudy"]::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background:
+        radial-gradient(ellipse 200px 100px at 20% 10%, rgba(255, 255, 255, 0.6) 0%, transparent 60%),
+        radial-gradient(ellipse 300px 120px at 60% 15%, rgba(255, 255, 255, 0.5) 0%, transparent 60%),
+        radial-gradient(ellipse 250px 90px at 80% 8%, rgba(255, 255, 255, 0.55) 0%, transparent 60%),
+        radial-gradient(ellipse 180px 80px at 40% 20%, rgba(255, 255, 255, 0.45) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 49;
+    animation: cloud-drift 60s linear infinite;
+}
+
+@keyframes cloud-drift {
+    0% {
+        transform: translateX(0);
+    }
+
+    50% {
+        transform: translateX(30px);
+    }
+
+    100% {
+        transform: translateX(0);
+    }
+}
+
+/* ============================================
+   폭풍 효과 (Storm)
+   ============================================ */
+body[data-weather="storm"] {
+    background: linear-gradient(180deg, #4B5563 0%, #374151 100%) !important;
+}
+
+body[data-weather="storm"] .main-header {
+    background: rgba(75, 85, 99, 0.95);
+}
+
+body[data-weather="storm"]::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    pointer-events: none;
+    z-index: 48;
+    animation: lightning 8s linear infinite;
+}
+
+@keyframes lightning {
+
+    0%,
+    89%,
+    91%,
+    93%,
+    100% {
+        background: transparent;
+    }
+
+    90%,
+    92% {
+        background: rgba(255, 255, 255, 0.15);
+    }
+}
+
+/* ============================================
+   바람 효과 (Wind)
+   ============================================ */
+body[data-weather="wind"]::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 200%;
+    height: 100%;
+    background: repeating-linear-gradient(-45deg,
+            transparent 0px,
+            transparent 40px,
+            rgba(255, 255, 255, 0.03) 40px,
+            rgba(255, 255, 255, 0.03) 80px);
+    pointer-events: none;
+    z-index: 49;
+    animation: wind-blow 3s linear infinite;
+}
+
+@keyframes wind-blow {
+    0% {
+        transform: translateX(0);
+    }
+
+    100% {
+        transform: translateX(-50%);
+    }
+}
+
+/* 바람 효과 - 낙엽 빠르게 */
+body[data-weather="wind"] .leaf {
+    animation-duration: 6s !important;
+}
+
+/* ============================================
+   벚꽃 효과 (Spring)
+   ============================================ */
+.petals {
+    display: none;
+}
+
+body[data-season="spring"] .petals {
+    display: block;
+}
+
+.petal {
+    position: absolute;
+    top: -30px;
+    font-size: 1.2rem;
+    animation: petalfall linear infinite;
+    opacity: 0.8;
+}
+
+.petal:nth-child(1) {
+    left: 8%;
+    animation-duration: 15s;
+    animation-delay: 0s;
+}
+
+.petal:nth-child(2) {
+    left: 18%;
+    animation-duration: 18s;
+    animation-delay: 2s;
+}
+
+.petal:nth-child(3) {
+    left: 28%;
+    animation-duration: 14s;
+    animation-delay: 4s;
+}
+
+.petal:nth-child(4) {
+    left: 38%;
+    animation-duration: 20s;
+    animation-delay: 1s;
+}
+
+.petal:nth-child(5) {
+    left: 48%;
+    animation-duration: 16s;
+    animation-delay: 3s;
+}
+
+.petal:nth-child(6) {
+    left: 58%;
+    animation-duration: 19s;
+    animation-delay: 5s;
+}
+
+.petal:nth-child(7) {
+    left: 68%;
+    animation-duration: 17s;
+    animation-delay: 2.5s;
+}
+
+.petal:nth-child(8) {
+    left: 78%;
+    animation-duration: 15s;
+    animation-delay: 4.5s;
+}
+
+.petal:nth-child(9) {
+    left: 88%;
+    animation-duration: 18s;
+    animation-delay: 1.5s;
+}
+
+.petal:nth-child(10) {
+    left: 98%;
+    animation-duration: 16s;
+    animation-delay: 3.5s;
+}
+
+@keyframes petalfall {
+    0% {
+        transform: translateY(-30px) rotate(0deg) translateX(0);
+        opacity: 0;
+    }
+
+    10% {
+        opacity: 0.8;
+    }
+
+    50% {
+        transform: translateY(50vh) rotate(180deg) translateX(50px);
+    }
+
+    90% {
+        opacity: 0.8;
+    }
+
+    100% {
+        transform: translateY(100vh) rotate(360deg) translateX(-30px);
+        opacity: 0;
+    }
+}
+
+/* ============================================
+   낙엽 효과 (Fall)
+   ============================================ */
+.leaves {
+    display: none;
+}
+
+body[data-season="fall"] .leaves {
+    display: block;
+}
+
+.leaf {
+    position: absolute;
+    top: -30px;
+    font-size: 1.5rem;
+    animation: leaffall linear infinite;
+    opacity: 0.9;
+}
+
+.leaf:nth-child(1) {
+    left: 5%;
+    animation-duration: 12s;
+    animation-delay: 0s;
+}
+
+.leaf:nth-child(2) {
+    left: 15%;
+    animation-duration: 15s;
+    animation-delay: 3s;
+}
+
+.leaf:nth-child(3) {
+    left: 25%;
+    animation-duration: 11s;
+    animation-delay: 1s;
+}
+
+.leaf:nth-child(4) {
+    left: 35%;
+    animation-duration: 14s;
+    animation-delay: 4s;
+}
+
+.leaf:nth-child(5) {
+    left: 45%;
+    animation-duration: 13s;
+    animation-delay: 2s;
+}
+
+.leaf:nth-child(6) {
+    left: 55%;
+    animation-duration: 16s;
+    animation-delay: 5s;
+}
+
+.leaf:nth-child(7) {
+    left: 65%;
+    animation-duration: 12s;
+    animation-delay: 2.5s;
+}
+
+.leaf:nth-child(8) {
+    left: 75%;
+    animation-duration: 15s;
+    animation-delay: 1.5s;
+}
+
+.leaf:nth-child(9) {
+    left: 85%;
+    animation-duration: 14s;
+    animation-delay: 3.5s;
+}
+
+.leaf:nth-child(10) {
+    left: 95%;
+    animation-duration: 13s;
+    animation-delay: 0.5s;
+}
+
+@keyframes leaffall {
+    0% {
+        transform: translateY(-30px) rotate(0deg) translateX(0);
+        opacity: 0;
+    }
+
+    10% {
+        opacity: 0.9;
+    }
+
+    25% {
+        transform: translateY(25vh) rotate(90deg) translateX(30px);
+    }
+
+    50% {
+        transform: translateY(50vh) rotate(180deg) translateX(-20px);
+    }
+
+    75% {
+        transform: translateY(75vh) rotate(270deg) translateX(40px);
+    }
+
+    90% {
+        opacity: 0.9;
+    }
+
+    100% {
+        transform: translateY(100vh) rotate(360deg) translateX(-10px);
+        opacity: 0;
+    }
+}
+
+/* ============================================
+   계절별 버튼 색상
+   ============================================ */
+body[data-season="spring"] .btn-primary {
+    background: #FF69B4;
+}
+
+body[data-season="spring"] .btn-primary:hover {
+    background: #FF1493;
+}
+
+body[data-season="summer"] .btn-primary {
+    background: #20B2AA;
+}
+
+body[data-season="summer"] .btn-primary:hover {
+    background: #008B8B;
+}
+
+body[data-season="fall"] .btn-primary {
+    background: #D2691E;
+}
+
+body[data-season="fall"] .btn-primary:hover {
+    background: #8B4513;
+}
+
+body[data-season="winter"] .btn-primary {
+    background: #4169E1;
+}
+
+body[data-season="winter"] .btn-primary:hover {
+    background: #0000CD;
+}
+
+/* ============================================
+   계절별 카드 스타일
+   ============================================ */
+body[data-season="spring"] .card {
+    border: 2px solid rgba(255, 182, 193, 0.3);
+}
+
+body[data-season="summer"] .card {
+    border: 2px solid rgba(32, 178, 170, 0.3);
+}
+
+body[data-season="fall"] .card {
+    border: 2px solid rgba(210, 105, 30, 0.3);
+}
+
+body[data-season="winter"] .card {
+    border: 2px solid rgba(65, 105, 225, 0.3);
+}

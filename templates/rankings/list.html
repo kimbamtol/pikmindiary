@@ -1,0 +1,279 @@
+{% extends 'base.html' %}
+
+{% block title %}랭킹 - 피크민 다이어리{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="ranking-page">
+        <h1 class="page-title">🏆 랭킹</h1>
+
+        <!-- 기간 선택 -->
+        <div class="period-tabs">
+            <a href="{% url 'rankings:list' %}" class="tab {% if period_type == 'ALL' %}active{% endif %}">전체</a>
+            <a href="{% url 'rankings:weekly' %}" class="tab {% if period_type == 'WEEKLY' %}active{% endif %}">주간</a>
+            <a href="{% url 'rankings:monthly' %}" class="tab {% if period_type == 'MONTHLY' %}active{% endif %}">월간</a>
+        </div>
+
+        <p class="period-label">{{ period_label }}</p>
+
+        <!-- 점수 설명 -->
+        <div class="score-info card">
+            <h3>📊 점수 계산 방식</h3>
+            <ul>
+                <li>승인된 글 작성: <strong>+10점</strong></li>
+                <li>받은 좋아요 (좌표): <strong>+5점</strong></li>
+                <li>받은 복사: <strong>+2점</strong></li>
+                <li>🌱 농사 일지 좋아요: <strong>+10점</strong></li>
+            </ul>
+            <div class="period-info">
+                <p>📅 <strong>주간</strong>: 매주 월요일 00:00 ~ 일요일 24:00</p>
+                <p>📅 <strong>월간</strong>: 매월 1일 00:00 ~ 말일 24:00</p>
+            </div>
+        </div>
+
+        <!-- 랭킹 목록 -->
+        {% if rankings %}
+        <div class="ranking-list">
+            {% for ranking in rankings %}
+            <div class="ranking-item card {% if forloop.counter <= 3 %}top-{{ forloop.counter }}{% endif %}">
+                <div class="rank">
+                    {% if forloop.counter == 1 %}
+                    🥇
+                    {% elif forloop.counter == 2 %}
+                    🥈
+                    {% elif forloop.counter == 3 %}
+                    🥉
+                    {% else %}
+                    {{ ranking.rank }}
+                    {% endif %}
+                </div>
+                <a href="{% url 'accounts:user_profile' user_id=ranking.user.pk %}" class="user-info">
+                    <div class="avatar">
+                        {% if ranking.user.profile_image %}
+                        <img src="{{ ranking.user.profile_image.url }}" alt="{{ ranking.user.nickname }}">
+                        {% else %}
+                        <div class="avatar-placeholder">{{ ranking.user.nickname|slice:":1" }}</div>
+                        {% endif %}
+                    </div>
+                    <span class="nickname">{{ ranking.user.nickname }}</span>
+                </a>
+                <div class="score">
+                    <span class="score-value">{{ ranking.score }}</span>
+                    <span class="score-label">점</span>
+                </div>
+                <div class="score-detail">
+                    <span title="승인된 글">📝 {{ ranking.approved_posts_count }}</span>
+                    <span title="받은 좋아요 (좌표)">❤️ {{ ranking.likes_received_count }}</span>
+                    <span title="받은 복사">📋 {{ ranking.copy_received_count }}</span>
+                    <span title="농사 좋아요">🌱 {{ ranking.farming_likes_received_count }}</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">🏆</div>
+            <h2 class="empty-state-title">아직 랭킹이 없습니다</h2>
+            <p class="empty-state-desc">좌표를 제보하고 첫 번째 랭커가 되어보세요!</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    .ranking-page {
+        max-width: 800px;
+        margin: var(--spacing-xl) auto;
+        background: var(--bg-primary);
+        padding: var(--spacing-xl);
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .page-title {
+        text-align: center;
+        margin-bottom: var(--spacing-lg);
+        color: #1a1a1a;
+    }
+
+    .period-tabs {
+        display: flex;
+        justify-content: center;
+        gap: var(--spacing-sm);
+        margin-bottom: var(--spacing-md);
+        padding: var(--spacing-sm);
+        background: var(--bg-primary);
+        border-radius: var(--radius-full);
+        width: fit-content;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .tab {
+        padding: var(--spacing-sm) var(--spacing-xl);
+        border-radius: var(--radius-full);
+        color: var(--text-secondary);
+        font-weight: 500;
+    }
+
+    .tab.active {
+        background: var(--primary);
+        color: white;
+    }
+
+    .period-label {
+        text-align: center;
+        color: var(--text-secondary);
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .score-info {
+        padding: var(--spacing-md);
+        margin-bottom: var(--spacing-xl);
+        background: var(--bg-secondary);
+        border-radius: var(--radius-xl);
+    }
+
+    .score-info h3 {
+        margin-bottom: var(--spacing-sm);
+        font-size: 0.95rem;
+    }
+
+    .score-info ul {
+        display: flex;
+        gap: var(--spacing-lg);
+        flex-wrap: wrap;
+    }
+
+    .score-info li {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+    }
+
+    .period-info {
+        margin-top: var(--spacing-md);
+        padding-top: var(--spacing-md);
+        border-top: 1px dashed var(--bg-tertiary);
+    }
+
+    .period-info p {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin: var(--spacing-xs) 0;
+    }
+
+    .negative {
+        color: #C62828;
+    }
+
+    .ranking-list {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-md);
+    }
+
+    .ranking-item {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-md);
+        padding: var(--spacing-md) var(--spacing-lg);
+        border-radius: var(--radius-xl);
+    }
+
+    .ranking-item.top-1 {
+        background: linear-gradient(135deg, #FFF9C4, #FFD54F);
+        border: 2px solid #FFD54F;
+        border-radius: var(--radius-xl);
+    }
+
+    .ranking-item.top-2 {
+        background: linear-gradient(135deg, #F5F5F5, #E0E0E0);
+        border: 2px solid #BDBDBD;
+        border-radius: var(--radius-xl);
+    }
+
+    .ranking-item.top-3 {
+        background: linear-gradient(135deg, #FFCCBC, #FFAB91);
+        border: 2px solid #FF8A65;
+        border-radius: var(--radius-xl);
+    }
+
+    .rank {
+        font-size: 1.5rem;
+        font-weight: 700;
+        min-width: 50px;
+        text-align: center;
+    }
+
+    .user-info {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+        flex: 1;
+        color: var(--text-primary);
+    }
+
+    .avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        overflow: hidden;
+    }
+
+    .avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .avatar-placeholder {
+        width: 100%;
+        height: 100%;
+        background: var(--primary);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+    }
+
+    .nickname {
+        font-weight: 600;
+    }
+
+    .score {
+        text-align: right;
+        min-width: 80px;
+    }
+
+    .score-value {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: var(--primary);
+    }
+
+    .score-label {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+    }
+
+    .score-detail {
+        display: flex;
+        gap: var(--spacing-sm);
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+    }
+
+    @media (max-width: 600px) {
+        .ranking-item {
+            flex-wrap: wrap;
+        }
+
+        .score-detail {
+            width: 100%;
+            margin-top: var(--spacing-sm);
+            justify-content: flex-end;
+        }
+    }
+</style>
+{% endblock %}

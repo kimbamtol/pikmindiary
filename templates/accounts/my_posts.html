@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+
+{% block title %}내가 쓴 글 - 피크민 다이어리{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="posts-page">
+        <div class="page-header">
+            <a href="{% url 'accounts:my_page' %}" class="back-link">← 마이페이지</a>
+            <h1 class="page-title">📋 내가 쓴 글</h1>
+        </div>
+
+        <!-- 필터 -->
+        <div class="filter-tabs">
+            <a href="{% url 'accounts:my_posts' %}" class="tab {% if not status_filter %}active{% endif %}">전체</a>
+            <a href="{% url 'accounts:my_posts' %}?status=APPROVED"
+                class="tab {% if status_filter == 'APPROVED' %}active{% endif %}">승인됨</a>
+            <a href="{% url 'accounts:my_posts' %}?status=PENDING"
+                class="tab {% if status_filter == 'PENDING' %}active{% endif %}">대기중</a>
+            <a href="{% url 'accounts:my_posts' %}?status=REJECTED"
+                class="tab {% if status_filter == 'REJECTED' %}active{% endif %}">거절됨</a>
+        </div>
+
+        <!-- 글 목록 -->
+        {% if page_obj %}
+        <div class="posts-list">
+            {% for post in page_obj %}
+            <a href="{% url 'coordinates:detail' pk=post.pk %}" class="post-item card">
+                <div class="post-status">
+                    <span
+                        class="badge badge-{% if post.status == 'APPROVED' %}success{% elif post.status == 'PENDING' %}pending{% else %}danger{% endif %}">
+                        {{ post.get_status_display }}
+                    </span>
+                </div>
+                <div class="post-content">
+                    <h3 class="post-title">{{ post.title }}</h3>
+                    <div class="post-meta">
+                        <span>{{ post.get_category_display }}</span>
+                        <span>{{ post.created_at|date:"Y.m.d" }}</span>
+                    </div>
+                </div>
+                <div class="post-stats">
+                    <span>❤️ {{ post.like_count }}</span>
+                    <span>✅ {{ post.valid_count }}</span>
+                    <span>💬 {{ post.comment_count }}</span>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+
+        <!-- 페이지네이션 -->
+        {% if page_obj.has_other_pages %}
+        <nav class="pagination">
+            {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}&status={{ status_filter }}">← 이전</a>
+            {% endif %}
+            <span>{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+            {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}&status={{ status_filter }}">다음 →</a>
+            {% endif %}
+        </nav>
+        {% endif %}
+
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">📝</div>
+            <h2 class="empty-state-title">작성한 글이 없습니다</h2>
+            <p class="empty-state-desc">첫 번째 좌표를 제보해보세요!</p>
+            <a href="{% url 'coordinates:create' %}" class="btn btn-primary">새 좌표 제보</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    .posts-page {
+        max-width: 800px;
+        margin: var(--spacing-xl) auto;
+    }
+
+    .page-header {
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .back-link {
+        display: inline-block;
+        margin-bottom: var(--spacing-md);
+        color: var(--text-secondary);
+    }
+
+    .filter-tabs {
+        display: flex;
+        gap: var(--spacing-sm);
+        margin-bottom: var(--spacing-lg);
+        padding: var(--spacing-sm);
+        background: var(--bg-primary);
+        border-radius: var(--radius-full);
+    }
+
+    .tab {
+        padding: var(--spacing-sm) var(--spacing-lg);
+        border-radius: var(--radius-full);
+        color: var(--text-secondary);
+        font-weight: 500;
+    }
+
+    .tab.active {
+        background: var(--primary);
+        color: white;
+    }
+
+    .posts-list {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-md);
+    }
+
+    .post-item {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-md);
+        padding: var(--spacing-md);
+        color: var(--text-primary);
+    }
+
+    .post-status {
+        flex-shrink: 0;
+    }
+
+    .post-content {
+        flex: 1;
+    }
+
+    .post-title {
+        font-size: 1rem;
+        margin-bottom: var(--spacing-xs);
+    }
+
+    .post-meta {
+        display: flex;
+        gap: var(--spacing-md);
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+    }
+
+    .post-stats {
+        display: flex;
+        gap: var(--spacing-md);
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+    }
+
+    @media (max-width: 480px) {
+        .filter-tabs {
+            flex-wrap: wrap;
+        }
+
+        .post-item {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .post-stats {
+            width: 100%;
+            justify-content: flex-start;
+        }
+    }
+</style>
+{% endblock %}

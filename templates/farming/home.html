@@ -1,0 +1,195 @@
+{% extends 'base.html' %}
+
+{% block title %}농사 게시판 - 피크민 다이어리{% endblock %}
+
+{% block content %}
+<div class="container farming-home">
+    <div class="farming-header">
+        <h1 class="page-title">🌻 농사 게시판</h1>
+        <p class="page-desc">빅플라워 농사를 도와주고, 나의 농사 기록을 공유하세요!</p>
+    </div>
+
+    <div class="farming-nav">
+        <a href="{% url 'farming:journal_list' %}" class="farming-nav-item">
+            <span class="nav-icon">📔</span>
+            <span class="nav-title">농사 일지</span>
+            <span class="nav-desc">나의 농사 기록 공유</span>
+        </a>
+        <a href="{% url 'farming:request_list' %}" class="farming-nav-item">
+            <span class="nav-icon">🙋</span>
+            <span class="nav-title">농사 요청</span>
+            <span class="nav-desc">꽃 심어주기 요청</span>
+        </a>
+        {% if user.is_authenticated %}
+        <a href="{% url 'farming:my_farming' %}" class="farming-nav-item">
+            <span class="nav-icon">👤</span>
+            <span class="nav-title">내 활동</span>
+            <span class="nav-desc">내 일지 &amp; 참여 기록</span>
+        </a>
+        {% endif %}
+    </div>
+
+    <div class="farming-sections">
+        <section class="farming-section">
+            <div class="section-header">
+                <h2>📔 최근 농사 일지</h2>
+                <a href="{% url 'farming:journal_list' %}" class="btn btn-text">더보기 →</a>
+            </div>
+            <div class="farming-grid">
+                {% for journal in recent_journals %}
+                <a href="{% url 'farming:journal_detail' journal.pk %}" class="farming-card">
+                    <div class="farming-card-content">
+                        <h3>{{ journal.title }}</h3>
+                        <p>{{ journal.author.nickname }} · {{ journal.created_at|date:"n/j" }}</p>
+                    </div>
+                </a>
+                {% empty %}
+                <p class="empty-text">아직 농사 일지가 없습니다.</p>
+                {% endfor %}
+            </div>
+        </section>
+
+        <section class="farming-section">
+            <div class="section-header">
+                <h2>🙋 모집중인 요청</h2>
+                <a href="{% url 'farming:request_list' %}" class="btn btn-text">더보기 →</a>
+            </div>
+            <div class="farming-grid">
+                {% for req in recent_requests %}
+                <a href="{% url 'farming:request_detail' req.pk %}" class="farming-card">
+                    <div class="farming-card-content">
+                        <h3>{{ req.title }}</h3>
+                        <p>{{ req.location_name }}</p>
+                    </div>
+                </a>
+                {% empty %}
+                <p class="empty-text">현재 모집중인 요청이 없습니다.</p>
+                {% endfor %}
+            </div>
+        </section>
+    </div>
+</div>
+
+<style>
+    .farming-header {
+        text-align: center;
+        padding: 2rem;
+        background: var(--bg-primary);
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-sm);
+        margin-bottom: 2rem;
+    }
+
+    .page-title {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .page-desc {
+        color: var(--text-secondary);
+    }
+
+    .farming-nav {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .farming-nav-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 1.5rem;
+        background: var(--bg-primary);
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-sm);
+        text-align: center;
+        transition: all 0.2s;
+    }
+
+    .farming-nav-item:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .nav-icon {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .nav-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .nav-desc {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+    }
+
+    .farming-section {
+        margin-bottom: 2rem;
+        padding: 1.5rem;
+        background: var(--bg-primary);
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .section-header h2 {
+        font-size: 1.3rem;
+        color: var(--text-primary);
+    }
+
+    .farming-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 1rem;
+    }
+
+    .farming-card {
+        background: var(--bg-secondary);
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        box-shadow: var(--shadow-sm);
+        transition: all 0.2s;
+    }
+
+    .farming-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .farming-card-content {
+        padding: 1rem;
+    }
+
+    .farming-card-content h3 {
+        font-size: 1.1rem;
+        margin-bottom: 0.25rem;
+        color: var(--text-primary);
+    }
+
+    .farming-card-content p {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+    }
+
+    .empty-text {
+        grid-column: 1 / -1;
+        text-align: center;
+        color: var(--text-secondary);
+        padding: 2rem;
+        background: var(--bg-secondary);
+        border-radius: var(--radius-lg);
+    }
+</style>
+{% endblock %}

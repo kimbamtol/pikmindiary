@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+
+{% block title %}좌표 삭제 - 피크민 다이어리{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="confirm-page">
+        <h1 class="page-title">🗑️ 좌표 삭제</h1>
+
+        <div class="confirm-box">
+            <div class="coordinate-preview">
+                <h2>{{ coordinate.title }}</h2>
+                <p class="meta">
+                    <span class="badge">{{ coordinate.get_category_display }}</span>
+                    <span>{{ coordinate.latitude }}, {{ coordinate.longitude }}</span>
+                </p>
+                {% if coordinate.description %}
+                <p class="description">{{ coordinate.description|truncatewords:30 }}</p>
+                {% endif %}
+            </div>
+
+            <div class="warning-text">
+                <p>⚠️ 정말로 이 좌표를 삭제하시겠습니까?</p>
+                <p>삭제된 좌표는 복구할 수 없습니다.</p>
+            </div>
+
+            <form method="post" class="delete-form">
+                {% csrf_token %}
+
+                <!-- 비회원 비밀번호 확인 -->
+                {% if not can_delete and coordinate.guest_password %}
+                <div class="form-group">
+                    <label class="form-label">비밀번호 *</label>
+                    <input type="password" name="password" class="form-control" required placeholder="작성 시 입력한 비밀번호">
+                </div>
+                {% endif %}
+
+                <div class="form-actions">
+                    <a href="{% url 'coordinates:detail' pk=coordinate.pk %}" class="btn btn-outline">취소</a>
+                    <button type="submit" class="btn btn-danger">삭제하기</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .confirm-page {
+        max-width: 500px;
+        margin: var(--spacing-xl) auto;
+        padding: var(--spacing-xl);
+        background: var(--bg-primary);
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-md);
+    }
+
+    .page-title {
+        text-align: center;
+        margin-bottom: var(--spacing-xl);
+        color: #C62828;
+    }
+
+    .coordinate-preview {
+        padding: var(--spacing-lg);
+        background: var(--bg-secondary);
+        border-radius: var(--radius-md);
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .coordinate-preview h2 {
+        font-size: 1.2rem;
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .coordinate-preview .meta {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        display: flex;
+        gap: var(--spacing-sm);
+        align-items: center;
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .coordinate-preview .description {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+    }
+
+    .warning-text {
+        text-align: center;
+        padding: var(--spacing-lg);
+        background: #FFEBEE;
+        border-radius: var(--radius-md);
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .warning-text p {
+        color: #C62828;
+        margin: var(--spacing-xs) 0;
+    }
+
+    .form-group {
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: var(--spacing-sm);
+        font-weight: 600;
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: space-between;
+        gap: var(--spacing-md);
+    }
+
+    .btn-danger {
+        background: #F44336;
+        color: white;
+    }
+
+    .btn-danger:hover {
+        background: #C62828;
+        color: white;
+    }
+</style>
+{% endblock %}

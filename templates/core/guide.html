@@ -1,0 +1,196 @@
+{% extends 'base.html' %}
+
+{% block title %}사이트 안내 - 피크민 다이어리{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="guide-page">
+        <h1 class="page-title">📖 사이트 안내</h1>
+
+        <div class="guide-section">
+            <h2>🌱 이 사이트는?</h2>
+            <p>
+                피크민 블룸을 플레이하는 유저들이 <strong>버섯, 빅플라워, 농사 정보</strong>를 공유하는 커뮤니티입니다.
+                좌표 제보, 농사 봉사, 데코 정보 등을 서로 나누고 검증합니다.
+            </p>
+        </div>
+
+        <div class="guide-section">
+            <h2>📝 좌표 제보 방법</h2>
+            <ol>
+                <li><strong>로그인</strong> (Google) 또는 <strong>비회원</strong>으로 글 작성 가능</li>
+                <li>카테고리 선택 (버섯/빅플라워/모종/기타)</li>
+                <li>좌표(위도, 경도) 입력</li>
+                <li>스크린샷 첨부 (최대 5장)</li>
+                <li>제출 후 <strong>관리자 승인</strong>을 거쳐 공개</li>
+            </ol>
+        </div>
+
+        <div class="guide-section">
+            <h2>🔍 좌표 검색 & 필터</h2>
+            <ul>
+                <li><strong>검색</strong>: 제목, 설명, 작성자 닉네임으로 검색</li>
+                <li><strong>카테고리</strong>: 버섯/빅플라워/모종 등으로 필터링</li>
+                <li><strong>정렬</strong>: 최신순, 좋아요순, 검증순</li>
+            </ul>
+        </div>
+
+        <div class="guide-section">
+            <h2>✅ 유효성 평가</h2>
+            <p>
+                좌표가 <strong>지금도 유효한지</strong> 다른 유저들이 평가합니다.
+            </p>
+            <div class="validity-example">
+                <button class="btn-validity valid">✅ 지금도 됨</button>
+                <button class="btn-validity invalid">❌ 이제 안 됨</button>
+            </div>
+            <p>
+                평가가 많이 쌓인 좌표는 <strong>"검증된 좌표"</strong>로 표시되고,
+                반대로 "이제 안 됨"이 많으면 <strong>"신뢰도 낮음"</strong> 배지가 붙습니다.
+            </p>
+        </div>
+
+        <div class="guide-section">
+            <h2>🏆 랭킹 시스템</h2>
+            <p>
+                활발한 기여자에게 점수가 부여됩니다!
+            </p>
+            <ul>
+                <li>승인된 글 작성: <strong>+10점</strong></li>
+                <li>받은 좋아요 (좌표): <strong>+2점</strong></li>
+                <li>받은 "지금도 됨" 평가: <strong>+3점</strong></li>
+                <li>받은 "이제 안 됨" 평가: <strong class="negative">-5점</strong></li>
+                <li>🌱 농사 일지 좋아요: <strong>+10점</strong></li>
+            </ul>
+            <p>전체/주간/월간 랭킹에서 상위 기여자를 확인할 수 있습니다.</p>
+            <p class="tip">💡 유효성 평가는 작성 후 1개월이 지난 글부터 가능합니다.</p>
+        </div>
+
+        <div class="guide-section">
+            <h2>⚠️ 주의사항</h2>
+            <ul>
+                <li>거짓 좌표 제보 시 계정이 정지될 수 있습니다.</li>
+                <li>부적절한 내용은 신고해주세요.</li>
+                <li>이 사이트는 Nintendo/Niantic과 무관합니다.</li>
+            </ul>
+        </div>
+
+        <div class="guide-actions">
+            <a href="{% url 'core:landing' %}" class="btn btn-outline">← 메인으로</a>
+            <a href="{% url 'core:mypage_guide' %}" class="btn btn-primary">마이페이지 안내 →</a>
+        </div>
+    </div>
+</div>
+
+<style>
+    .guide-page {
+        max-width: 800px;
+        margin: var(--spacing-xl) auto;
+        padding: var(--spacing-xl);
+        background: var(--bg-primary);
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-md);
+    }
+
+    .page-title {
+        text-align: center;
+        margin-bottom: var(--spacing-xl);
+        font-size: 2rem;
+    }
+
+    .guide-section {
+        margin-bottom: var(--spacing-xl);
+        padding-bottom: var(--spacing-xl);
+        border-bottom: 1px solid var(--bg-tertiary);
+    }
+
+    .guide-section:last-of-type {
+        border-bottom: none;
+    }
+
+    .guide-section h2 {
+        font-size: 1.3rem;
+        margin-bottom: var(--spacing-md);
+        color: var(--primary);
+    }
+
+    .guide-section p {
+        color: var(--text-secondary);
+        line-height: 1.8;
+    }
+
+    .guide-section ol,
+    .guide-section ul {
+        padding-left: var(--spacing-lg);
+        color: var(--text-secondary);
+    }
+
+    .guide-section li {
+        margin-bottom: var(--spacing-sm);
+        line-height: 1.6;
+    }
+
+    .guide-section ol {
+        list-style: decimal;
+    }
+
+    .guide-section ul {
+        list-style: disc;
+    }
+
+    .validity-example {
+        display: flex;
+        gap: var(--spacing-md);
+        margin: var(--spacing-md) 0;
+    }
+
+    .btn-validity {
+        padding: var(--spacing-sm) var(--spacing-md);
+        border-radius: var(--radius-md);
+        font-weight: 600;
+        cursor: default;
+    }
+
+    .btn-validity.valid {
+        background: #E8F5E9;
+        color: #2E7D32;
+        border: 2px solid #4CAF50;
+    }
+
+    .btn-validity.invalid {
+        background: #FFEBEE;
+        color: #C62828;
+        border: 2px solid #F44336;
+    }
+
+    .guide-actions {
+        display: flex;
+        justify-content: space-between;
+        gap: var(--spacing-md);
+        margin-top: var(--spacing-xl);
+    }
+
+    .negative {
+        color: #C62828;
+    }
+
+    .tip {
+        font-size: 0.9rem;
+        color: var(--primary);
+        margin-top: var(--spacing-sm);
+        padding: var(--spacing-sm) var(--spacing-md);
+        background: var(--primary-light);
+        border-radius: var(--radius-md);
+    }
+
+    @media (max-width: 480px) {
+        .guide-page {
+            padding: var(--spacing-md);
+        }
+
+        .guide-actions {
+            flex-direction: column;
+        }
+    }
+</style>
+{% endblock %}

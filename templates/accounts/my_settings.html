@@ -1,0 +1,695 @@
+{% extends 'base.html' %}
+
+{% block title %}계정 설정 - 피크민 다이어리{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="settings-page">
+        <div class="page-header">
+            <a href="{% url 'accounts:my_page' %}" class="back-link">← 마이페이지</a>
+            <h1 class="page-title">⚙️ 계정 설정</h1>
+        </div>
+
+        <form method="post" enctype="multipart/form-data" class="settings-form card">
+            {% csrf_token %}
+
+            <!-- 프로필 이미지 -->
+            <div class="form-group">
+                <label class="form-label">프로필 이미지</label>
+                <div class="avatar-upload">
+                    <div class="current-avatar">
+                        {% if user.profile_image %}
+                        <img src="{{ user.profile_image.url }}" alt="{{ user.nickname }}">
+                        {% else %}
+                        <div class="avatar-placeholder">{{ user.nickname|slice:":1" }}</div>
+                        {% endif %}
+                    </div>
+                    <input type="file" name="profile_image" accept="image/*" class="form-control">
+                </div>
+            </div>
+
+            <!-- 닉네임 -->
+            <div class="form-group">
+                <label class="form-label">닉네임</label>
+                <input type="text" name="nickname" value="{{ user.nickname }}" class="form-control" maxlength="30"
+                    required>
+            </div>
+
+            <!-- 자기소개 -->
+            <div class="form-group">
+                <label class="form-label">자기소개</label>
+                <textarea name="bio" class="form-control" rows="3" maxlength="200">{{ user.bio }}</textarea>
+            </div>
+
+            <!-- 프로필 이모지 (랭킹 등록 사용자 또는 관리자) -->
+            {% if user.has_ranking or can_customize %}
+            <div class="form-group">
+                <label class="form-label">프로필 이모지 🏅</label>
+                <div class="emoji-selector">
+                    <span class="emoji-preview" id="emoji-preview">{{ user.profile_emoji|default:"선택" }}</span>
+                    <select name="profile_emoji" id="profile-emoji-select" class="form-control">
+                        <option value="">이모지 없음</option>
+                        {% for emoji in pikmin_emojis %}
+                            <option value="{{ emoji }}" {% if user.profile_emoji == emoji %}selected{% endif %}>
+                                {{ emoji }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <small class="form-help">닉네임 왼쪽에 표시됩니다.</small>
+            </div>
+            {% endif %}
+
+            <!-- 배지 커스터마이즈 (랭커 또는 관리자) -->
+            {% if can_customize %}
+            <div class="form-group title-selection">
+                <label class="form-label">🎨 배지 커스터마이즈</label>
+                {% if user.special_title %}
+                <div class="admin-title-notice">
+                    <span class="notice-icon">👑</span>
+                    관리자가 부여한 칭호가 있습니다: <strong>{{ user.get_special_title_display }}</strong>
+                    <br><small>관리자 부여 칭호가 우선 적용됩니다.</small>
+                </div>
+                {% endif %}
+
+                <!-- 미리보기 -->
+                <div class="title-preview-section">
+                    <label class="form-label-small">미리보기</label>
+                    <div class="title-preview-box">
+                        <span class="author-badge" id="title-preview-badge"
+                              data-style="{{ user.badge_style }}"
+                              data-title="{{ user.selected_title }}">
+                            <span class="profile-emoji" id="preview-emoji"
+                                  style="{% if not user.profile_emoji %}display:none{% endif %}">{{ user.profile_emoji }}</span>
+                            <span class="author-name" id="preview-name">{{ user.nickname }}</span>
+                            <span class="special-title-tag" id="preview-title"
+                                  style="{% if not user.selected_title %}display:none{% endif %}"></span>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- 칭호 선택 -->
+                <div class="customize-row">
+                    <label class="form-label-small">칭호</label>
+                    <select name="selected_title" id="title-select" class="form-control">
+                        <option value="" data-label="">칭호 없음</option>
+                        {% for code, label in available_titles %}
+                        <option value="{{ code }}"
+                                {% if user.selected_title == code %}selected{% endif %}
+                                data-label="{{ label }}">
+                            {{ label }}
+                            {% if code == 'explorer' %}(달리는거북이님 전용){% elif code in user.PREMIUM_TITLES and not user.is_admin_user %}(1위 전용){% endif %}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- 스타일 선택 -->
+                <div class="customize-row">
+                    <label class="form-label-small">스타일</label>
+                    <select name="badge_style" id="badge-style-select" class="form-control">
+                        {% for code, label in badge_styles %}
+                        <option value="{{ code }}" {% if user.badge_style == code %}selected{% endif %}>
+                            {{ label }}{% if code == 'underline' %} (달리는거북이님 전용){% endif %}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- 닉네임 색상 -->
+                <div class="customize-row">
+                    <label class="form-label-small">닉네임 색상</label>
+                    <select name="nickname_color" id="nickname-color-select" class="form-control">
+                        {% for code, label in color_choices %}
+                        <option value="{{ code }}" {% if user.nickname_color == code %}selected{% endif %}>
+                            {{ label }}{% if code == 'rainbow' %} (달리는거북이님 전용){% endif %}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- 닉네임 배경 색상 -->
+                <div class="customize-row">
+                    <label class="form-label-small">닉네임 배경 색상</label>
+                    <select name="nickname_bg_color" id="nickname-bg-color-select" class="form-control">
+                        {% for code, label in color_choices %}
+                        <option value="{{ code }}" {% if user.nickname_bg_color == code %}selected{% endif %}>
+                            {{ label }}{% if code == 'rainbow' %} (달리는거북이님 전용){% endif %}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- 칭호 글자 색상 -->
+                <div class="customize-row">
+                    <label class="form-label-small">칭호 글자 색상</label>
+                    <select name="title_color" id="title-color-select" class="form-control">
+                        {% for code, label in color_choices %}
+                        <option value="{{ code }}" {% if user.title_color == code %}selected{% endif %}>
+                            {{ label }}{% if code == 'rainbow' %} (달리는거북이님 전용){% endif %}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- 색상 경고 메시지 -->
+                <div class="color-warning" id="color-warning" style="display: none;">
+                    ⚠️ 글자색과 배경색이 같으면 글자가 보이지 않을 수 있어요!
+                </div>
+
+                <small class="form-help">
+                    {% if user.is_admin_user %}
+                    👑 관리자 - 모든 옵션 사용 가능
+                    {% elif ranking_position %}
+                    🥇 현재 순위: {{ ranking_position }}위 |
+                    {% if ranking_position == 1 %}모든 칭호 선택 가능{% else %}일반 칭호만 선택 가능{% endif %}
+                    {% endif %}
+                </small>
+            </div>
+            {% elif ranking_position %}
+            <div class="form-group">
+                <label class="form-label">🏆 특별 칭호</label>
+                <p class="form-hint">상위 3위 내에 들면 특별 칭호를 선택할 수 있습니다.</p>
+            </div>
+            {% endif %}
+
+            <!-- 이메일 (읽기 전용) -->
+            <div class="form-group">
+                <label class="form-label">이메일</label>
+                <input type="email" value="{{ user.email }}" class="form-control" disabled>
+                <small class="form-help">이메일은 변경할 수 없습니다.</small>
+            </div>
+
+            <div class="form-actions">
+                <a href="{% url 'accounts:my_page' %}" class="btn btn-outline">취소</a>
+                <button type="submit" class="btn btn-primary">저장</button>
+            </div>
+        </form>
+
+        <!-- 위험 영역 -->
+        <div class="danger-zone card">
+            <h3>⚠️ 계정 관리</h3>
+            <p>로그아웃하거나 계정을 관리합니다.</p>
+            <div class="danger-actions">
+                <a href="{% url 'account_logout' %}" class="btn btn-outline">로그아웃</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .settings-page {
+        max-width: 600px;
+        margin: var(--spacing-xl) auto;
+    }
+
+    .page-header {
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .back-link {
+        display: inline-block;
+        margin-bottom: var(--spacing-md);
+        color: var(--text-secondary);
+    }
+
+    .settings-form {
+        padding: var(--spacing-xl);
+        margin-bottom: var(--spacing-xl);
+    }
+
+    .avatar-upload {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-lg);
+    }
+
+    .current-avatar {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        overflow: hidden;
+        flex-shrink: 0;
+    }
+
+    .current-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .avatar-placeholder {
+        width: 100%;
+        height: 100%;
+        background: var(--primary);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        font-weight: 700;
+    }
+
+    .form-group {
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .form-help {
+        display: block;
+        margin-top: var(--spacing-xs);
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: var(--spacing-md);
+        padding-top: var(--spacing-lg);
+        border-top: 1px solid var(--bg-tertiary);
+    }
+
+    .danger-zone {
+        padding: var(--spacing-lg);
+        border: 2px solid #FFCDD2;
+        background: #FFEBEE;
+    }
+
+    .danger-zone h3 {
+        color: #C62828;
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .danger-zone p {
+        color: var(--text-secondary);
+        margin-bottom: var(--spacing-md);
+    }
+
+    /* 이모지 선택기 */
+    .emoji-selector {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-md);
+    }
+
+    .emoji-preview {
+        font-size: 2.5em;
+        min-width: 50px;
+        min-height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px dashed var(--bg-tertiary);
+        border-radius: 8px;
+        padding: var(--spacing-sm);
+    }
+
+    #profile-emoji-select {
+        flex: 1;
+        font-size: 1.2em;
+    }
+
+    /* 칭호 선택 섹션 */
+    .title-selection {
+        background: linear-gradient(135deg, #FFF8E1, #FFECB3);
+        padding: var(--spacing-lg);
+        border-radius: var(--radius-lg);
+        border: 2px solid #FFD54F;
+    }
+
+    .admin-title-notice {
+        background: #E8F5E9;
+        padding: var(--spacing-md);
+        border-radius: var(--radius-md);
+        border: 1px solid #81C784;
+        margin-bottom: var(--spacing-md);
+        color: #2E7D32;
+    }
+
+    .admin-title-notice .notice-icon {
+        font-size: 1.2em;
+        margin-right: var(--spacing-xs);
+    }
+
+    .title-preview-section {
+        background: var(--bg-primary);
+        padding: var(--spacing-md);
+        border-radius: var(--radius-md);
+        margin-bottom: var(--spacing-md);
+    }
+
+    .form-label-small {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin-bottom: var(--spacing-sm);
+        display: block;
+    }
+
+    .title-preview-box {
+        padding: var(--spacing-lg);
+        background: #ffffff;
+        border-radius: var(--radius-md);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 60px;
+        border: 1px solid var(--bg-tertiary);
+    }
+
+    .customize-row {
+        margin-bottom: var(--spacing-md);
+    }
+
+    .customize-row select {
+        margin-top: var(--spacing-xs);
+    }
+
+    /* 미리보기용 배지 스타일 */
+    .title-preview-box .author-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .title-preview-box .profile-emoji {
+        font-size: 1.5em;
+        line-height: 1;
+        min-width: 1.5em;
+        text-align: center;
+    }
+
+    .title-preview-box .author-name {
+        font-weight: 600;
+        padding: 6px 12px;
+        border-radius: 4px;
+        position: relative;
+        transition: all 0.3s ease;
+    }
+
+    .title-preview-box .special-title-tag {
+        font-size: 0.8em;
+        padding: 3px 8px;
+        border-radius: 4px;
+        background-color: rgba(255, 215, 0, 0.25);
+        color: #5D4E0E;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        position: relative;
+        z-index: 1;
+    }
+
+    /* ============ 스타일별 CSS ============ */
+
+    /* 기본 (배경만) */
+    .title-preview-box .author-badge.style-default .author-name {
+        background: linear-gradient(135deg, rgba(255, 107, 107, 0.08), rgba(72, 219, 251, 0.08));
+    }
+
+    /* 언더라인만 */
+    .title-preview-box .author-badge.style-underline .author-name {
+        background: transparent;
+    }
+    .title-preview-box .author-badge.style-underline .author-name::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb, #a29bfe, #ff6b6b);
+        background-size: 200% 100%;
+        border-radius: 0 0 4px 4px;
+        animation: slide-underline 2s linear infinite;
+    }
+
+    /* 배경만 */
+    .title-preview-box .author-badge.style-background .author-name {
+        background: linear-gradient(135deg, rgba(255, 107, 107, 0.12), rgba(72, 219, 251, 0.12));
+        border-radius: 6px;
+    }
+
+    /* 글로우 효과 */
+    .title-preview-box .author-badge.style-glow .author-name {
+        background: transparent;
+        text-shadow: 0 0 10px rgba(255, 107, 107, 0.5), 0 0 20px rgba(72, 219, 251, 0.3);
+        animation: glow-pulse 2s ease-in-out infinite;
+    }
+    .title-preview-box .author-badge.style-glow .author-name::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, #ff6b6b, #48dbfb);
+        box-shadow: 0 0 10px rgba(255, 107, 107, 0.5);
+        border-radius: 1px;
+    }
+
+    @keyframes slide-underline {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+    }
+
+    @keyframes glow-pulse {
+        0%, 100% { text-shadow: 0 0 10px rgba(255, 107, 107, 0.5), 0 0 20px rgba(72, 219, 251, 0.3); }
+        50% { text-shadow: 0 0 20px rgba(255, 107, 107, 0.8), 0 0 30px rgba(72, 219, 251, 0.5); }
+    }
+
+    /* ============ 색상별 CSS ============ */
+    .title-preview-box .color-red { color: #e74c3c !important; }
+    .title-preview-box .color-orange { color: #e67e22 !important; }
+    .title-preview-box .color-yellow { color: #d4a000 !important; }
+    .title-preview-box .color-green { color: #27ae60 !important; }
+    .title-preview-box .color-blue { color: #3498db !important; }
+    .title-preview-box .color-purple { color: #9b59b6 !important; }
+    .title-preview-box .color-pink { color: #e91e63 !important; }
+    .title-preview-box .color-rainbow {
+        background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb, #a29bfe, #ff6b6b) !important;
+        background-size: 300% 100% !important;
+        -webkit-background-clip: text !important;
+        -webkit-text-fill-color: transparent !important;
+        background-clip: text !important;
+        animation: rainbow-shift 3s linear infinite !important;
+        text-shadow:
+            -1px -1px 0 rgba(0,0,0,0.1),
+            1px -1px 0 rgba(0,0,0,0.1),
+            -1px 1px 0 rgba(0,0,0,0.1),
+            1px 1px 0 rgba(0,0,0,0.1);
+        filter: drop-shadow(0 0 1px rgba(0,0,0,0.2));
+    }
+
+    @keyframes rainbow-shift {
+        0% { background-position: 0% 50%; }
+        100% { background-position: 300% 50%; }
+    }
+
+    /* 칭호 글자 색상 - 배경색 투명 유지 */
+    .title-preview-box .special-title-tag.title-text-red { color: #c0392b !important; background-color: transparent; }
+    .title-preview-box .special-title-tag.title-text-orange { color: #d35400 !important; background-color: transparent; }
+    .title-preview-box .special-title-tag.title-text-yellow { color: #a67c00 !important; background-color: transparent; }
+    .title-preview-box .special-title-tag.title-text-green { color: #1e8449 !important; background-color: transparent; }
+    .title-preview-box .special-title-tag.title-text-blue { color: #2980b9 !important; background-color: transparent; }
+    .title-preview-box .special-title-tag.title-text-purple { color: #8e44ad !important; background-color: transparent; }
+    .title-preview-box .special-title-tag.title-text-pink { color: #c2185b !important; background-color: transparent; }
+    .title-preview-box .special-title-tag.title-text-rainbow {
+        background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb, #a29bfe, #ff6b6b) !important;
+        background-size: 300% 100% !important;
+        -webkit-background-clip: text !important;
+        -webkit-text-fill-color: transparent !important;
+        background-clip: text !important;
+        animation: rainbow-shift 3s linear infinite !important;
+    }
+
+    /* 피크민 탐험가 전용 반짝이는 효과 - 배경에만 적용 */
+    .title-preview-box .special-title-tag.title-explorer-shine {
+        position: relative;
+        overflow: hidden;
+        background-color: rgba(255, 215, 0, 0.2) !important;
+    }
+    .title-preview-box .special-title-tag.title-explorer-shine::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 50%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+        animation: explorer-shine 2s ease-in-out infinite;
+        z-index: -1;
+    }
+
+    @keyframes explorer-shine {
+        0% { left: -100%; }
+        50%, 100% { left: 150%; }
+    }
+
+    /* 색상 경고 메시지 */
+    .color-warning {
+        background: #FFF3CD;
+        border: 1px solid #FFCA28;
+        color: #856404;
+        padding: var(--spacing-sm) var(--spacing-md);
+        border-radius: var(--radius-md);
+        margin-top: var(--spacing-md);
+        font-size: 0.9rem;
+    }
+
+    /* 닉네임 배경 색상 */
+    .title-preview-box .author-name.nickname-bg-red { background: rgba(231, 76, 60, 0.15) !important; }
+    .title-preview-box .author-name.nickname-bg-orange { background: rgba(230, 126, 34, 0.15) !important; }
+    .title-preview-box .author-name.nickname-bg-yellow { background: rgba(241, 196, 15, 0.2) !important; }
+    .title-preview-box .author-name.nickname-bg-green { background: rgba(39, 174, 96, 0.15) !important; }
+    .title-preview-box .author-name.nickname-bg-blue { background: rgba(52, 152, 219, 0.15) !important; }
+    .title-preview-box .author-name.nickname-bg-purple { background: rgba(155, 89, 182, 0.15) !important; }
+    .title-preview-box .author-name.nickname-bg-pink { background: rgba(233, 30, 99, 0.15) !important; }
+    .title-preview-box .author-name.nickname-bg-rainbow {
+        background: linear-gradient(90deg, rgba(255,107,107,0.15), rgba(254,202,87,0.15), rgba(72,219,251,0.15), rgba(162,155,254,0.15)) !important;
+        animation: rainbow-bg 3s linear infinite !important;
+        background-size: 300% 100% !important;
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const emojiSelect = document.getElementById('profile-emoji-select');
+    const emojiPreview = document.getElementById('emoji-preview');
+    const titleSelect = document.getElementById('title-select');
+    const styleSelect = document.getElementById('badge-style-select');
+    const nicknameColorSelect = document.getElementById('nickname-color-select');
+    const titleColorSelect = document.getElementById('title-color-select');
+    const nicknameBgColorSelect = document.getElementById('nickname-bg-color-select');
+    const colorWarning = document.getElementById('color-warning');
+    const previewBadge = document.getElementById('title-preview-badge');
+    const previewName = document.getElementById('preview-name');
+    const previewTitle = document.getElementById('preview-title');
+    const previewEmoji = document.getElementById('preview-emoji');
+
+    // 칭호 아이콘 매핑 (사용 안함)
+    const titleIcons = {};
+
+    // 이모지 미리보기
+    if (emojiSelect && emojiPreview) {
+        emojiSelect.addEventListener('change', function() {
+            emojiPreview.textContent = this.value || '선택';
+            updatePreview();
+        });
+    }
+
+    // 모든 셀렉트에 change 이벤트 추가
+    [titleSelect, styleSelect, nicknameColorSelect, nicknameBgColorSelect, titleColorSelect].forEach(function(select) {
+        if (select) {
+            select.addEventListener('change', updatePreview);
+        }
+    });
+
+
+    // 초기 미리보기 업데이트
+    updatePreview();
+
+    function updatePreview() {
+        if (!previewBadge) return;
+
+        // 칭호 정보
+        const titleCode = titleSelect ? titleSelect.value : '';
+        const selectedOption = titleSelect ? titleSelect.options[titleSelect.selectedIndex] : null;
+        const titleLabel = selectedOption ? selectedOption.getAttribute('data-label') : '';
+
+        // 스타일 및 색상
+        const badgeStyle = styleSelect ? styleSelect.value : 'default';
+        const nicknameColor = nicknameColorSelect ? nicknameColorSelect.value : '';
+        const nicknameBgColor = nicknameBgColorSelect ? nicknameBgColorSelect.value : '';
+        const titleColor = titleColorSelect ? titleColorSelect.value : '';
+
+        // 배지 클래스 초기화
+        previewBadge.className = 'author-badge';
+
+        // 스타일 적용 (칭호 선택과 무관하게 사용자가 선택한 스타일만 적용)
+        if (badgeStyle && badgeStyle !== 'default') {
+            previewBadge.classList.add('style-' + badgeStyle);
+        }
+
+        // 닉네임 색상 적용
+        if (previewName) {
+            previewName.className = 'author-name';
+            if (nicknameColor) {
+                previewName.classList.add('color-' + nicknameColor);
+            }
+            if (nicknameBgColor) {
+                previewName.classList.add('nickname-bg-' + nicknameBgColor);
+            }
+        }
+
+        // 칭호 표시
+        if (previewTitle) {
+            if (titleCode && titleLabel) {
+                previewTitle.style.display = 'inline';
+                previewTitle.textContent = titleLabel;
+                previewTitle.className = 'special-title-tag';
+
+                // 색상 맵핑
+                const colorMap = {
+                    'red': '#c0392b',
+                    'orange': '#d35400',
+                    'yellow': '#a67c00',
+                    'green': '#1e8449',
+                    'blue': '#2980b9',
+                    'purple': '#8e44ad',
+                    'pink': '#c2185b'
+                };
+
+                // 스타일 초기화
+                previewTitle.style.color = '';
+                previewTitle.style.backgroundColor = '';
+                previewTitle.style.background = '';
+                previewTitle.style.webkitBackgroundClip = '';
+                previewTitle.style.webkitTextFillColor = '';
+                previewTitle.style.animation = '';
+
+                // 피크민 탐험가(explorer)일 때만 반짝이는 효과 적용
+                if (titleCode === 'explorer') {
+                    previewTitle.classList.add('title-explorer-shine');
+                }
+
+                // 칭호 글자 색상 (인라인 스타일로 적용)
+                if (titleColor && titleColor !== 'rainbow') {
+                    previewTitle.style.color = colorMap[titleColor] || '';
+                } else if (titleColor === 'rainbow') {
+                    previewTitle.classList.add('title-text-rainbow');
+                }
+            } else {
+                previewTitle.style.display = 'none';
+            }
+        }
+
+        // 색상 경고 체크
+        checkColorWarning(nicknameColor, nicknameBgColor);
+
+        // 이모지 표시
+        if (previewEmoji) {
+            const emoji = emojiSelect ? emojiSelect.value : '';
+            if (emoji) {
+                previewEmoji.textContent = emoji;
+                previewEmoji.style.display = 'inline';
+            } else {
+                previewEmoji.style.display = 'none';
+            }
+        }
+    }
+
+    // 색상 경고 체크 함수
+    function checkColorWarning(nicknameColor, nicknameBgColor) {
+        if (!colorWarning) return;
+
+        let showWarning = false;
+
+        // 닉네임: 글자색과 배경색이 같은지 체크 (둘 다 값이 있을 때만)
+        if (nicknameColor && nicknameBgColor && nicknameColor === nicknameBgColor) {
+            showWarning = true;
+        }
+
+        colorWarning.style.display = showWarning ? 'block' : 'none';
+    }
+});
+</script>
+{% endblock %}

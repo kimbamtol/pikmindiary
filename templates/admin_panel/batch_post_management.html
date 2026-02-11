@@ -1,0 +1,368 @@
+{% extends 'base.html' %}
+
+{% block title %}게시글 일괄 관리 - 관리자{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="admin-page">
+        <div class="page-header">
+            <h1>📋 게시글 일괄 관리</h1>
+            <a href="{% url 'admin_panel:dashboard' %}" class="btn btn-outline">← 대시보드</a>
+        </div>
+
+        <!-- 검색/필터 -->
+        <form method="get" class="search-filter-form">
+            <input type="text" name="q" value="{{ query }}" placeholder="제목 검색..." class="form-control">
+            <select name="status" class="form-control">
+                <option value="">전체 상태</option>
+                {% for value, label in status_choices %}
+                <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="btn btn-primary">검색</button>
+        </form>
+
+        <!-- 일괄 작업 버튼 -->
+        <div class="batch-actions">
+            <label class="select-all-label">
+                <input type="checkbox" id="selectAll"> 전체 선택
+            </label>
+            <button type="button" class="btn btn-danger" id="batchDeleteBtn">🗑️ 선택 삭제</button>
+            <button type="button" class="btn btn-warning" id="openBanModal">🚫 작성자 정지</button>
+            <a href="{% url 'admin_panel:ban_list' %}" class="btn btn-outline">📋 정지 목록</a>
+        </div>
+
+        <!-- 게시글 목록 -->
+        <form method="post" action="{% url 'admin_panel:batch_delete_posts' %}" id="batchForm">
+            {% csrf_token %}
+            <div class="post-grid">
+                {% for coord in page_obj %}
+                <div class="post-card">
+                    <div class="post-checkbox">
+                        <input type="checkbox" name="post_ids" value="{{ coord.pk }}"
+                            data-author-id="{{ coord.author.pk|default:'' }}"
+                            data-author-name="{{ coord.author.nickname|default:'비회원' }}">
+                    </div>
+                    <div class="post-image">
+                        {% if coord.images.first %}
+                        <img src="{{ coord.images.first.image.url }}" alt="">
+                        {% else %}
+                        <div class="no-image">📷</div>
+                        {% endif %}
+                    </div>
+                    <div class="post-info">
+                        <div class="post-title">{{ coord.title|truncatechars:20 }}</div>
+                        <div class="post-meta">
+                            <span class="post-author">{{ coord.author.nickname|default:"비회원" }}</span>
+                            <span class="post-status status-{{ coord.status|lower }}">{{ coord.get_status_display
+                                }}</span>
+                        </div>
+                        <div class="post-date">{{ coord.created_at|date:"m/d H:i" }}</div>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="empty-message">표시할 게시글이 없습니다.</p>
+                {% endfor %}
+            </div>
+        </form>
+
+        <!-- 페이지네이션 -->
+        {% if page_obj.has_other_pages %}
+        <div class="pagination">
+            {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}&q={{ query }}&status={{ status_filter }}">← 이전</a>
+            {% endif %}
+            <span>{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+            {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}&q={{ query }}&status={{ status_filter }}">다음 →</a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- 정지 모달 -->
+<div class="modal" id="banModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>🚫 작성자 정지</h3>
+            <button class="modal-close" id="closeBanModal">×</button>
+        </div>
+        <form method="post" action="{% url 'admin_panel:ban_user' %}">
+            {% csrf_token %}
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>정지 대상</label>
+                    <div id="banTargetInfo" class="ban-target-info">선택된 게시글의 작성자를 정지합니다.</div>
+                    <input type="hidden" name="user_id" id="banUserId">
+                </div>
+                <div class="form-group">
+                    <label>정지 기간</label>
+                    <select name="duration" class="form-control">
+                        {% for value, label in ban_durations %}
+                        <option value="{{ value }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>정지 사유</label>
+                    <textarea name="reason" class="form-control" rows="3" placeholder="정지 사유를 입력하세요"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" id="cancelBan">취소</button>
+                <button type="submit" class="btn btn-danger">정지하기</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .admin-page {
+        max-width: 1200px;
+        margin: var(--spacing-xl) auto;
+        padding: var(--spacing-lg);
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: var(--spacing-xl);
+    }
+
+    .search-filter-form {
+        display: flex;
+        gap: var(--spacing-md);
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .search-filter-form input[type="text"] {
+        flex: 1;
+    }
+
+    .batch-actions {
+        display: flex;
+        gap: var(--spacing-md);
+        align-items: center;
+        margin-bottom: var(--spacing-lg);
+        padding: var(--spacing-md);
+        background: var(--bg-secondary);
+        border-radius: var(--radius-md);
+    }
+
+    .select-all-label {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+        cursor: pointer;
+    }
+
+    .post-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: var(--spacing-md);
+    }
+
+    .post-card {
+        background: var(--bg-primary);
+        border-radius: var(--radius-md);
+        overflow: hidden;
+        box-shadow: var(--shadow-sm);
+        position: relative;
+    }
+
+    .post-checkbox {
+        position: absolute;
+        top: 8px;
+        left: 8px;
+        z-index: 10;
+    }
+
+    .post-checkbox input {
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+    }
+
+    .post-image {
+        width: 100%;
+        aspect-ratio: 1;
+        overflow: hidden;
+    }
+
+    .post-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .no-image {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--bg-secondary);
+        font-size: 2rem;
+    }
+
+    .post-info {
+        padding: var(--spacing-sm);
+    }
+
+    .post-title {
+        font-weight: 600;
+        margin-bottom: 4px;
+    }
+
+    .post-meta {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.8rem;
+        margin-bottom: 4px;
+    }
+
+    .post-status {
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 0.7rem;
+    }
+
+    .status-pending {
+        background: #FFF3E0;
+        color: #E65100;
+    }
+
+    .status-approved {
+        background: #E8F5E9;
+        color: #2E7D32;
+    }
+
+    .status-rejected {
+        background: #FFEBEE;
+        color: #C62828;
+    }
+
+    .post-date {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+    }
+
+    /* 모달 */
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 2000;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal.open {
+        display: flex;
+    }
+
+    .modal-content {
+        background: white;
+        border-radius: var(--radius-xl);
+        max-width: 500px;
+        width: 90%;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .modal-header {
+        padding: var(--spacing-lg);
+        border-bottom: 1px solid #eee;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .modal-close {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+    }
+
+    .modal-body {
+        padding: var(--spacing-lg);
+    }
+
+    .modal-footer {
+        padding: var(--spacing-lg);
+        border-top: 1px solid #eee;
+        display: flex;
+        justify-content: flex-end;
+        gap: var(--spacing-md);
+    }
+
+    .ban-target-info {
+        padding: var(--spacing-md);
+        background: var(--bg-secondary);
+        border-radius: var(--radius-md);
+        margin-top: var(--spacing-sm);
+    }
+
+    .pagination {
+        display: flex;
+        justify-content: center;
+        gap: var(--spacing-lg);
+        margin-top: var(--spacing-xl);
+    }
+</style>
+
+<script>
+    // 전체 선택
+    document.getElementById('selectAll').addEventListener('change', function () {
+        document.querySelectorAll('input[name="post_ids"]').forEach(cb => {
+            cb.checked = this.checked;
+        });
+    });
+
+    // 일괄 삭제
+    document.getElementById('batchDeleteBtn').addEventListener('click', function () {
+        const checked = document.querySelectorAll('input[name="post_ids"]:checked');
+        if (checked.length === 0) {
+            alert('삭제할 게시글을 선택하세요.');
+            return;
+        }
+        if (confirm(checked.length + '개의 게시글을 삭제하시겠습니까?')) {
+            document.getElementById('batchForm').submit();
+        }
+    });
+
+    // 정지 모달
+    const banModal = document.getElementById('banModal');
+
+    document.getElementById('openBanModal').addEventListener('click', function () {
+        const checked = document.querySelector('input[name="post_ids"]:checked');
+        if (!checked) {
+            alert('정지할 작성자의 게시글을 선택하세요.');
+            return;
+        }
+
+        const authorId = checked.dataset.authorId;
+        const authorName = checked.dataset.authorName;
+
+        document.getElementById('banUserId').value = authorId;
+        document.getElementById('banTargetInfo').textContent = authorName + '님을 정지합니다.';
+
+        banModal.classList.add('open');
+    });
+
+    document.getElementById('closeBanModal').addEventListener('click', function () {
+        banModal.classList.remove('open');
+    });
+
+    document.getElementById('cancelBan').addEventListener('click', function () {
+        banModal.classList.remove('open');
+    });
+</script>
+{% endblock %}

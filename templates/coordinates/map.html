@@ -1,0 +1,1104 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}피크민 좌표 지도 - 버섯, 모종, 빅플라워 위치 지도 | 피크민 다이어리{% endblock %}
+{% block description %}피크민 블룸 지도로 주변 버섯, 모종, 빅플라워 좌표를 한눈에 확인하세요. 피크민 엽서 위치를 쉽게 찾을 수 있습니다.{% endblock %}
+{% block og_title %}피크민 좌표 지도 - 피크민 블룸 위치 지도{% endblock %}
+
+{% block extra_css %}
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<!-- MarkerCluster CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+
+<style>
+    .map-container {
+        position: relative;
+        width: 100%;
+        height: calc(100vh - 60px);
+    }
+
+    #map {
+        width: 100%;
+        height: 100%;
+        z-index: 1;
+    }
+
+    .map-controls {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        z-index: 1001;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        transition: left 0.3s ease;
+    }
+
+    .map-controls.sidebar-open {
+        left: 330px;
+    }
+
+    .map-filters {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        z-index: 1000;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .back-btn,
+    .list-btn,
+    .location-btn,
+    .report-btn {
+        background: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        font-weight: 600;
+        color: var(--primary);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+    }
+
+    .back-btn:hover,
+    .list-btn:hover,
+    .location-btn:hover {
+        background: var(--primary);
+        color: white;
+    }
+
+    .report-btn {
+        background: #3498db;
+        color: white;
+    }
+
+    .report-btn:hover {
+        background: #2980b9;
+    }
+
+    .list-btn.active,
+    .location-btn.active {
+        background: var(--primary);
+        color: white;
+    }
+
+    .filter-box {
+        background: white;
+        padding: 10px 15px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .filter-box label {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        cursor: pointer;
+        font-size: 0.9rem;
+    }
+
+    .filter-box input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+    }
+
+    /* 리스트 사이드바 */
+    .list-sidebar {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 320px;
+        height: 100%;
+        background: white;
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+        z-index: 1002;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .list-sidebar.open {
+        transform: translateX(0);
+    }
+
+    .list-header {
+        padding: 15px;
+        border-bottom: 1px solid #eee;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: var(--primary);
+        color: white;
+    }
+
+    .list-header h3 {
+        margin: 0;
+        font-size: 1rem;
+    }
+
+    .list-close {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 1.5rem;
+        cursor: pointer;
+        padding: 0;
+        line-height: 1;
+    }
+
+    .list-content {
+        flex: 1;
+        overflow-y: auto;
+        padding: 10px;
+    }
+
+    .list-item {
+        display: flex;
+        gap: 10px;
+        padding: 10px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background 0.2s;
+        border-bottom: 1px solid #eee;
+    }
+
+    .list-item:hover {
+        background: #f5f5f5;
+    }
+
+    .list-item-image {
+        width: 60px;
+        height: 60px;
+        border-radius: 6px;
+        object-fit: cover;
+        flex-shrink: 0;
+    }
+
+    .list-item-placeholder {
+        width: 60px;
+        height: 60px;
+        border-radius: 6px;
+        background: #eee;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        flex-shrink: 0;
+    }
+
+    .list-item-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .list-item-title {
+        font-weight: 600;
+        font-size: 0.9rem;
+        margin-bottom: 4px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .list-item-meta {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+    }
+
+    .list-item-stats {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        margin-top: 4px;
+    }
+
+    .list-empty {
+        text-align: center;
+        padding: 40px 20px;
+        color: var(--text-secondary);
+    }
+
+    /* Custom marker popup */
+    .coord-popup {
+        min-width: 200px;
+    }
+
+    .coord-popup-image {
+        width: 100%;
+        height: 120px;
+        object-fit: cover;
+        border-radius: 8px;
+        margin-bottom: 8px;
+    }
+
+    .coord-popup-title {
+        font-weight: 600;
+        font-size: 1rem;
+        margin-bottom: 4px;
+        color: var(--text-primary);
+    }
+
+    .coord-popup-meta {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin-bottom: 8px;
+    }
+
+    .coord-popup-stats {
+        display: flex;
+        gap: 12px;
+        font-size: 0.85rem;
+        margin-bottom: 8px;
+    }
+
+    .coord-popup-link {
+        display: block;
+        text-align: center;
+        background: var(--primary);
+        color: white;
+        padding: 8px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .coord-popup-link:hover {
+        background: var(--primary-dark);
+    }
+
+    /* Custom cluster icons */
+    .marker-cluster-small {
+        background-color: rgba(110, 204, 57, 0.6);
+    }
+
+    .marker-cluster-small div {
+        background-color: rgba(110, 204, 57, 0.8);
+    }
+
+    .marker-cluster-medium {
+        background-color: rgba(240, 194, 12, 0.6);
+    }
+
+    .marker-cluster-medium div {
+        background-color: rgba(240, 194, 12, 0.8);
+    }
+
+    .marker-cluster-large {
+        background-color: rgba(241, 128, 23, 0.6);
+    }
+
+    .marker-cluster-large div {
+        background-color: rgba(241, 128, 23, 0.8);
+    }
+
+    .marker-cluster {
+        background-clip: padding-box;
+        border-radius: 20px;
+    }
+
+    .marker-cluster div {
+        width: 30px;
+        height: 30px;
+        margin-left: 5px;
+        margin-top: 5px;
+        text-align: center;
+        border-radius: 15px;
+        font: 12px "Helvetica Neue", Arial, Helvetica, sans-serif;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+    }
+
+    @media (max-width: 768px) {
+        .list-sidebar {
+            width: 100%;
+        }
+
+        .filter-box {
+            flex-wrap: wrap;
+            font-size: 0.8rem;
+        }
+
+        .filter-box label {
+            font-size: 0.8rem;
+        }
+    }
+
+    /* 복사 버튼 */
+    .copy-btn {
+        cursor: pointer;
+        padding: 2px 4px;
+        border-radius: 4px;
+        transition: background 0.2s;
+    }
+
+    .copy-btn:hover {
+        background: rgba(52, 152, 219, 0.2);
+    }
+
+    /* 토스트 */
+    .map-toast {
+        position: fixed;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%) translateY(20px);
+        background: #333;
+        color: white;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        z-index: 9999;
+        opacity: 0;
+        transition: opacity 0.3s, transform 0.3s;
+        text-align: center;
+        line-height: 1.6;
+    }
+
+    .map-toast.show {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+
+    .map-toast small {
+        font-size: 0.78rem;
+        opacity: 0.85;
+    }
+
+    /* 팝업 복사 버튼 */
+    .popup-copy-btn {
+        cursor: pointer;
+        padding: 2px 6px;
+        border-radius: 4px;
+        transition: background 0.2s;
+    }
+
+    .popup-copy-btn:hover {
+        background: rgba(52, 152, 219, 0.3);
+    }
+
+    /* 지도 검색 바 */
+    .map-search-box {
+        display: flex;
+        gap: 8px;
+        margin-top: 10px;
+    }
+
+    .map-view-search-input {
+        flex: 1;
+        padding: 10px 15px;
+        border: none;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .map-view-search-input:focus {
+        outline: none;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+    }
+
+    .map-view-search-btn {
+        background: #27ae60;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .map-view-search-btn:hover {
+        background: #219a52;
+    }
+
+    .map-view-search-btn:disabled {
+        background: #95a5a6;
+        cursor: not-allowed;
+    }
+
+    /* 검색 결과 */
+    .map-view-search-results {
+        max-height: 250px;
+        overflow-y: auto;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        margin-top: 8px;
+        display: none;
+    }
+
+    .map-view-search-results.active {
+        display: block;
+    }
+
+    .map-view-result-item {
+        padding: 12px 15px;
+        cursor: pointer;
+        border-bottom: 1px solid #eee;
+        transition: background 0.2s;
+    }
+
+    .map-view-result-item:hover {
+        background: #f5f5f5;
+    }
+
+    .map-view-result-item:last-child {
+        border-bottom: none;
+    }
+
+    .map-view-result-name {
+        font-weight: 600;
+        color: var(--text-primary);
+        font-size: 0.95rem;
+    }
+
+    .map-view-result-address {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        margin-top: 2px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .map-view-no-results {
+        padding: 15px;
+        text-align: center;
+        color: var(--text-secondary);
+    }
+
+    .map-view-loading {
+        padding: 15px;
+        text-align: center;
+        color: var(--text-secondary);
+    }
+
+    @media (max-width: 768px) {
+
+        /* 모바일에서 검색 바를 하단에 배치 */
+        .map-filters {
+            top: auto;
+            bottom: 20px;
+            right: 10px;
+            left: 10px;
+            flex-direction: column-reverse;
+        }
+
+        .filter-box {
+            font-size: 0.75rem;
+            padding: 8px 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .filter-box label {
+            font-size: 0.75rem;
+        }
+
+        .map-search-box {
+            flex-direction: row;
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+
+        .map-view-search-input {
+            flex: 1;
+        }
+
+        .map-view-search-btn {
+            padding: 10px 15px;
+        }
+
+        .map-view-search-results {
+            position: absolute;
+            bottom: 100%;
+            left: 0;
+            right: 0;
+            margin-bottom: 8px;
+            max-height: 200px;
+        }
+
+        /* 모바일에서 줌 컨트롤 위치 조정 */
+        .leaflet-control-zoom {
+            margin-bottom: 140px !important;
+        }
+    }
+
+    /* 줌 버튼 스타일 */
+    .leaflet-control-zoom a {
+        width: 36px !important;
+        height: 36px !important;
+        line-height: 36px !important;
+        font-size: 18px !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="map-container">
+    <!-- 왼쪽 컨트롤 -->
+    <div class="map-controls">
+        <a href="{% url 'coordinates:list' %}" class="back-btn">
+            ← 목록으로
+        </a>
+        <button class="list-btn" id="listToggle">
+            📋 리스트 (<span id="visibleCount">0</span>)
+        </button>
+        <button class="location-btn" id="myLocationBtn">
+            📍 내 위치로
+        </button>
+        <a href="{% url 'coordinates:create' %}?from_map=1" class="report-btn" id="reportBtn">
+            ➕ 제보하기
+        </a>
+    </div>
+
+    <!-- 오른쪽 필터 -->
+    <div class="map-filters">
+        <div class="filter-box">
+            <label><input type="checkbox" class="category-filter" value="MUSHROOM" checked> 🍄 버섯</label>
+            <label><input type="checkbox" class="category-filter" value="BIGFLOWER" checked> 🌸 빅플라워</label>
+            <label><input type="checkbox" class="category-filter" value="SEEDLING" checked> 🌱 모종</label>
+            <label><input type="checkbox" class="category-filter" value="OTHER" checked> 📍 기타</label>
+        </div>
+        <!-- 검색 바 -->
+        <div class="map-search-box">
+            <input type="text" id="mapViewSearchInput" class="map-view-search-input" placeholder="🔍 장소, 주소 검색...">
+            <button type="button" class="map-view-search-btn" id="mapViewSearchBtn">검색</button>
+        </div>
+        <div id="mapViewSearchResults" class="map-view-search-results"></div>
+    </div>
+
+    <!-- 리스트 사이드바 -->
+    <div class="list-sidebar" id="listSidebar">
+        <div class="list-header">
+            <h3>📋 현재 화면 (<span id="sidebarCount">0</span>개)</h3>
+            <button class="list-close" id="listClose">×</button>
+        </div>
+        <div class="list-content" id="listContent">
+            <div class="list-empty">지도를 이동하면 보이는 게시글이 표시됩니다.</div>
+        </div>
+    </div>
+
+    <div id="map"></div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<!-- MarkerCluster JS -->
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+
+<script>
+    // 마커 데이터
+    const markersData = {{ markers_json| safe }};
+
+    // 카테고리별 아이콘
+    const categoryIcons = {
+        'MUSHROOM': '🍄',
+        'BIGFLOWER': '🌸',
+        'SEEDLING': '🌱',
+        'OTHER': '📍'
+    };
+
+    // 토스트 메시지 함수
+    function showToast(message) {
+        // 기존 토스트 제거
+        const existingToast = document.querySelector('.map-toast');
+        if (existingToast) existingToast.remove();
+
+        // 새 토스트 생성
+        const toast = document.createElement('div');
+        toast.className = 'map-toast';
+        toast.innerHTML = message;
+        document.body.appendChild(toast);
+
+        // 애니메이션
+        setTimeout(() => toast.classList.add('show'), 10);
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+        }, 2500);
+    }
+
+    // 지도 초기화 (세계 중심, 기본 줌 컨트롤 비활성화)
+    const map = L.map('map', {
+        zoomControl: false  // 기본 줌 컨트롤 비활성화
+    }).setView([30, 10], 2);
+
+    // 줌 컨트롤 우측 하단에 추가
+    L.control.zoom({
+        position: 'bottomright'
+    }).addTo(map);
+
+    // OpenStreetMap 타일 추가
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors',
+        maxZoom: 19
+    }).addTo(map);
+
+    // 마커 클러스터 그룹
+    const markerCluster = L.markerClusterGroup({
+        maxClusterRadius: 50,
+        spiderfyOnMaxZoom: true,
+        showCoverageOnHover: false,
+        zoomToBoundsOnClick: true
+    });
+
+    // 모든 마커와 데이터 저장
+    const allMarkers = [];
+
+    // 마커 생성
+    markersData.forEach(function (coord) {
+        const icon = L.divIcon({
+            className: 'custom-marker',
+            html: '<div style="font-size: 24px; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">' + (categoryIcons[coord.category] || '📍') + '</div>',
+            iconSize: [30, 30],
+            iconAnchor: [15, 15]
+        });
+
+        const marker = L.marker([coord.lat, coord.lng], { icon: icon });
+        marker.coordData = coord; // 마커에 데이터 저장
+
+        // 팝업 내용
+        let popupContent = '<div class="coord-popup">';
+        if (coord.image) {
+            popupContent += '<img src="' + coord.image + '" class="coord-popup-image" alt="' + coord.title + '">';
+        }
+        popupContent += '<div class="coord-popup-title">' + coord.title + '</div>';
+        popupContent += '<div class="coord-popup-meta">' + coord.category_display + ' · ' + coord.region_display + '</div>';
+        popupContent += '<div class="coord-popup-stats">';
+        popupContent += '<span class="popup-copy-btn" data-id="' + coord.id + '" data-coords="' + coord.lat + ', ' + coord.lng + '" title="좌표 복사">📋 <span class="popup-copy-count">' + coord.copy_count + '</span></span>';
+        popupContent += '<span>❤️ ' + coord.like_count + '</span>';
+        popupContent += '</div>';
+        popupContent += '<a href="/coordinates/' + coord.id + '/" class="coord-popup-link">상세보기 →</a></div>';
+
+        marker.bindPopup(popupContent, { maxWidth: 250 });
+
+        allMarkers.push(marker);
+        markerCluster.addLayer(marker);
+    });
+
+    map.addLayer(markerCluster);
+
+    // 마커가 있으면 해당 범위로 이동
+    if (markersData.length > 0) {
+        const bounds = markerCluster.getBounds();
+        map.fitBounds(bounds, { padding: [30, 30] });
+    }
+
+    // 팝업 열릴 때 복사 버튼 이벤트 추가
+    map.on('popupopen', function (e) {
+        const popupCopyBtn = e.popup.getElement().querySelector('.popup-copy-btn');
+        if (popupCopyBtn) {
+            popupCopyBtn.addEventListener('click', function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+
+                const coords = this.dataset.coords;
+                const coordId = this.dataset.id;
+                const copyCountEl = this.querySelector('.popup-copy-count');
+
+                // 클립보드에 복사
+                navigator.clipboard.writeText(coords).then(function () {
+                    showToast('✅ 복사되었습니다<br><small>좋아요와 댓글은 업로더분에게 큰 힘이 됩니다!</small>');
+                }).catch(function () {
+                    const textarea = document.createElement('textarea');
+                    textarea.value = coords;
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textarea);
+                    showToast('✅ 복사되었습니다<br><small>좋아요와 댓글은 업로더분에게 큰 힘이 됩니다!</small>');
+                });
+
+                // 복사 카운트 API 호출 (30분 제한)
+                fetch('/coordinates/' + coordId + '/copy-coords/')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (copyCountEl) {
+                            copyCountEl.textContent = data.copy_count;
+                        }
+                        // 마커 데이터 업데이트
+                        allMarkers.forEach(m => {
+                            if (m.coordData.id == coordId) {
+                                m.coordData.copy_count = data.copy_count;
+                            }
+                        });
+                    })
+                    .catch(err => console.log('Copy count update failed'));
+            });
+        }
+    });
+
+    // 현재 화면에 보이는 마커 가져오기
+    function getVisibleMarkers() {
+        const bounds = map.getBounds();
+        const checkedCategories = Array.from(document.querySelectorAll('.category-filter:checked'))
+            .map(cb => cb.value);
+
+        return allMarkers.filter(function (marker) {
+            const coord = marker.coordData;
+            // 체크된 카테고리인지 + 화면 범위 안에 있는지
+            return checkedCategories.includes(coord.category) &&
+                bounds.contains(marker.getLatLng());
+        });
+    }
+
+    // 리스트 업데이트
+    function updateList() {
+        const visibleMarkers = getVisibleMarkers();
+        const count = visibleMarkers.length;
+
+        document.getElementById('visibleCount').textContent = count;
+        document.getElementById('sidebarCount').textContent = count;
+
+        const listContent = document.getElementById('listContent');
+
+        if (count === 0) {
+            listContent.innerHTML = '<div class="list-empty">현재 화면에 표시된 게시글이 없습니다.</div>';
+            return;
+        }
+
+        let html = '';
+        visibleMarkers.forEach(function (marker) {
+            const coord = marker.coordData;
+            html += '<div class="list-item" data-lat="' + coord.lat + '" data-lng="' + coord.lng + '" data-id="' + coord.id + '">';
+
+            if (coord.image) {
+                html += '<img src="' + coord.image + '" class="list-item-image" alt="">';
+            } else {
+                html += '<div class="list-item-placeholder">' + (categoryIcons[coord.category] || '📍') + '</div>';
+            }
+
+            html += '<div class="list-item-info">';
+            html += '<div class="list-item-title">' + coord.title + '</div>';
+            html += '<div class="list-item-meta">' + coord.category_display + ' · ' + coord.region_display + '</div>';
+            html += '<div class="list-item-stats">';
+            html += '<span class="copy-btn" data-id="' + coord.id + '" data-coords="' + coord.lat + ', ' + coord.lng + '" title="좌표 복사">📋 <span class="copy-count">' + coord.copy_count + '</span></span>';
+            html += ' · ❤️ ' + coord.like_count;
+            html += '</div>';
+            html += '</div></div>';
+        });
+
+        listContent.innerHTML = html;
+
+        // 복사 버튼 클릭 이벤트
+        listContent.querySelectorAll('.copy-btn').forEach(function (btn) {
+            btn.addEventListener('click', function (e) {
+                e.stopPropagation(); // 리스트 항목 클릭 이벤트 방지
+                const coords = this.dataset.coords;
+                const coordId = this.dataset.id;
+                const copyCountEl = this.querySelector('.copy-count');
+
+                // 클립보드에 복사
+                navigator.clipboard.writeText(coords).then(function () {
+                    showToast('✅ 복사되었습니다<br><small>좋아요와 댓글은 업로더분에게 큰 힘이 됩니다!</small>');
+                }).catch(function () {
+                    // 클립보드 API 실패 시 대체 방법
+                    const textarea = document.createElement('textarea');
+                    textarea.value = coords;
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textarea);
+                    showToast('✅ 복사되었습니다<br><small>좋아요와 댓글은 업로더분에게 큰 힘이 됩니다!</small>');
+                });
+
+                // 복사 카운트 API 호출 (30분 제한 적용됨)
+                fetch('/coordinates/' + coordId + '/copy-coords/')
+                    .then(response => response.json())
+                    .then(data => {
+                        // UI 업데이트
+                        if (copyCountEl) {
+                            copyCountEl.textContent = data.copy_count;
+                        }
+                        // 마커 데이터도 업데이트
+                        allMarkers.forEach(m => {
+                            if (m.coordData.id == coordId) {
+                                m.coordData.copy_count = data.copy_count;
+                            }
+                        });
+                    })
+                    .catch(err => console.log('Copy count update failed'));
+            });
+        });
+
+        // 항목 클릭 이벤트
+        listContent.querySelectorAll('.list-item').forEach(function (item) {
+            item.addEventListener('click', function () {
+                const lat = parseFloat(this.dataset.lat);
+                const lng = parseFloat(this.dataset.lng);
+
+                // 해당 위치로 이동
+                map.setView([lat, lng], 15);
+
+                // 해당 마커 팝업 열기
+                allMarkers.forEach(function (m) {
+                    if (m.coordData.lat === lat && m.coordData.lng === lng) {
+                        setTimeout(function () {
+                            m.openPopup();
+                        }, 500);
+                    }
+                });
+            });
+        });
+    }
+
+    // 지도 이동/줌 시 리스트 업데이트
+    map.on('moveend', updateList);
+    map.on('zoomend', updateList);
+
+    // 초기 리스트 업데이트
+    setTimeout(updateList, 500);
+
+    // 카테고리 필터
+    document.querySelectorAll('.category-filter').forEach(function (checkbox) {
+        checkbox.addEventListener('change', function () {
+            const checkedCategories = Array.from(document.querySelectorAll('.category-filter:checked'))
+                .map(cb => cb.value);
+
+            markerCluster.clearLayers();
+
+            allMarkers.forEach(function (marker) {
+                if (checkedCategories.includes(marker.coordData.category)) {
+                    markerCluster.addLayer(marker);
+                }
+            });
+
+            updateList();
+        });
+    });
+
+    // 리스트 토글
+    const listSidebar = document.getElementById('listSidebar');
+    const listToggle = document.getElementById('listToggle');
+    const listClose = document.getElementById('listClose');
+    const mapControls = document.querySelector('.map-controls');
+
+    listToggle.addEventListener('click', function () {
+        listSidebar.classList.toggle('open');
+        listToggle.classList.toggle('active');
+        mapControls.classList.toggle('sidebar-open');
+    });
+
+    listClose.addEventListener('click', function () {
+        listSidebar.classList.remove('open');
+        listToggle.classList.remove('active');
+        mapControls.classList.remove('sidebar-open');
+    });
+
+    // 내 위치 마커
+    let myLocationMarker = null;
+    let myLocationCircle = null;
+
+    // 내 위치 가져오기
+    function getMyLocation(successCallback, errorCallback) {
+        if (!navigator.geolocation) {
+            alert('이 브라우저에서는 위치 정보를 지원하지 않습니다.');
+            if (errorCallback) errorCallback();
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            function (position) {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+                successCallback(lat, lng);
+            },
+            function (error) {
+                let msg = '위치 정보 오류: ';
+                switch (error.code) {
+                    case error.PERMISSION_DENIED:
+                        msg = '위치 권한이 거부되었습니다. 브라우저 설정에서 허용해주세요.';
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        msg = 'PC에서는 위치 정보를 사용할 수 없을 수 있습니다.';
+                        break;
+                    case error.TIMEOUT:
+                        msg = '위치 정보 요청 시간이 초과되었습니다.';
+                        break;
+                    default:
+                        msg = '위치 정보를 가져올 수 없습니다.';
+                }
+                alert(msg);
+                if (errorCallback) errorCallback();
+            },
+            { enableHighAccuracy: false, timeout: 15000, maximumAge: 60000 }
+        );
+    }
+
+    // 내 위치 표시
+    function showMyLocation(lat, lng) {
+        // 기존 마커 제거
+        if (myLocationMarker) {
+            map.removeLayer(myLocationMarker);
+        }
+        if (myLocationCircle) {
+            map.removeLayer(myLocationCircle);
+        }
+
+        // 파란색 원 (정확도 표시)
+        myLocationCircle = L.circle([lat, lng], {
+            color: '#3498db',
+            fillColor: '#3498db',
+            fillOpacity: 0.2,
+            radius: 100
+        }).addTo(map);
+
+        // 파란색 점 마커
+        const myIcon = L.divIcon({
+            className: 'my-location-marker',
+            html: '<div style="width: 16px; height: 16px; background: #3498db; border: 3px solid white; border-radius: 50%; box-shadow: 0 2px 6px rgba(0,0,0,0.3);"></div>',
+            iconSize: [22, 22],
+            iconAnchor: [11, 11]
+        });
+
+        myLocationMarker = L.marker([lat, lng], { icon: myIcon })
+            .bindPopup('📍 내 현재 위치')
+            .addTo(map);
+    }
+
+    // 내 위치로 이동 버튼
+    document.getElementById('myLocationBtn').addEventListener('click', function () {
+        this.textContent = '📍 찾는 중...';
+        const btn = this;
+
+        getMyLocation(
+            function (lat, lng) {
+                showMyLocation(lat, lng);
+                map.setView([lat, lng], 14);
+                btn.textContent = '📍 내 위치로';
+            },
+            function () {
+                // 에러 시 버튼 텍스트 복원
+                btn.textContent = '📍 내 위치로';
+            }
+        );
+    });
+
+    // 페이지 로드 시 내 위치 자동 표시 (선택적)
+    // getMyLocation(showMyLocation);
+
+    // ========================================
+    // 지도 검색 기능 (Nominatim)
+    // ========================================
+    const mapViewSearchInput = document.getElementById('mapViewSearchInput');
+    const mapViewSearchBtn = document.getElementById('mapViewSearchBtn');
+    const mapViewSearchResults = document.getElementById('mapViewSearchResults');
+    let searchMarker = null;
+
+    if (mapViewSearchBtn) {
+        mapViewSearchBtn.addEventListener('click', performMapViewSearch);
+    }
+
+    if (mapViewSearchInput) {
+        mapViewSearchInput.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                performMapViewSearch();
+            }
+        });
+
+        // 외부 클릭 시 검색 결과 숨기기
+        document.addEventListener('click', function (e) {
+            if (!mapViewSearchResults.contains(e.target) &&
+                !mapViewSearchInput.contains(e.target) &&
+                !mapViewSearchBtn.contains(e.target)) {
+                mapViewSearchResults.classList.remove('active');
+            }
+        });
+    }
+
+    function performMapViewSearch() {
+        const query = mapViewSearchInput.value.trim();
+        if (!query) return;
+
+        // 로딩 표시
+        mapViewSearchResults.innerHTML = '<div class="map-view-loading">🔍 검색 중...</div>';
+        mapViewSearchResults.classList.add('active');
+        mapViewSearchBtn.disabled = true;
+
+        // Nominatim API 호출 (한국 우선)
+        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&countrycodes=kr&accept-language=ko`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.length === 0) {
+                    // 한국 결과 없으면 전체 검색
+                    return fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&accept-language=ko`)
+                        .then(response => response.json());
+                }
+                return data;
+            })
+            .then(data => {
+                mapViewSearchBtn.disabled = false;
+
+                if (data.length === 0) {
+                    mapViewSearchResults.innerHTML = '<div class="map-view-no-results">😢 검색 결과가 없습니다</div>';
+                    return;
+                }
+
+                // 결과 표시
+                mapViewSearchResults.innerHTML = data.map(item => `
+                    <div class="map-view-result-item" data-lat="${item.lat}" data-lon="${item.lon}">
+                        <div class="map-view-result-name">${item.display_name.split(',')[0]}</div>
+                        <div class="map-view-result-address">${item.display_name}</div>
+                    </div>
+                `).join('');
+
+                // 결과 클릭 이벤트
+                mapViewSearchResults.querySelectorAll('.map-view-result-item').forEach(item => {
+                    item.addEventListener('click', function () {
+                        const lat = parseFloat(this.dataset.lat);
+                        const lon = parseFloat(this.dataset.lon);
+
+                        // 지도 이동
+                        map.setView([lat, lon], 16);
+
+                        // 기존 검색 마커 제거
+                        if (searchMarker) {
+                            map.removeLayer(searchMarker);
+                        }
+
+                        // 새 마커 추가
+                        const searchIcon = L.divIcon({
+                            className: 'search-location-marker',
+                            html: '<div style="font-size: 32px; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">🔍</div>',
+                            iconSize: [32, 32],
+                            iconAnchor: [16, 32]
+                        });
+
+                        searchMarker = L.marker([lat, lon], { icon: searchIcon })
+                            .bindPopup('🔍 검색 위치: ' + this.querySelector('.map-view-result-name').textContent)
+                            .addTo(map)
+                            .openPopup();
+
+                        // 검색 결과 숨기기
+                        mapViewSearchResults.classList.remove('active');
+                        mapViewSearchInput.value = '';
+
+                        showToast('📍 검색 위치로 이동했습니다!');
+                    });
+                });
+            })
+            .catch(error => {
+                console.error('검색 오류:', error);
+                mapViewSearchBtn.disabled = false;
+                mapViewSearchResults.innerHTML = '<div class="map-view-no-results">❌ 검색 중 오류가 발생했습니다</div>';
+            });
+    }
+</script>
+{% endblock %}

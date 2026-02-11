@@ -1,0 +1,172 @@
+{% extends 'base.html' %}
+
+{% block title %}농사 일지 수정 - 피크민 다이어리{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="form-page">
+        <h1 class="page-title">✏️ 농사 일지 수정</h1>
+
+        <form method="post" enctype="multipart/form-data" class="journal-form">
+            {% csrf_token %}
+
+            <!-- 비회원 비밀번호 입력 -->
+            {% if not can_edit and journal.guest_password %}
+            <div class="password-notice">
+                <p>🔒 비회원 글입니다. 작성 시 입력한 비밀번호를 입력해주세요.</p>
+            </div>
+            <div class="form-group">
+                <label class="form-label">비밀번호 *</label>
+                <input type="password" name="password" class="form-control" required>
+            </div>
+            {% endif %}
+
+            <div class="form-group">
+                <label class="form-label">제목 *</label>
+                <input type="text" name="title" class="form-control" value="{{ journal.title }}" required
+                    maxlength="100">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">내용 *</label>
+                <textarea name="content" class="form-control" rows="6" required>{{ journal.content }}</textarea>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">위치명</label>
+                <input type="text" name="location_name" class="form-control" value="{{ journal.location_name }}"
+                    placeholder="예: 서울 강남구">
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">꽃 종류</label>
+                    <input type="text" name="flower_type" class="form-control" value="{{ journal.flower_type }}"
+                        placeholder="예: 빨간 꽃">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">심은 꽃 수</label>
+                    <input type="number" name="flower_count" class="form-control" value="{{ journal.flower_count }}"
+                        min="0">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">위도</label>
+                    <input type="number" name="latitude" id="latitude" class="form-control" step="0.000001"
+                        value="{{ journal.latitude|default:'' }}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">경도</label>
+                    <input type="number" name="longitude" id="longitude" class="form-control" step="0.000001"
+                        value="{{ journal.longitude|default:'' }}">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">이미지</label>
+                {% if journal.image %}
+                <div class="current-image">
+                    <img src="{{ journal.image.url }}" alt="현재 이미지" style="max-width: 200px; margin-bottom: 10px;">
+                    <p>현재 이미지</p>
+                </div>
+                {% endif %}
+                <input type="file" name="image" class="form-control" accept="image/*">
+            </div>
+
+            <div class="form-actions">
+                <a href="{% url 'farming:journal_detail' pk=journal.pk %}" class="btn btn-outline">취소</a>
+                <button type="submit" class="btn btn-primary btn-lg">수정하기</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .form-page {
+        max-width: 700px;
+        margin: var(--spacing-xl) auto;
+        padding: var(--spacing-xl);
+        background: var(--bg-primary);
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-md);
+    }
+
+    .page-title {
+        text-align: center;
+        margin-bottom: var(--spacing-xl);
+    }
+
+    .password-notice {
+        padding: var(--spacing-md);
+        background: #E3F2FD;
+        border-radius: var(--radius-md);
+        margin-bottom: var(--spacing-lg);
+        color: #1565C0;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: var(--spacing-md);
+    }
+
+    .form-group {
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: var(--spacing-sm);
+        font-weight: 600;
+    }
+
+    .current-image {
+        margin-bottom: var(--spacing-md);
+    }
+
+    .current-image img {
+        border-radius: var(--radius-md);
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: space-between;
+        gap: var(--spacing-md);
+    }
+
+    @media (max-width: 480px) {
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+
+        .form-actions {
+            flex-direction: column-reverse;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const latInput = document.getElementById('latitude');
+        const lngInput = document.getElementById('longitude');
+
+        if (latInput && lngInput) {
+            latInput.addEventListener('input', function (e) {
+                const value = e.target.value;
+                if (value.includes(',')) {
+                    const parts = value.split(',');
+                    if (parts.length === 2) {
+                        const lat = parts[0].trim();
+                        const lng = parts[1].trim();
+                        latInput.value = lat;
+                        lngInput.value = lng;
+                        lngInput.focus();
+                    }
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

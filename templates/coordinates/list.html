@@ -1,0 +1,912 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}피크민 좌표 목록 - 버섯, 모종, 빅플라워 좌표 모음 | 피크민 다이어리{% endblock %}
+{% block description %}피크민 블룸 버섯 좌표, 모종 좌표, 빅플라워 위치를 한눈에! 유저들이 공유한 피크민 엽서 좌표를 검색하고 복사하세요.{% endblock %}
+{% block og_title %}피크민 좌표 목록 - 피크민 블룸 좌표 모음{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="list-header">
+        <h1 class="page-title">📍 좌표 목록</h1>
+        <a href="{% url 'coordinates:create' %}" class="btn btn-primary">
+            ✏️ 새 좌표 제보
+        </a>
+    </div>
+
+    <div class="coord-page-layout">
+        <!-- 좌측 랭킹 위젯 -->
+        <aside class="ranking-sidebar">
+            <div class="ranking-widget">
+                <h3 class="ranking-widget-title">🏆 TOP 5 랭커</h3>
+                {% if ranker_stats %}
+                <div class="ranking-widget-list">
+                    {% for stat in ranker_stats %}
+                    <a href="{% url 'accounts:user_profile' user_id=stat.ranking.user.pk %}"
+                        class="ranking-widget-item">
+                        <div class="ranker-header">
+                            <span class="ranker-rank">
+                                {% if stat.ranking.rank == 1 %}🥇
+                                {% elif stat.ranking.rank == 2 %}🥈
+                                {% elif stat.ranking.rank == 3 %}🥉
+                                {% else %}{{ stat.ranking.rank }}.
+                                {% endif %}
+                            </span>
+                            <span class="ranker-name">{{ stat.ranking.user.nickname }}</span>
+                        </div>
+                        <div class="ranker-stats">
+                            <span title="버섯">🍄{{ stat.mushroom }}</span>
+                            <span title="빅플라워">🌻{{ stat.bigflower }}</span>
+                            <span title="모종">🌱{{ stat.seedling }}</span>
+                            <span title="복사 수">📋{{ stat.ranking.copy_received_count }}</span>
+                            <span class="ranker-score">{{ stat.ranking.score }}점</span>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+                <a href="{% url 'rankings:list' %}" class="ranking-widget-more">더보기 →</a>
+                {% else %}
+                <p class="ranking-widget-empty">아직 랭킹이 없어요</p>
+                {% endif %}
+            </div>
+
+            <!-- 공지/업데이트 버튼 -->
+            {% if site_notice %}
+            <div class="notice-buttons">
+                {% if site_notice.content %}
+                <button class="notice-btn" onclick="openModal('notice-modal')">
+                    📢 사이트 공지
+                </button>
+                {% endif %}
+                {% if site_notice.update_log %}
+                <button class="notice-btn" onclick="openModal('update-modal')">
+                    🔄 업데이트 내역
+                </button>
+                {% endif %}
+            </div>
+            {% endif %}
+        </aside>
+
+        <!-- 메인 컨텐츠 -->
+        <main class="coord-main-content">
+            <!-- 검색 & 필터 -->
+            <div class="filter-bar">
+                <form method="get" class="filter-form">
+                    <div class="search-box">
+                        <input type="text" name="q" value="{{ query }}" placeholder="제목, 엽서이름, 닉네임 검색..."
+                            class="form-control">
+                        <button type="submit" class="btn btn-primary">🔍</button>
+                    </div>
+
+                    <div class="filter-options">
+                        <select name="category" class="form-control" onchange="this.form.submit()">
+                            <option value="">전체 카테고리</option>
+                            {% for value, label in categories %}
+                            <option value="{{ value }}" {% if category == value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+
+                        <select name="region" class="form-control" onchange="this.form.submit()">
+                            <option value="">전체 지역</option>
+                            {% for value, label in regions %}
+                            <option value="{{ value }}" {% if region_filter == value %}selected{% endif %}>{{ label }}
+                            </option>
+                            {% endfor %}
+                        </select>
+
+                        <select name="sort" class="form-control" onchange="this.form.submit()">
+                            <option value="latest" {% if sort == "latest" %}selected{% endif %}>최신순</option>
+                            <option value="copies" {% if sort == "copies" %}selected{% endif %}>복사순</option>
+                            <option value="likes" {% if sort == "likes" %}selected{% endif %}>좋아요순</option>
+                            <option value="bookmarks" {% if sort == "bookmarks" %}selected{% endif %}>북마크순</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+
+            <!-- 좌표 목록 -->
+            {% if coords %}
+            <div class="coord-grid grid grid-3">
+                {% for coord in coords %}
+                <article class="card coord-card">
+                    <a href="{% url 'coordinates:detail' pk=coord.pk %}">
+                        <div class="coord-card-image">
+                            {% if coord.images.first %}
+                            <img src="{{ coord.images.first.image.url }}" alt="{{ coord.title }}">
+                            {% else %}
+                            <div class="coord-card-placeholder">🗺️</div>
+                            {% endif %}
+                            <span class="badge badge-primary coord-card-category">
+                                {{ coord.get_category_display }}
+                            </span>
+                            {% if coord.is_outdated %}
+                            <span class="badge badge-warning coord-card-badge">오래됨</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="coord-card-content">
+                            <h3 class="coord-card-title">{{ coord.title }}</h3>
+                            {% if coord.postcard_name %}
+                            <div class="coord-card-postcard">🏷️ {{ coord.postcard_name }}</div>
+                            {% endif %}
+                            <div class="coord-card-meta">
+                                <span>📍 {{ coord.latitude }}, {{ coord.longitude }}</span>
+                                <span class="coord-region">{{ coord.get_region_display }}</span>
+                            </div>
+                            <div class="coord-card-meta">
+                                <span class="author-badge {{ coord.author.get_badge_class }}">
+                                    {% if coord.author.profile_emoji %}
+                                        <span class="profile-emoji">{{ coord.author.profile_emoji }}</span>
+                                    {% endif %}
+                                    <span class="author-name">{{ coord.author.nickname|default:"익명" }}</span>
+                                    {% if coord.author.special_title %}
+                                    <span class="special-title-tag">{{ coord.author.get_special_title_display }}</span>
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </div>
+                    </a>
+
+                    <!-- Stats section - template variables must be on ONE line -->
+                    <div class="coord-card-stats">
+                        <button type="button" class="copy-btn" data-coords="{{ coord.latitude }}, {{ coord.longitude }}" data-pk="{{ coord.pk }}" title="좌표 복사">📋 <span class="copy-count">{{ coord.copy_count }}</span></button>
+                        <span class="coord-stat">👁️ {{ coord.view_count }}</span>
+                        <span class="coord-stat">❤️ {{ coord.like_count }}</span>
+                        <span class="coord-stat">⭐ {{ coord.bookmark_count }}</span>
+                        <span class="coord-stat">💬 {{ coord.comment_count }}</span>
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+
+
+            <!-- 무한 스크롤 로딩 표시 -->
+            {% if has_next %}
+            <div id="scroll-sentinel" class="scroll-loading">
+                <div class="loading-spinner"></div>
+                <span>로딩 중...</span>
+            </div>
+            {% endif %}
+
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">🗺️</div>
+                <h2 class="empty-state-title">좌표가 없습니다</h2>
+                <p class="empty-state-desc">
+                    {% if query or category %}
+                    검색 조건에 맞는 좌표가 없습니다.
+                    {% else %}
+                    첫 번째 좌표를 제보해주세요!
+                    {% endif %}
+                </p>
+                <a href="{% url 'coordinates:create' %}" class="btn btn-primary">새 좌표 제보</a>
+            </div>
+            {% endif %}
+        </main>
+    </div>
+</div>
+
+<style>
+    .list-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: var(--spacing-xl) 0;
+    }
+
+    .page-title {
+        font-size: 1.8rem;
+        margin: 0;
+    }
+
+    /* 2열 레이아웃 */
+    .coord-page-layout {
+        display: grid;
+        grid-template-columns: 220px 1fr;
+        gap: var(--spacing-xl);
+        align-items: start;
+    }
+
+    /* 랭킹 사이드바 */
+    .ranking-sidebar {
+        position: sticky;
+        top: 80px;
+    }
+
+    .ranking-widget {
+        background: var(--bg-primary);
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-sm);
+        padding: var(--spacing-md);
+        overflow: hidden;
+    }
+
+    .ranking-widget-title {
+        font-size: 1rem;
+        font-weight: 700;
+        text-align: center;
+        padding-bottom: var(--spacing-sm);
+        border-bottom: 1px solid var(--bg-tertiary);
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .ranking-widget-list {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-xs);
+    }
+
+    .ranking-widget-item {
+        display: block;
+        padding: var(--spacing-sm);
+        border-radius: var(--radius-md);
+        transition: background var(--transition-fast);
+        border-bottom: 1px solid var(--bg-secondary);
+    }
+
+    .ranking-widget-item:last-child {
+        border-bottom: none;
+    }
+
+    .ranking-widget-item:hover {
+        background: var(--bg-secondary);
+    }
+
+    .ranker-header {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-xs);
+        margin-bottom: 4px;
+    }
+
+    .ranker-rank {
+        font-weight: 700;
+        font-size: 1rem;
+    }
+
+    .ranker-name {
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: var(--text-primary);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .ranker-stats {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+    }
+
+    .ranker-stats span {
+        white-space: nowrap;
+    }
+
+    .ranker-score {
+        font-weight: 700;
+        color: var(--primary);
+    }
+
+    .ranking-widget-more {
+        display: block;
+        text-align: center;
+        padding: var(--spacing-sm);
+        font-size: 0.85rem;
+        color: var(--primary);
+        font-weight: 600;
+        margin-top: var(--spacing-sm);
+        border-top: 1px solid var(--bg-tertiary);
+    }
+
+    .ranking-widget-more:hover {
+        color: var(--primary-dark);
+    }
+
+    .ranking-widget-empty {
+        text-align: center;
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+        padding: var(--spacing-md);
+    }
+
+    /* 공지 버튼 */
+    .notice-buttons {
+        margin-top: var(--spacing-md);
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-sm);
+    }
+
+    .notice-btn {
+        width: 100%;
+        padding: var(--spacing-sm) var(--spacing-md);
+        background: var(--bg-primary);
+        border: 1px solid var(--bg-tertiary);
+        border-radius: var(--radius-lg);
+        cursor: pointer;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        transition: all 0.2s;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .notice-btn:hover {
+        background: var(--bg-secondary);
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-md);
+    }
+
+    /* 모달 */
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 9999;
+        justify-content: center;
+        align-items: center;
+        padding: var(--spacing-md);
+    }
+
+    .modal-overlay.show {
+        display: flex;
+    }
+
+    .modal-content {
+        background: var(--bg-primary);
+        border-radius: var(--radius-xl);
+        max-width: 500px;
+        width: 100%;
+        max-height: 80vh;
+        overflow: hidden;
+        box-shadow: var(--shadow-xl);
+        animation: modalSlideIn 0.3s ease;
+    }
+
+    @keyframes modalSlideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: var(--spacing-md) var(--spacing-lg);
+        border-bottom: 1px solid var(--bg-tertiary);
+    }
+
+    .modal-header h3 {
+        margin: 0;
+        font-size: 1.1rem;
+    }
+
+    .modal-close {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: var(--text-secondary);
+        padding: 0;
+        line-height: 1;
+        transition: color 0.2s;
+    }
+
+    .modal-close:hover {
+        color: var(--text-primary);
+    }
+
+    .modal-body {
+        padding: var(--spacing-lg);
+        overflow-y: auto;
+        max-height: calc(80vh - 60px);
+        font-size: 0.9rem;
+        line-height: 1.7;
+        color: var(--text-secondary);
+    }
+
+    .modal-body p {
+        margin: 0;
+    }
+
+    .modal-body p + p {
+        margin-top: var(--spacing-sm);
+    }
+
+    /* 메인 컨텐츠 */
+    .coord-main-content {
+        min-width: 0;
+    }
+
+    .filter-bar {
+        margin-bottom: var(--spacing-xl);
+        padding: var(--spacing-md);
+        background: var(--bg-primary);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .filter-form {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-md);
+    }
+
+    .search-box {
+        display: flex;
+        gap: var(--spacing-sm);
+    }
+
+    .search-box .form-control {
+        flex: 1;
+    }
+
+    .filter-options {
+        display: flex;
+        gap: var(--spacing-md);
+    }
+
+    .filter-options .form-control {
+        flex: 1;
+    }
+
+    .coord-card-placeholder {
+        width: 100%;
+        aspect-ratio: 16/9;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--bg-tertiary);
+        font-size: 3rem;
+    }
+
+    .coord-card-postcard {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        margin-top: 2px;
+    }
+
+    .coord-card-badge {
+        position: absolute;
+        top: var(--spacing-sm);
+        right: var(--spacing-sm);
+    }
+
+    @media (max-width: 992px) {
+        .coord-page-layout {
+            grid-template-columns: 1fr;
+        }
+
+        .ranking-sidebar {
+            position: static;
+        }
+
+        .ranking-widget {
+            margin-bottom: var(--spacing-md);
+        }
+
+        .ranking-widget-list {
+            flex-direction: row;
+            flex-wrap: wrap;
+            gap: var(--spacing-sm);
+        }
+
+        .ranking-widget-item {
+            flex: 1;
+            min-width: 150px;
+            border-bottom: none;
+            background: var(--bg-secondary);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .list-header {
+            flex-direction: column;
+            gap: var(--spacing-md);
+            text-align: center;
+        }
+
+        .filter-options {
+            flex-direction: column;
+        }
+
+        .filter-options .form-control {
+            font-size: 1rem;
+            font-weight: 600;
+            padding: 12px 16px;
+            background: var(--bg-secondary);
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            color: var(--text-primary);
+        }
+    }
+
+    .coord-copy-row {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .coord-card-stats {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 1rem;
+        color: var(--text-secondary);
+        padding: 8px 12px;
+        border-top: 1px solid var(--bg-tertiary);
+    }
+
+    .coord-stat {
+        display: flex;
+        align-items: center;
+        gap: 2px;
+    }
+
+    .copy-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 4px 8px;
+        font-size: 1rem;
+        color: var(--text-secondary);
+        transition: all 0.2s;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .copy-btn:hover {
+        color: var(--primary);
+    }
+
+    .copy-btn:active {
+        transform: scale(0.95);
+    }
+
+    .copy-btn.copied {
+        color: #4CAF50;
+    }
+
+    .copy-toast {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        z-index: 9999;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        text-align: center;
+        line-height: 1.6;
+    }
+
+    .copy-toast small {
+        font-size: 0.78rem;
+        opacity: 0.85;
+    }
+
+    .copy-toast.show {
+        opacity: 1;
+    }
+
+    /* 무한 스크롤 로딩 표시 */
+    .scroll-loading {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 24px;
+        color: var(--text-secondary);
+    }
+
+    .loading-spinner {
+        width: 20px;
+        height: 20px;
+        border: 2px solid var(--bg-tertiary);
+        border-top-color: var(--primary);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    .scroll-loading.hidden {
+        display: none;
+    }
+</style>
+
+<!-- 공지 모달 -->
+{% if site_notice %}
+{% if site_notice.content %}
+<div id="notice-modal" class="modal-overlay" onclick="closeModalOnOverlay(event)">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>📢 사이트 공지</h3>
+            <button class="modal-close" onclick="closeModal('notice-modal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            {{ site_notice.content|linebreaks }}
+        </div>
+    </div>
+</div>
+{% endif %}
+{% if site_notice.update_log %}
+<div id="update-modal" class="modal-overlay" onclick="closeModalOnOverlay(event)">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>🔄 업데이트 내역</h3>
+            <button class="modal-close" onclick="closeModal('update-modal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            {{ site_notice.update_log|linebreaks }}
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endif %}
+
+<div id="copy-toast" class="copy-toast">✅ 복사되었습니다<br><small>좋아요와 댓글은 업로더분에게 큰 힘이 됩니다!</small></div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Attach event listeners to all copy buttons
+        var copyButtons = document.querySelectorAll('.copy-btn');
+        copyButtons.forEach(function (btn) {
+            btn.addEventListener('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                var coords = this.getAttribute('data-coords');
+                if (coords) {
+                    handleCopy(coords, this);
+                }
+            });
+
+            // Also handle touch for iOS
+            btn.addEventListener('touchend', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                var coords = this.getAttribute('data-coords');
+                if (coords) {
+                    handleCopy(coords, this);
+                }
+            });
+        });
+    });
+
+    function handleCopy(coords, btn) {
+        var pk = btn.getAttribute('data-pk');
+        var copyCountSpan = btn.querySelector('.copy-count');
+        var originalHTML = btn.innerHTML;
+
+        function showSuccess(newCount) {
+            btn.innerHTML = '✅ ' + (newCount !== undefined ? newCount : (copyCountSpan ? copyCountSpan.textContent : ''));
+            btn.classList.add('copied');
+
+            var toast = document.getElementById('copy-toast');
+            if (toast) {
+                toast.classList.add('show');
+            }
+
+            setTimeout(function () {
+                btn.innerHTML = '📋 <span class="copy-count">' + (newCount !== undefined ? newCount : (copyCountSpan ? copyCountSpan.textContent : '')) + '</span>';
+                btn.classList.remove('copied');
+                if (toast) {
+                    toast.classList.remove('show');
+                }
+            }, 2500);
+        }
+
+        function afterCopy() {
+            // Call API to increment copy count
+            if (pk) {
+                fetch('/coordinates/' + pk + '/copy-coords/', { method: 'GET' })
+                    .then(function (response) { return response.json(); })
+                    .then(function (data) {
+                        showSuccess(data.copy_count);
+                    })
+                    .catch(function () {
+                        showSuccess();
+                    });
+            } else {
+                showSuccess();
+            }
+        }
+
+        // iOS Safari detection
+        var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+            (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        var isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+
+        if (isIOS || isSafari) {
+            copyTextForiOS(coords, afterCopy);
+        } else if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(coords).then(afterCopy).catch(function () {
+                copyTextFallback(coords, afterCopy);
+            });
+        } else {
+            copyTextFallback(coords, afterCopy);
+        }
+    }
+
+    function copyTextForiOS(text, callback) {
+        var input = document.createElement('input');
+        input.setAttribute('readonly', 'readonly');
+        input.setAttribute('contenteditable', 'true');
+        input.style.position = 'fixed';
+        input.style.top = '50%';
+        input.style.left = '50%';
+        input.style.opacity = '0';
+        input.style.fontSize = '16px';
+        input.value = text;
+        document.body.appendChild(input);
+
+        input.focus();
+        input.setSelectionRange(0, text.length);
+
+        var success = false;
+        try {
+            success = document.execCommand('copy');
+        } catch (err) {
+            success = false;
+        }
+
+        document.body.removeChild(input);
+
+        if (success) {
+            callback();
+        } else {
+            alert('복사됨: ' + text);
+        }
+    }
+
+    function copyTextFallback(text, callback) {
+        var textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed';
+        textarea.style.left = '-9999px';
+        textarea.style.top = '0';
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+
+        try {
+            document.execCommand('copy');
+            callback();
+        } catch (err) {
+            alert('복사됨: ' + text);
+        }
+
+        document.body.removeChild(textarea);
+    }
+
+    // 무한 스크롤
+    (function () {
+        var currentPage = 1;
+        var isLoading = false;
+        var hasNext = {% if has_next %}true{% else %} false{% endif %};
+    var coordGrid = document.querySelector('.coord-grid');
+    var sentinel = document.getElementById('scroll-sentinel');
+
+    if (!sentinel || !coordGrid) return;
+
+    var query = '{{ query|escapejs }}';
+    var category = '{{ category|escapejs }}';
+    var sort = '{{ sort|escapejs }}';
+    var region = '{{ region_filter|escapejs }}';
+
+    var observer = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+            if (entry.isIntersecting && hasNext && !isLoading) {
+                loadMore();
+            }
+        });
+    }, { rootMargin: '100px' });
+
+    observer.observe(sentinel);
+
+    function loadMore() {
+        isLoading = true;
+        currentPage++;
+
+        var url = '/coordinates/?page=' + currentPage;
+        if (query) url += '&q=' + encodeURIComponent(query);
+        if (category) url += '&category=' + encodeURIComponent(category);
+        if (sort) url += '&sort=' + encodeURIComponent(sort);
+        if (region) url += '&region=' + encodeURIComponent(region);
+
+        fetch(url, {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+            .then(function (response) { return response.json(); })
+            .then(function (data) {
+                // 새 카드 추가
+                var temp = document.createElement('div');
+                temp.innerHTML = data.html;
+                var newCards = temp.querySelectorAll('.coord-card');
+                newCards.forEach(function (card) {
+                    coordGrid.appendChild(card);
+                    // 새 카드의 복사 버튼에 이벤트 리스너 추가
+                    var btn = card.querySelector('.copy-btn');
+                    if (btn) {
+                        btn.addEventListener('click', function (e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            var coords = this.getAttribute('data-coords');
+                            if (coords) handleCopy(coords, this);
+                        });
+                        btn.addEventListener('touchend', function (e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            var coords = this.getAttribute('data-coords');
+                            if (coords) handleCopy(coords, this);
+                        });
+                    }
+                });
+
+                hasNext = data.has_next;
+                isLoading = false;
+
+                if (!hasNext) {
+                    sentinel.classList.add('hidden');
+                    observer.disconnect();
+                }
+            })
+            .catch(function (err) {
+                console.error('Failed to load more:', err);
+                isLoading = false;
+            });
+    }
+    }) ();
+
+    // 모달 열기
+    function openModal(modalId) {
+        document.getElementById(modalId).classList.add('show');
+        document.body.style.overflow = 'hidden';
+    }
+
+    // 모달 닫기
+    function closeModal(modalId) {
+        document.getElementById(modalId).classList.remove('show');
+        document.body.style.overflow = '';
+    }
+
+    // 오버레이 클릭 시 닫기
+    function closeModalOnOverlay(event) {
+        if (event.target.classList.contains('modal-overlay')) {
+            event.target.classList.remove('show');
+            document.body.style.overflow = '';
+        }
+    }
+
+    // ESC 키로 닫기
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            document.querySelectorAll('.modal-overlay.show').forEach(function(modal) {
+                modal.classList.remove('show');
+            });
+            document.body.style.overflow = '';
+        }
+    });
+</script>
+{% endblock %}

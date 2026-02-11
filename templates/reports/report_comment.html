@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+
+{% block title %}댓글 신고 - 피크민 다이어리{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="report-page">
+        <a href="{% url 'coordinates:detail' pk=comment.coordinate.pk %}" class="back-link">← 돌아가기</a>
+
+        <div class="report-form card">
+            <h1 class="form-title">🚨 댓글 신고</h1>
+
+            <div class="target-info">
+                <strong>신고 대상 댓글:</strong>
+                <p class="target-content">"{{ comment.content|truncatewords:20 }}"</p>
+                <span class="target-author">- {{ comment.display_name }}</span>
+            </div>
+
+            <form method="post">
+                {% csrf_token %}
+
+                <div class="form-group">
+                    <label class="form-label">신고 사유 *</label>
+                    {% for value, label in reasons %}
+                    <label class="radio-option">
+                        <input type="radio" name="reason" value="{{ value }}" required>
+                        <span>{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">상세 내용</label>
+                    <textarea name="detail" class="form-control" rows="4"
+                        placeholder="신고 사유를 자세히 적어주세요 (선택)"></textarea>
+                </div>
+
+                <div class="form-actions">
+                    <a href="{% url 'coordinates:detail' pk=comment.coordinate.pk %}" class="btn btn-outline">취소</a>
+                    <button type="submit" class="btn btn-primary">신고하기</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .report-page {
+        max-width: 500px;
+        margin: var(--spacing-xl) auto;
+    }
+
+    .back-link {
+        display: inline-block;
+        margin-bottom: var(--spacing-md);
+        color: var(--text-secondary);
+    }
+
+    .report-form {
+        padding: var(--spacing-xl);
+    }
+
+    .form-title {
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .target-info {
+        padding: var(--spacing-md);
+        background: var(--bg-secondary);
+        border-radius: var(--radius-md);
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .target-content {
+        margin: var(--spacing-sm) 0;
+        font-style: italic;
+        color: var(--text-secondary);
+    }
+
+    .target-author {
+        font-size: 0.85rem;
+        color: var(--text-light);
+    }
+
+    .radio-option {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+        padding: var(--spacing-sm) 0;
+        cursor: pointer;
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: var(--spacing-md);
+        margin-top: var(--spacing-lg);
+    }
+</style>
+{% endblock %}

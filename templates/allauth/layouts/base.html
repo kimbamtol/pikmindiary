@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}
+{% block head_title %}{% endblock head_title %} - 피크민 다이어리
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="allauth-page">
+        <div class="allauth-card card">
+            {% block body %}
+            {% endblock body %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .allauth-page {
+        min-height: 60vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: var(--spacing-xl) 0;
+    }
+
+    .allauth-card {
+        max-width: 480px;
+        width: 100%;
+        padding: var(--spacing-2xl);
+    }
+
+    .allauth-card h1 {
+        text-align: center;
+        margin-bottom: var(--spacing-lg);
+        font-size: 1.5rem;
+    }
+
+    .allauth-card p {
+        text-align: center;
+        color: var(--text-secondary);
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .allauth-card form {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-md);
+    }
+
+    .allauth-card button[type="submit"],
+    .allauth-card input[type="submit"] {
+        padding: var(--spacing-md);
+        background: var(--primary);
+        color: white;
+        border: none;
+        border-radius: var(--radius-md);
+        font-size: 1rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all var(--transition-fast);
+    }
+
+    .allauth-card button[type="submit"]:hover,
+    .allauth-card input[type="submit"]:hover {
+        background: var(--primary-dark);
+    }
+
+    .allauth-card input[type="text"],
+    .allauth-card input[type="email"],
+    .allauth-card input[type="password"] {
+        padding: var(--spacing-md);
+        border: 2px solid var(--bg-tertiary);
+        border-radius: var(--radius-md);
+        font-size: 1rem;
+    }
+
+    .allauth-card a {
+        color: var(--primary);
+    }
+
+    .allauth-card ul {
+        list-style: none;
+        padding: 0;
+    }
+
+    .allauth-card li {
+        margin: var(--spacing-xs) 0;
+    }
+</style>
+{% endblock %}

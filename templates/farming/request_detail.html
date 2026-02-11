@@ -1,0 +1,225 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ request.title }} - 피크민 다이어리{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="request-detail">
+        <div class="request-header">
+            <div class="status-badge status-{{ request.status }}">{{ request.get_status_display }}</div>
+            <span class="badge badge-{{ request.flower_type }}">{{ request.get_flower_type_display }}</span>
+            <h1>{{ request.title }}</h1>
+            <div class="request-meta">
+                <span>{{ request.author.nickname }}</span>
+                <span>{{ request.created_at|date:"Y.n.j H:i" }}</span>
+            </div>
+        </div>
+
+        <div class="request-location">
+            <h3>📍 위치</h3>
+            <p class="location-name">{{ request.location_name }}</p>
+            <p class="location-coords">좌표: {{ request.latitude }}, {{ request.longitude }}</p>
+            <button onclick="copyCoords()" class="btn btn-outline btn-sm">좌표 복사</button>
+        </div>
+
+        {% if request.content %}
+        <div class="request-content">
+            <h3>📝 설명</h3>
+            {{ request.content|linebreaks }}
+        </div>
+        {% endif %}
+
+        {% if request.deadline %}
+        <div class="request-deadline">
+            <h3>⏰ 마감 시간</h3>
+            <p>{{ request.deadline|date:"Y년 n월 j일 H:i" }}</p>
+        </div>
+        {% endif %}
+
+        <!-- 참여자 목록 -->
+        <div class="request-participants">
+            <h3>🙋 참여자 ({{ participations.count }}명)</h3>
+            {% if participations %}
+            <ul class="participant-list">
+                {% for p in participations %}
+                <li>
+                    <span class="participant-name">{{ p.participant.nickname }}</span>
+                    <span class="participant-time">{{ p.created_at|date:"n/j H:i" }}</span>
+                    {% if p.message %}
+                    <p class="participant-message">{{ p.message }}</p>
+                    {% endif %}
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p class="empty-text">아직 참여자가 없습니다. 첫 번째 봉사자가 되어주세요! 🌸</p>
+            {% endif %}
+        </div>
+
+        <!-- 액션 버튼 -->
+        <div class="request-actions">
+            <a href="{% url 'farming:request_list' %}" class="btn btn-outline">목록으로</a>
+
+            {% if user.is_authenticated %}
+            {% if user == request.author %}
+            {% if request.status != 'completed' %}
+            <form action="{% url 'farming:complete_request' request.pk %}" method="post" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-primary">✅ 완료 처리</button>
+            </form>
+            {% endif %}
+            {% else %}
+            {% if not user_participated and request.status == 'open' or request.status == 'in_progress' %}
+            <form action="{% url 'farming:participate' request.pk %}" method="post" class="participate-form">
+                {% csrf_token %}
+                <input type="text" name="message" placeholder="메시지 (선택)" class="form-control">
+                <button type="submit" class="btn btn-primary">🙋 참여하기</button>
+            </form>
+            {% elif user_participated %}
+            <span class="participated-badge">✅ 참여 완료</span>
+            {% endif %}
+            {% endif %}
+            {% else %}
+            <a href="{% url 'account_login' %}" class="btn btn-primary">로그인하고 참여하기</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+    function copyCoords() {
+        const coords = "{{ request.latitude }}, {{ request.longitude }}";
+        navigator.clipboard.writeText(coords);
+        alert('좌표가 복사되었습니다: ' + coords);
+    }
+</script>
+
+<style>
+    .request-detail {
+        max-width: 800px;
+        margin: var(--spacing-xl) auto;
+        background: var(--bg-primary);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-md);
+        overflow: hidden;
+    }
+
+    .request-header {
+        padding: var(--spacing-xl);
+        border-bottom: 1px solid var(--bg-tertiary);
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: var(--spacing-xs) var(--spacing-sm);
+        border-radius: var(--radius-sm);
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .request-header h1 {
+        font-size: 1.8rem;
+        margin: var(--spacing-sm) 0;
+    }
+
+    .request-meta {
+        display: flex;
+        gap: var(--spacing-md);
+        color: var(--text-secondary);
+    }
+
+    .request-location,
+    .request-content,
+    .request-deadline,
+    .request-participants {
+        padding: var(--spacing-lg) var(--spacing-xl);
+        border-bottom: 1px solid var(--bg-tertiary);
+    }
+
+    .request-location h3,
+    .request-content h3,
+    .request-deadline h3,
+    .request-participants h3 {
+        font-size: 1rem;
+        margin-bottom: var(--spacing-md);
+        color: var(--text-secondary);
+    }
+
+    .location-name {
+        font-size: 1.2rem;
+        font-weight: 600;
+    }
+
+    .location-coords {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        margin: var(--spacing-sm) 0;
+    }
+
+    .participant-list {
+        list-style: none;
+    }
+
+    .participant-list li {
+        padding: var(--spacing-sm) 0;
+        border-bottom: 1px solid var(--bg-tertiary);
+    }
+
+    .participant-name {
+        font-weight: 600;
+    }
+
+    .participant-time {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin-left: var(--spacing-sm);
+    }
+
+    .participant-message {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        margin-top: var(--spacing-xs);
+    }
+
+    .request-actions {
+        padding: var(--spacing-lg) var(--spacing-xl);
+        display: flex;
+        gap: var(--spacing-md);
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .participate-form {
+        display: flex;
+        gap: var(--spacing-sm);
+        align-items: center;
+    }
+
+    .participate-form .form-control {
+        width: 200px;
+    }
+
+    .participated-badge {
+        background: var(--primary-light);
+        color: var(--primary-dark);
+        padding: var(--spacing-sm) var(--spacing-md);
+        border-radius: var(--radius-full);
+        font-weight: 600;
+    }
+
+    .btn-sm {
+        padding: var(--spacing-xs) var(--spacing-sm);
+        font-size: 0.85rem;
+    }
+
+    .empty-text {
+        color: var(--text-primary);
+        font-weight: 500;
+        padding: var(--spacing-md);
+        background: var(--bg-secondary);
+        border-radius: var(--radius-md);
+        text-align: center;
+    }
+</style>
+{% endblock %}

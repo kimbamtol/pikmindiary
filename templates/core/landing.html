@@ -1,0 +1,288 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}피크민 다이어리 - 피크민 블룸 버섯, 모종, 엽서 좌표 커뮤니티{% endblock %}
+{% block description %}피크민 블룸 버섯 좌표, 모종 좌표, 빅플라워 위치, 엽서 정보를 함께 공유하는 유저 커뮤니티입니다. 피크민 좌표를 찾고 농사 정보를 나눠보세요!{% endblock %}
+{% block keywords %}피크민, 피크민 블룸, 피크민 좌표, 피크민 버섯, 피크민 버섯 좌표, 피크민 모종, 피크민 모종 좌표, 피크민 엽서, 피크민 엽서 좌표, 피크민 빅플라워, 피크민 농사,
+Pikmin Bloom{% endblock %}
+{% block og_title %}피크민 다이어리 - 피크민 블룸 좌표 공유 커뮤니티{% endblock %}
+{% block og_description %}피크민 블룸 버섯, 모종, 빅플라워 좌표를 공유하고 농사 정보를 나눠요!{% endblock %}
+
+{% block header %}
+<!-- 랜딩 페이지는 헤더 없음 -->
+{% endblock %}
+
+{% block content %}
+<div class="landing-container">
+    <!-- 메인 카드 -->
+    <div class="landing-card">
+        <div class="landing-logo">
+            <span class="landing-logo-icon">🌱</span>
+        </div>
+
+        <h1 class="landing-title">피크민 다이어리 커뮤니티</h1>
+
+        <p class="landing-description">
+            유저들이 함께 하는 버섯, 빅플라워, 농사 정보
+        </p>
+
+        <!-- 위치 안내 박스 -->
+        <div class="location-notice">
+            <span class="location-notice-icon">📍</span>
+            <p>
+                위치를 허용하면 입장 후<br>
+                <strong>내 지역 계절에 맞는 화면</strong>이 펼쳐집니다!
+            </p>
+        </div>
+
+        <!-- 입장/지도 버튼 -->
+        <div class="landing-main-buttons">
+            <button class="btn btn-primary btn-lg btn-enter" onclick="weatherTheme.handleEnterClick()">
+                🚀 입장하기
+            </button>
+            <a href="{% url 'coordinates:map' %}" class="btn btn-secondary btn-lg btn-map">
+                🗺️ 지도로 보기
+            </a>
+        </div>
+
+        <!-- 안내 버튼 -->
+        <div class="landing-links">
+            <a href="{% url 'core:guide' %}" class="btn btn-outline">
+                📖 사이트 안내
+            </a>
+            <a href="{% url 'core:mypage_guide' %}" class="btn btn-outline">
+                👤 마이페이지 안내
+            </a>
+        </div>
+    </div>
+
+    <!-- 하단 정보 -->
+    <div class="landing-footer">
+        <p>© {% now "Y" %} 피크민 다이어리</p>
+        <p class="landing-disclaimer">Nintendo 또는 Niantic과 관련이 없습니다.</p>
+    </div>
+</div>
+
+<style>
+    /* 랜딩 페이지 전용 스타일 */
+    .landing-container {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: var(--spacing-xl);
+    }
+
+    .landing-card {
+        background: var(--bg-glass);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-radius: var(--radius-xl);
+        padding: var(--spacing-2xl);
+        text-align: center;
+        max-width: 480px;
+        width: 100%;
+        box-shadow: var(--shadow-xl);
+        animation: fadeInUp 0.8s ease;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .landing-logo {
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .landing-logo-icon {
+        font-size: 5rem;
+        display: block;
+        animation: bounce 2s ease infinite;
+    }
+
+    @keyframes bounce {
+
+        0%,
+        100% {
+            transform: translateY(0);
+        }
+
+        50% {
+            transform: translateY(-10px);
+        }
+    }
+
+    .landing-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: var(--spacing-md);
+        background: linear-gradient(135deg, #4CAF50, #8BC34A);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .landing-description {
+        font-size: 1.1rem;
+        color: var(--text-secondary);
+        margin-bottom: var(--spacing-xl);
+    }
+
+    .location-notice {
+        background: rgba(76, 175, 80, 0.1);
+        border: 2px dashed var(--primary);
+        border-radius: var(--radius-lg);
+        padding: var(--spacing-md);
+        margin-bottom: var(--spacing-xl);
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-md);
+        text-align: left;
+    }
+
+    .location-notice-icon {
+        font-size: 2rem;
+        flex-shrink: 0;
+    }
+
+    .location-notice p {
+        font-size: 0.95rem;
+        color: var(--text-secondary);
+        line-height: 1.5;
+    }
+
+    .landing-main-buttons {
+        display: flex;
+        gap: var(--spacing-md);
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .btn-enter {
+        flex: 1;
+        padding: var(--spacing-md) var(--spacing-xl);
+        font-size: 1.1rem;
+        animation: pulse 2s ease infinite;
+    }
+
+    .btn-map {
+        flex: 1;
+        padding: var(--spacing-md) var(--spacing-xl);
+        font-size: 1.1rem;
+        background: #3498db;
+        color: white;
+        border: none;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .btn-map:hover {
+        background: #2980b9;
+    }
+
+    @keyframes pulse {
+
+        0%,
+        100% {
+            box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.4);
+        }
+
+        50% {
+            box-shadow: 0 0 0 10px rgba(76, 175, 80, 0);
+        }
+    }
+
+    .landing-links {
+        display: flex;
+        gap: var(--spacing-md);
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .landing-links .btn {
+        flex: 1;
+        min-width: 140px;
+        background: rgba(255, 255, 255, 0.95);
+        border: 2px solid var(--primary);
+        color: var(--primary);
+        font-weight: 600;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .landing-links .btn:hover {
+        background: var(--primary);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+    }
+
+    .landing-footer {
+        margin-top: var(--spacing-xl);
+        text-align: center;
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+    }
+
+    .landing-disclaimer {
+        font-size: 0.75rem;
+        margin-top: var(--spacing-xs);
+        opacity: 0.7;
+    }
+
+    /* 반응형 */
+    @media (max-width: 480px) {
+        .landing-card {
+            padding: var(--spacing-lg);
+        }
+
+        .landing-title {
+            font-size: 1.5rem;
+        }
+
+        .landing-links {
+            flex-direction: column;
+        }
+    }
+
+    /* 밤 모드에서 버튼 가시성 */
+    body[data-time="night"] .landing-links .btn {
+        background: rgba(255, 255, 255, 0.98);
+        color: #1A202C;
+        border-color: #4CAF50;
+    }
+
+    body[data-time="night"] .landing-links .btn:hover {
+        background: #4CAF50;
+        color: white;
+    }
+
+    body[data-time="night"] .landing-card {
+        background: rgba(255, 255, 255, 0.95);
+    }
+
+    body[data-time="night"] .landing-description {
+        color: #4A5568;
+    }
+</style>
+{% endblock %}
+
+{% block footer %}
+<!-- 랜딩 페이지는 푸터 없음 -->
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // 랜딩 페이지 표시
+    document.body.classList.add('landing-page');
+</script>
+{% endblock %}

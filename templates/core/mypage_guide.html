@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+
+{% block title %}마이페이지 안내 - 피크민 다이어리{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="guide-page">
+        <h1 class="page-title">👤 마이페이지 시스템 안내</h1>
+
+        <div class="guide-section">
+            <h2>🔑 회원가입 방법</h2>
+            <p>
+                <strong>Google 계정</strong>으로 간편하게 가입할 수 있습니다.
+                별도의 회원가입 절차 없이 Google 로그인만 하면 됩니다.
+            </p>
+        </div>
+
+        <div class="guide-section">
+            <h2>📝 비회원으로 글 작성</h2>
+            <p>
+                로그인하지 않아도 글과 댓글을 남길 수 있습니다!
+            </p>
+            <ul>
+                <li><strong>닉네임</strong>과 <strong>비밀번호</strong>를 입력하세요.</li>
+                <li>비밀번호는 나중에 글을 수정/삭제할 때 사용합니다.</li>
+                <li>비회원 글은 마이페이지에서 조회할 수 없습니다.</li>
+            </ul>
+        </div>
+
+        <div class="guide-section">
+            <h2>⭐ 회원 혜택</h2>
+            <div class="benefit-list">
+                <div class="benefit-item">
+                    <span class="benefit-icon">📋</span>
+                    <div>
+                        <strong>내가 쓴 글 관리</strong>
+                        <p>작성한 모든 글을 한눈에 확인하고 관리</p>
+                    </div>
+                </div>
+                <div class="benefit-item">
+                    <span class="benefit-icon">🔖</span>
+                    <div>
+                        <strong>북마크 기능</strong>
+                        <p>마음에 드는 좌표를 저장해두고 나중에 확인</p>
+                    </div>
+                </div>
+                <div class="benefit-item">
+                    <span class="benefit-icon">🏆</span>
+                    <div>
+                        <strong>랭킹 참여</strong>
+                        <p>기여도에 따라 랭킹에 이름이 올라갑니다</p>
+                    </div>
+                </div>
+                <div class="benefit-item">
+                    <span class="benefit-icon">📊</span>
+                    <div>
+                        <strong>통계 확인</strong>
+                        <p>받은 좋아요, 유효성 평가 등 통계 확인</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="guide-section">
+            <h2>📱 마이페이지 기능</h2>
+            <ul>
+                <li><strong>내 글 목록</strong>: 작성한 글 전체 조회 (대기/승인/거절 상태별)</li>
+                <li><strong>북마크</strong>: 저장해둔 좌표 목록</li>
+                <li><strong>통계</strong>: 승인된 글 수, 받은 좋아요, 받은 유효성 평가</li>
+                <li><strong>프로필 설정</strong>: 닉네임, 프로필 이미지, 자기소개 수정</li>
+            </ul>
+        </div>
+
+        <div class="guide-actions">
+            <a href="{% url 'core:guide' %}" class="btn btn-outline">← 사이트 안내</a>
+            <a href="{% url 'core:landing' %}" class="btn btn-primary">메인으로 →</a>
+        </div>
+    </div>
+</div>
+
+<style>
+    .guide-page {
+        max-width: 800px;
+        margin: var(--spacing-xl) auto;
+        padding: var(--spacing-xl);
+        background: var(--bg-primary);
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-md);
+    }
+
+    .page-title {
+        text-align: center;
+        margin-bottom: var(--spacing-xl);
+        font-size: 2rem;
+    }
+
+    .guide-section {
+        margin-bottom: var(--spacing-xl);
+        padding-bottom: var(--spacing-xl);
+        border-bottom: 1px solid var(--bg-tertiary);
+    }
+
+    .guide-section h2 {
+        font-size: 1.3rem;
+        margin-bottom: var(--spacing-md);
+        color: var(--primary);
+    }
+
+    .guide-section p {
+        color: var(--text-secondary);
+        line-height: 1.8;
+    }
+
+    .guide-section ul {
+        list-style: disc;
+        padding-left: var(--spacing-lg);
+        color: var(--text-secondary);
+    }
+
+    .guide-section li {
+        margin-bottom: var(--spacing-sm);
+        line-height: 1.6;
+    }
+
+    .benefit-list {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-md);
+    }
+
+    .benefit-item {
+        display: flex;
+        gap: var(--spacing-md);
+        padding: var(--spacing-md);
+        background: var(--bg-secondary);
+        border-radius: var(--radius-md);
+    }
+
+    .benefit-icon {
+        font-size: 2rem;
+        flex-shrink: 0;
+    }
+
+    .benefit-item strong {
+        display: block;
+        margin-bottom: var(--spacing-xs);
+    }
+
+    .benefit-item p {
+        font-size: 0.9rem;
+        margin: 0;
+    }
+
+    .guide-actions {
+        display: flex;
+        justify-content: space-between;
+        gap: var(--spacing-md);
+        margin-top: var(--spacing-xl);
+    }
+
+    @media (max-width: 480px) {
+        .guide-page {
+            padding: var(--spacing-md);
+        }
+
+        .guide-actions {
+            flex-direction: column;
+        }
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,185 @@
+{% extends 'base.html' %}
+
+{% block title %}내 건의사항 - 피크민 다이어리{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="suggestions-page">
+        <a href="{% url 'accounts:my_page' %}" class="back-link">← 마이페이지로</a>
+
+        <h1 class="page-title">📋 내 건의사항</h1>
+
+        {% if page_obj %}
+        <div class="suggestions-list">
+            {% for suggestion in page_obj %}
+            <div class="suggestion-card card">
+                <div class="suggestion-header">
+                    <span class="suggestion-category badge badge-secondary">{{ suggestion.get_category_display }}</span>
+                    <span class="suggestion-status 
+                        {% if suggestion.status == 'RESOLVED' %}badge-success
+                        {% elif suggestion.status == 'REVIEWED' %}badge-warning
+                        {% else %}badge-secondary{% endif %} badge">
+                        {{ suggestion.get_status_display }}
+                    </span>
+                    <span class="suggestion-date">{{ suggestion.created_at|date:"Y.m.d H:i" }}</span>
+                </div>
+
+                <h3 class="suggestion-title">{{ suggestion.title }}</h3>
+                <p class="suggestion-content">{{ suggestion.content|linebreaksbr }}</p>
+
+                {% if suggestion.admin_reply %}
+                <div class="admin-reply">
+                    <div class="reply-header">
+                        <span class="reply-icon">💬</span>
+                        <span class="reply-label">운영자 답변</span>
+                        <span class="reply-date">{{ suggestion.replied_at|date:"Y.m.d H:i" }}</span>
+                    </div>
+                    <p class="reply-content">{{ suggestion.admin_reply|linebreaksbr }}</p>
+                </div>
+                {% else %}
+                <div class="no-reply">
+                    <span>⏳ 아직 답변이 없습니다</span>
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- 페이지네이션 -->
+        {% if page_obj.has_other_pages %}
+        <div class="pagination">
+            {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}" class="btn btn-secondary">← 이전</a>
+            {% endif %}
+            <span class="page-info">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+            {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}" class="btn btn-secondary">다음 →</a>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">📭</div>
+            <h2 class="empty-state-title">건의사항이 없습니다</h2>
+            <p class="empty-state-desc">운영자에게 건의할 내용이 있다면 건의하기 페이지를 이용해주세요.</p>
+            <a href="{% url 'core:suggestion_form' %}" class="btn btn-primary">건의하기</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    .suggestions-page {
+        max-width: 800px;
+        margin: var(--spacing-xl) auto;
+    }
+
+    .back-link {
+        display: inline-block;
+        margin-bottom: var(--spacing-md);
+        color: var(--text-secondary);
+    }
+
+    .page-title {
+        margin-bottom: var(--spacing-xl);
+    }
+
+    .suggestions-list {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-lg);
+    }
+
+    .suggestion-card {
+        padding: var(--spacing-lg);
+    }
+
+    .suggestion-header {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+        margin-bottom: var(--spacing-md);
+    }
+
+    .suggestion-date {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin-left: auto;
+    }
+
+    .suggestion-title {
+        font-size: 1.1rem;
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .suggestion-content {
+        color: var(--text-secondary);
+        line-height: 1.6;
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .admin-reply {
+        background: var(--bg-secondary);
+        border-radius: var(--radius-md);
+        padding: var(--spacing-md);
+        border-left: 3px solid var(--primary);
+    }
+
+    .reply-header {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-xs);
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .reply-icon {
+        font-size: 1.2rem;
+    }
+
+    .reply-label {
+        font-weight: 600;
+        color: var(--primary);
+    }
+
+    .reply-date {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        margin-left: auto;
+    }
+
+    .reply-content {
+        line-height: 1.6;
+    }
+
+    .no-reply {
+        text-align: center;
+        padding: var(--spacing-md);
+        background: var(--bg-secondary);
+        border-radius: var(--radius-md);
+        color: var(--text-secondary);
+    }
+
+    .pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: var(--spacing-md);
+        margin-top: var(--spacing-xl);
+    }
+
+    .page-info {
+        color: var(--text-secondary);
+    }
+
+    .badge-success {
+        background-color: #28a745;
+        color: white;
+    }
+
+    .badge-warning {
+        background-color: #ffc107;
+        color: #212529;
+    }
+</style>
+{% endblock %}

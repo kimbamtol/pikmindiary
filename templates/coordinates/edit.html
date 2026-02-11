@@ -1,0 +1,288 @@
+{% extends 'base.html' %}
+
+{% block title %}좌표 수정 - 피크민 다이어리{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="form-page">
+        <h1 class="page-title">✏️ 좌표 수정</h1>
+
+        <form method="post" class="coord-form" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <!-- 비회원 비밀번호 확인 -->
+            {% if not can_edit and coordinate.guest_password %}
+            <div class="guest-notice">
+                <p>🔒 비회원으로 작성된 글입니다. 비밀번호를 입력해주세요.</p>
+            </div>
+            <div class="form-group">
+                <label class="form-label">비밀번호 *</label>
+                <input type="password" name="password" class="form-control" required>
+            </div>
+            {% endif %}
+
+            <!-- 기본 정보 -->
+            <div class="form-group">
+                <label class="form-label">제목 *</label>
+                <input type="text" name="title" class="form-control" value="{{ coordinate.title }}" required
+                    maxlength="100">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">엽서이름</label>
+                <input type="text" name="postcard_name" class="form-control" value="{{ coordinate.postcard_name }}"
+                    maxlength="100">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">카테고리 *</label>
+                <select name="category" class="form-control" required>
+                    {% for value, label in categories %}
+                    <option value="{{ value }}" {% if coordinate.category == value %}selected{% endif %}>{{ label }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- 좌표 입력 -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">위도 (Latitude) *</label>
+                    <input type="text" name="latitude" id="latitude" class="form-control"
+                        value="{{ coordinate.latitude }}" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">경도 (Longitude) *</label>
+                    <input type="text" name="longitude" id="longitude" class="form-control"
+                        value="{{ coordinate.longitude }}" required>
+                </div>
+            </div>
+
+            <!-- 설명 -->
+            <div class="form-group">
+                <label class="form-label">설명</label>
+                <textarea name="description" class="form-control" rows="4">{{ coordinate.description }}</textarea>
+            </div>
+
+            <!-- 기존 이미지 -->
+            {% if coordinate.images.all %}
+            <div class="form-group">
+                <label class="form-label">현재 이미지</label>
+                <div class="existing-images">
+                    {% for img in coordinate.images.all %}
+                    <div class="existing-image-item">
+                        <img src="{{ img.image.url }}" alt="이미지 {{ forloop.counter }}">
+                        <label class="delete-checkbox">
+                            <input type="checkbox" name="delete_images" value="{{ img.pk }}">
+                            <span>삭제</span>
+                        </label>
+                    </div>
+                    {% endfor %}
+                </div>
+                <p class="form-hint">삭제할 이미지를 선택하세요</p>
+            </div>
+            {% endif %}
+
+            <!-- 새 이미지 추가 -->
+            <div class="form-group">
+                <label class="form-label">새 이미지 추가</label>
+                <input type="file" name="images" accept="image/*" multiple class="form-control">
+                <p class="form-hint">최대 5장까지 업로드 가능 (기존 이미지 포함)</p>
+            </div>
+
+            <!-- 워터마크 옵션 -->
+            <div class="form-group watermark-option">
+                <label class="checkbox-label">
+                    <input type="checkbox" name="watermark_enabled" id="watermark_enabled"
+                           {% if coordinate.watermark_enabled %}checked{% endif %}
+                           onchange="toggleWatermarkName()">
+                    <span class="checkbox-text">🔒 사진에 닉네임 워터마크 표시</span>
+                </label>
+                <small class="form-help">{% if coordinate.watermark_enabled %}이미 워터마크가 적용되어 있습니다.{% else %}체크하면 기존 이미지 + 새 이미지 모두에 워터마크가 적용됩니다. (한번 적용하면 취소 불가){% endif %}</small>
+
+                <div id="watermark-name-field" class="watermark-name-field"
+                     style="display: {% if coordinate.watermark_enabled %}block{% else %}none{% endif %};">
+                    <label class="form-label">워터마크 닉네임 (선택)</label>
+                    <input type="text" name="watermark_name" class="form-control"
+                           value="{{ coordinate.watermark_name }}"
+                           placeholder="비워두면 작성자 닉네임 사용" maxlength="50">
+                    <small class="form-help">워터마크에 표시될 이름을 직접 지정할 수 있습니다.</small>
+                </div>
+            </div>
+
+            <!-- 버튼 -->
+            <div class="form-actions">
+                <a href="{% url 'coordinates:detail' pk=coordinate.pk %}" class="btn btn-outline">취소</a>
+                <button type="submit" class="btn btn-primary btn-lg">수정하기</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function toggleWatermarkName() {
+        const checkbox = document.getElementById('watermark_enabled');
+        const nameField = document.getElementById('watermark-name-field');
+        if (checkbox.checked) {
+            nameField.style.display = 'block';
+        } else {
+            nameField.style.display = 'none';
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const latInput = document.querySelector('input[name="latitude"]');
+        const lngInput = document.querySelector('input[name="longitude"]');
+
+        if (latInput && lngInput) {
+            latInput.addEventListener('input', function (e) {
+                const value = e.target.value;
+                if (value.includes(',')) {
+                    const parts = value.split(',');
+                    if (parts.length === 2) {
+                        const lat = parts[0].trim();
+                        const lng = parts[1].trim();
+
+                        latInput.value = lat;
+                        lngInput.value = lng;
+
+                        lngInput.focus();
+                    }
+                }
+            });
+        }
+    });
+</script>
+
+<style>
+    .form-page {
+        max-width: 700px;
+        margin: var(--spacing-xl) auto;
+        padding: var(--spacing-xl);
+        background: var(--bg-primary);
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-md);
+    }
+
+    .page-title {
+        text-align: center;
+        margin-bottom: var(--spacing-xl);
+    }
+
+    .guest-notice {
+        padding: var(--spacing-md);
+        background: #FFF3E0;
+        border-radius: var(--radius-md);
+        margin-bottom: var(--spacing-lg);
+        color: #E65100;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: var(--spacing-md);
+    }
+
+    .form-group {
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: var(--spacing-sm);
+        font-weight: 600;
+    }
+
+    .existing-images {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: var(--spacing-md);
+    }
+
+    .existing-image-item {
+        position: relative;
+        border-radius: 8px;
+        overflow: hidden;
+        border: 2px solid var(--bg-tertiary);
+    }
+
+    .existing-image-item img {
+        width: 100%;
+        aspect-ratio: 1;
+        object-fit: cover;
+    }
+
+    .delete-checkbox {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: rgba(220, 53, 69, 0.9);
+        color: white;
+        padding: 4px 8px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        cursor: pointer;
+        font-size: 0.8rem;
+    }
+
+    .existing-image-item:has(input:checked) {
+        border-color: #dc3545;
+        opacity: 0.6;
+    }
+
+    /* 워터마크 옵션 */
+    .watermark-option {
+        padding: var(--spacing-md);
+        background: #E3F2FD;
+        border-radius: var(--radius-md);
+        border: 1px solid #90CAF9;
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .checkbox-label {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+        cursor: pointer;
+    }
+
+    .checkbox-label input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+    }
+
+    .checkbox-text {
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .watermark-name-field {
+        margin-top: var(--spacing-md);
+        padding-top: var(--spacing-md);
+        border-top: 1px solid #90CAF9;
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: space-between;
+        gap: var(--spacing-md);
+    }
+
+    @media (max-width: 480px) {
+        .form-page {
+            padding: var(--spacing-md);
+        }
+
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+
+        .form-actions {
+            flex-direction: column-reverse;
+        }
+    }
+</style>
+{% endblock %}

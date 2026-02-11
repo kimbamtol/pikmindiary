@@ -1,0 +1,179 @@
+{% extends 'base.html' %}
+
+{% block title %}농사 요청 - 피크민 다이어리{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <div>
+            <h1>🙋 농사 요청</h1>
+            <p>빅플라워 농사를 도와주세요!</p>
+        </div>
+        <a href="{% url 'farming:request_create' %}" class="btn btn-primary">🆘 요청하기</a>
+    </div>
+
+    <div class="filter-bar">
+        <a href="{% url 'farming:request_list' %}"
+            class="filter-btn {% if not status or status == 'open' %}active{% endif %}">모집중</a>
+        <a href="?status=in_progress" class="filter-btn {% if status == 'in_progress' %}active{% endif %}">진행중</a>
+        <a href="?status=completed" class="filter-btn {% if status == 'completed' %}active{% endif %}">완료</a>
+        <a href="?status=all" class="filter-btn {% if status == 'all' %}active{% endif %}">전체</a>
+    </div>
+
+    <div class="request-grid">
+        {% for req in requests %}
+        <a href="{% url 'farming:request_detail' req.pk %}" class="request-card card">
+            <div class="request-status status-{{ req.status }}">{{ req.get_status_display }}</div>
+            <div class="request-content">
+                <h3>{{ req.title }}</h3>
+                <p class="request-location">📍 {{ req.location_name }}</p>
+                <p class="request-meta">
+                    <span>{{ req.author.nickname }}</span>
+                    <span>{{ req.created_at|date:"n/j H:i" }}</span>
+                </p>
+                {% if req.deadline %}
+                <p class="request-deadline">⏰ 마감: {{ req.deadline|date:"n/j H:i" }}</p>
+                {% endif %}
+                <p class="request-participants">🙋 {{ req.participations.count }}명 참여</p>
+            </div>
+        </a>
+        {% empty %}
+        <div class="empty-state">
+            <div class="empty-state-icon">🙋</div>
+            <h3 class="empty-state-title">모집중인 요청이 없어요</h3>
+            <p class="empty-state-desc">농사 도움이 필요하면 요청해보세요!</p>
+            <a href="{% url 'farming:request_create' %}" class="btn btn-primary">요청하기</a>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if requests.has_other_pages %}
+    <div class="pagination">
+        {% if requests.has_previous %}
+        <a href="?page={{ requests.previous_page_number }}{% if status %}&status={{ status }}{% endif %}">이전</a>
+        {% endif %}
+        <span class="current">{{ requests.number }} / {{ requests.paginator.num_pages }}</span>
+        {% if requests.has_next %}
+        <a href="?page={{ requests.next_page_number }}{% if status %}&status={{ status }}{% endif %}">다음</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding: 1rem 0;
+    }
+
+    .page-header h1 {
+        font-size: 1.8rem;
+    }
+
+    .page-header p {
+        color: var(--text-secondary);
+    }
+
+    .filter-bar {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+        padding: 1rem;
+        background: var(--bg-primary);
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .filter-btn {
+        padding: 0.5rem 1rem;
+        border-radius: 9999px;
+        background: var(--bg-primary);
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        transition: all 0.2s;
+    }
+
+    .filter-btn:hover,
+    .filter-btn.active {
+        background: var(--primary);
+        color: white;
+    }
+
+    .request-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1rem;
+    }
+
+    .request-card {
+        position: relative;
+        padding: 1rem;
+    }
+
+    .request-status {
+        position: absolute;
+        top: 0.75rem;
+        right: 0.75rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .status-open {
+        background: #E8F5E9;
+        color: #2E7D32;
+    }
+
+    .status-in_progress {
+        background: #FFF3E0;
+        color: #E65100;
+    }
+
+    .status-completed {
+        background: #E0E0E0;
+        color: #616161;
+    }
+
+    .status-closed {
+        background: #FFEBEE;
+        color: #C62828;
+    }
+
+    .request-content h3 {
+        font-size: 1.1rem;
+        margin: 0.5rem 0;
+        color: var(--text-primary);
+    }
+
+    .request-location {
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+    }
+
+    .request-meta {
+        display: flex;
+        gap: 1rem;
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+    }
+
+    .request-deadline {
+        font-size: 0.85rem;
+        color: var(--secondary);
+        font-weight: 500;
+        margin-top: 0.5rem;
+    }
+
+    .request-participants {
+        font-size: 0.9rem;
+        font-weight: 500;
+        margin-top: 0.5rem;
+        color: var(--primary);
+    }
+</style>
+{% endblock %}

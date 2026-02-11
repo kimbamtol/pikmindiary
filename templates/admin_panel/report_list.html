@@ -1,0 +1,212 @@
+{% extends 'base.html' %}
+
+{% block title %}신고 목록 - 관리자{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="admin-page">
+        <div class="page-header">
+            <a href="{% url 'admin_panel:dashboard' %}" class="back-link">← 대시보드</a>
+            <h1 class="page-title">🚨 신고 목록</h1>
+        </div>
+
+        <!-- 필터 -->
+        <div class="filter-tabs">
+            <a href="?status=PENDING" class="tab {% if status_filter == 'PENDING' %}active{% endif %}">대기</a>
+            <a href="?status=RESOLVED" class="tab {% if status_filter == 'RESOLVED' %}active{% endif %}">처리됨</a>
+            <a href="?status=DISMISSED" class="tab {% if status_filter == 'DISMISSED' %}active{% endif %}">기각</a>
+            <a href="?status=" class="tab {% if not status_filter %}active{% endif %}">전체</a>
+        </div>
+
+        {% if page_obj %}
+        <div class="item-list">
+            {% for report in page_obj %}
+            <div class="report-item card">
+                <div class="report-header">
+                    <span
+                        class="badge badge-{% if report.status == 'PENDING' %}warning{% elif report.status == 'RESOLVED' %}success{% else %}secondary{% endif %}">
+                        {{ report.get_status_display }}
+                    </span>
+                    <span class="badge badge-primary">{{ report.get_reason_display }}</span>
+                    <span class="report-date">{{ report.created_at|date:"Y.m.d H:i" }}</span>
+                </div>
+
+                <div class="report-content">
+                    <div class="report-target">
+                        <strong>신고 대상:</strong>
+                        {% if report.coordinate %}
+                        <a href="{% url 'coordinates:detail' pk=report.coordinate.pk %}">
+                            좌표 - {{ report.coordinate.title }}
+                        </a>
+                        {% else %}
+                        댓글 - "{{ report.comment.content|truncatewords:10 }}"
+                        {% endif %}
+                    </div>
+                    <div class="report-reporter">
+                        <strong>신고자:</strong> {{ report.reporter.nickname }}
+                    </div>
+                    {% if report.detail %}
+                    <div class="report-detail">
+                        <strong>상세 내용:</strong>
+                        <p>{{ report.detail }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+
+                {% if report.status == 'PENDING' %}
+                <div class="report-actions">
+                    <form action="{% url 'admin_panel:resolve_report' pk=report.pk %}" method="post"
+                        class="action-form">
+                        {% csrf_token %}
+                        <textarea name="admin_note" placeholder="관리자 메모 (선택)" class="form-control"></textarea>
+                        <div class="action-buttons">
+                            <button type="submit" name="action" value="resolve" class="btn btn-danger">
+                                신고 수락 (대상 삭제)
+                            </button>
+                            <button type="submit" name="action" value="dismiss" class="btn btn-outline">
+                                신고 기각
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                {% else %}
+                <div class="report-result">
+                    {% if report.admin_note %}
+                    <p><strong>관리자 메모:</strong> {{ report.admin_note }}</p>
+                    {% endif %}
+                    <p class="resolved-info">
+                        {{ report.resolved_by.nickname }}님이 {{ report.resolved_at|date:"Y.m.d H:i" }}에 처리
+                    </p>
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+
+        {% if page_obj.has_other_pages %}
+        <nav class="pagination">
+            {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}&status={{ status_filter }}">← 이전</a>
+            {% endif %}
+            <span>{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+            {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}&status={{ status_filter }}">다음 →</a>
+            {% endif %}
+        </nav>
+        {% endif %}
+
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">✅</div>
+            <h2 class="empty-state-title">신고가 없습니다</h2>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    .admin-page {
+        max-width: 900px;
+        margin: var(--spacing-xl) auto;
+    }
+
+    .page-header {
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .back-link {
+        display: inline-block;
+        margin-bottom: var(--spacing-md);
+        color: var(--text-secondary);
+    }
+
+    .filter-tabs {
+        display: flex;
+        gap: var(--spacing-sm);
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .tab {
+        padding: var(--spacing-sm) var(--spacing-lg);
+        border-radius: var(--radius-full);
+        background: var(--bg-primary);
+        color: var(--text-secondary);
+        font-weight: 500;
+    }
+
+    .tab.active {
+        background: var(--primary);
+        color: white;
+    }
+
+    .item-list {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-lg);
+    }
+
+    .report-item {
+        padding: var(--spacing-lg);
+    }
+
+    .report-header {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-md);
+        margin-bottom: var(--spacing-md);
+    }
+
+    .report-date {
+        margin-left: auto;
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+    }
+
+    .report-content {
+        margin-bottom: var(--spacing-md);
+    }
+
+    .report-target,
+    .report-reporter,
+    .report-detail {
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .report-detail p {
+        margin-top: var(--spacing-xs);
+        padding: var(--spacing-sm);
+        background: var(--bg-secondary);
+        border-radius: var(--radius-sm);
+    }
+
+    .report-actions {
+        padding-top: var(--spacing-md);
+        border-top: 1px solid var(--bg-tertiary);
+    }
+
+    .action-form textarea {
+        margin-bottom: var(--spacing-md);
+        min-height: 60px;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: var(--spacing-md);
+    }
+
+    .report-result {
+        padding-top: var(--spacing-md);
+        border-top: 1px solid var(--bg-tertiary);
+        font-size: 0.9rem;
+    }
+
+    .resolved-info {
+        color: var(--text-secondary);
+    }
+
+    .badge-secondary {
+        background: var(--bg-tertiary);
+        color: var(--text-secondary);
+    }
+</style>
+{% endblock %}

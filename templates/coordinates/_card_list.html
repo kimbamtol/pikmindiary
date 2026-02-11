@@ -1,0 +1,50 @@
+{% for coord in coords %}
+<article class="card coord-card">
+    <a href="{% url 'coordinates:detail' pk=coord.pk %}">
+        <div class="coord-card-image">
+            {% if coord.images.first %}
+            <img src="{{ coord.images.first.image.url }}" alt="{{ coord.title }}">
+            {% else %}
+            <div class="coord-card-placeholder">🗺️</div>
+            {% endif %}
+            <span class="badge badge-primary coord-card-category">
+                {{ coord.get_category_display }}
+            </span>
+            {% if coord.is_outdated %}
+            <span class="badge badge-warning coord-card-badge">오래됨</span>
+            {% endif %}
+        </div>
+
+        <div class="coord-card-content">
+            <h3 class="coord-card-title">{{ coord.title }}</h3>
+            {% if coord.postcard_name %}
+            <div class="coord-card-postcard">🏷️ {{ coord.postcard_name }}</div>
+            {% endif %}
+            <div class="coord-card-meta">
+                <span>📍 {{ coord.latitude }}, {{ coord.longitude }}</span>
+                <span class="coord-region">{{ coord.get_region_display }}</span>
+            </div>
+            <div class="coord-card-meta">
+                <span class="author-badge {{ coord.author.get_badge_class }}">
+                    {% if coord.author.profile_emoji %}
+                        <span class="profile-emoji">{{ coord.author.profile_emoji }}</span>
+                    {% endif %}
+                    <span class="author-name">{{ coord.author.nickname|default:"익명" }}</span>
+                    {% if coord.author.special_title %}
+                    <span class="special-title-tag">{{ coord.author.get_special_title_display }}</span>
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+    </a>
+
+    <div class="coord-card-stats">
+        <button type="button" class="copy-btn" data-coords="{{ coord.latitude }}, {{ coord.longitude }}"
+            data-pk="{{ coord.pk }}" title="좌표 복사">📋 <span class="copy-count">{{ coord.copy_count }}</span></button>
+        <span class="coord-stat">👁️ {{ coord.view_count }}</span>
+        <span class="coord-stat">❤️ {{ coord.like_count }}</span>
+        <span class="coord-stat">⭐ {{ coord.bookmark_count }}</span>
+        <span class="coord-stat">💬 {{ coord.comment_count }}</span>
+    </div>
+</article>
+{% endfor %}

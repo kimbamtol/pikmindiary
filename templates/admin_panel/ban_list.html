@@ -1,0 +1,244 @@
+{% extends 'base.html' %}
+
+{% block title %}정지 목록 - 관리자{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="admin-page">
+        <div class="page-header">
+            <h1>🚫 정지 목록</h1>
+            <div class="header-actions">
+                <a href="{% url 'admin_panel:batch_post_management' %}" class="btn btn-outline">← 게시글 관리</a>
+                <a href="{% url 'admin_panel:dashboard' %}" class="btn btn-outline">대시보드</a>
+            </div>
+        </div>
+
+        <!-- 필터 -->
+        <div class="filter-tabs">
+            <a href="?active=true" class="tab {% if show_active %}active{% endif %}">활성 정지</a>
+            <a href="?active=false" class="tab {% if not show_active %}active{% endif %}">모든 정지</a>
+        </div>
+
+        <!-- 정지 목록 -->
+        <div class="ban-list">
+            {% for ban in page_obj %}
+            <div class="ban-item {% if not ban.is_active %}inactive{% endif %}">
+                <div class="ban-target">
+                    {% if ban.user %}
+                    <span class="target-type user">👤</span>
+                    <span class="target-name">{{ ban.user.nickname }}</span>
+                    {% endif %}
+                    {% if ban.ip_address %}
+                    <span class="target-type ip">🌐</span>
+                    <span class="target-ip">{{ ban.ip_address }}</span>
+                    {% endif %}
+                </div>
+
+                <div class="ban-info">
+                    <div class="ban-duration">
+                        <strong>{{ ban.get_duration_display }}</strong>
+                        {% if ban.is_expired %}
+                        <span class="expired-badge">만료됨</span>
+                        {% elif not ban.is_active %}
+                        <span class="unbanned-badge">해제됨</span>
+                        {% endif %}
+                    </div>
+                    <div class="ban-time">
+                        {{ ban.banned_at|date:"Y-m-d H:i" }}
+                        {% if ban.expires_at %}
+                        ~ {{ ban.expires_at|date:"Y-m-d H:i" }}
+                        {% else %}
+                        (영구)
+                        {% endif %}
+                    </div>
+                    {% if ban.reason %}
+                    <div class="ban-reason">사유: {{ ban.reason }}</div>
+                    {% endif %}
+                    <div class="ban-admin">정지한 관리자: {{ ban.banned_by.nickname|default:"시스템" }}</div>
+                    {% if ban.unbanned_by %}
+                    <div class="unban-info">해제 관리자: {{ ban.unbanned_by.nickname }} ({{ ban.unbanned_at|date:"m/d H:i"
+                        }})</div>
+                    {% endif %}
+                </div>
+
+                <div class="ban-actions">
+                    {% if ban.is_active and not ban.is_expired %}
+                    <form method="post" action="{% url 'admin_panel:unban_user' ban.pk %}"
+                        onsubmit="return confirm('정지를 해제하시겠습니까?');">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-success btn-sm">정지 해제</button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+            {% empty %}
+            <p class="empty-message">정지된 사용자가 없습니다.</p>
+            {% endfor %}
+        </div>
+
+        <!-- 페이지네이션 -->
+        {% if page_obj.has_other_pages %}
+        <div class="pagination">
+            {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}&active={{ show_active }}">← 이전</a>
+            {% endif %}
+            <span>{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+            {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}&active={{ show_active }}">다음 →</a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    .admin-page {
+        max-width: 900px;
+        margin: var(--spacing-xl) auto;
+        padding: var(--spacing-lg);
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: var(--spacing-xl);
+        flex-wrap: wrap;
+        gap: var(--spacing-md);
+    }
+
+    .header-actions {
+        display: flex;
+        gap: var(--spacing-sm);
+    }
+
+    .filter-tabs {
+        display: flex;
+        gap: var(--spacing-md);
+        margin-bottom: var(--spacing-lg);
+        border-bottom: 2px solid #eee;
+    }
+
+    .tab {
+        padding: var(--spacing-md) var(--spacing-lg);
+        text-decoration: none;
+        color: var(--text-secondary);
+        border-bottom: 2px solid transparent;
+        margin-bottom: -2px;
+    }
+
+    .tab.active {
+        color: var(--primary);
+        border-bottom-color: var(--primary);
+    }
+
+    .ban-list {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-md);
+    }
+
+    .ban-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: var(--spacing-lg);
+        background: var(--bg-primary);
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-sm);
+        gap: var(--spacing-lg);
+    }
+
+    .ban-item.inactive {
+        opacity: 0.6;
+        background: var(--bg-secondary);
+    }
+
+    .ban-target {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+        min-width: 150px;
+    }
+
+    .target-type {
+        font-size: 1.5rem;
+    }
+
+    .target-name {
+        font-weight: 600;
+    }
+
+    .target-ip {
+        font-family: monospace;
+        font-size: 0.9rem;
+    }
+
+    .ban-info {
+        flex: 1;
+    }
+
+    .ban-duration {
+        font-size: 1.1rem;
+        margin-bottom: var(--spacing-xs);
+    }
+
+    .ban-time,
+    .ban-reason,
+    .ban-admin,
+    .unban-info {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin-top: 4px;
+    }
+
+    .expired-badge,
+    .unbanned-badge {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        margin-left: 8px;
+    }
+
+    .expired-badge {
+        background: #E0E0E0;
+        color: #616161;
+    }
+
+    .unbanned-badge {
+        background: #E8F5E9;
+        color: #2E7D32;
+    }
+
+    .btn-sm {
+        padding: 6px 12px;
+        font-size: 0.85rem;
+    }
+
+    .btn-success {
+        background: #4CAF50;
+        color: white;
+    }
+
+    .pagination {
+        display: flex;
+        justify-content: center;
+        gap: var(--spacing-lg);
+        margin-top: var(--spacing-xl);
+    }
+
+    .empty-message {
+        text-align: center;
+        color: var(--text-secondary);
+        padding: var(--spacing-xl);
+    }
+
+    @media (max-width: 768px) {
+        .ban-item {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+    }
+</style>
+{% endblock %}

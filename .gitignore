@@ -1,0 +1,50 @@
+# Environment & Secrets
+.env
+*.env.local
+
+# Database
+db.sqlite3
+db.sqlite3-journal
+
+# User uploads (production data)
+media/
+
+# Virtual environment
+venv/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+
+# Django collected static files
+staticfiles/
+
+# System / Server
+*.sock
+*.pid
+*.log
+
+# Nginx / Gunicorn config (server-specific)
+gunicorn.service
+nginx-pikmin
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Claude Code
+.agent/
+.claude/
+
+# Utility scripts (one-off)
+compare_regions.py
+update_all_regions.py

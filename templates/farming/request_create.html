@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+
+{% block title %}농사 요청 작성 - 피크민 다이어리{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="form-container">
+        <h1>🆘 농사 요청</h1>
+        <p class="form-desc">빅플라워 농사를 도와줄 분을 찾아보세요!</p>
+
+        <form method="post" class="farming-form">
+            {% csrf_token %}
+
+            <!-- 비회원 필드 -->
+            {% if not user.is_authenticated %}
+            <div class="guest-notice">
+                <p>💡 비회원으로 글을 작성합니다. 닉네임과 비밀번호를 입력해주세요.</p>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">닉네임 *</label>
+                    <input type="text" name="guest_nickname" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">비밀번호 * <small>(수정/삭제용)</small></label>
+                    <input type="password" name="guest_password" class="form-control" required>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="form-group">
+                <label class="form-label">제목 *</label>
+                <input type="text" name="title" class="form-control" placeholder="예: 신주쿠역 빅플라워 도와주세요!" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">설명</label>
+                <textarea name="content" class="form-control" rows="4" placeholder="어떤 도움이 필요한지 설명해주세요."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">장소명 *</label>
+                <input type="text" name="location_name" class="form-control" placeholder="예: 신주쿠역 남쪽 출구" required>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">위도 *</label>
+                    <input type="text" name="latitude" id="latitude" class="form-control" placeholder="35.6896"
+                        required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">경도 *</label>
+                    <input type="text" name="longitude" id="longitude" class="form-control" placeholder="139.7006"
+                        required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">필요한 꽃</label>
+                    <input type="text" name="flower_type" class="form-control" placeholder="예: 빨간 꽃, 아무 꽃이나">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">마감 시간</label>
+                    <input type="datetime-local" name="deadline" class="form-control">
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <a href="{% url 'farming:request_list' %}" class="btn btn-outline">취소</a>
+                <button type="submit" class="btn btn-primary">요청하기</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .form-container {
+        max-width: 600px;
+        margin: var(--spacing-xl) auto;
+        background: var(--bg-primary);
+        padding: var(--spacing-xl);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-md);
+    }
+
+    .form-container h1 {
+        font-size: 1.5rem;
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .form-desc {
+        color: var(--text-secondary);
+        margin-bottom: var(--spacing-xl);
+    }
+
+    .guest-notice {
+        padding: var(--spacing-md);
+        background: #FFF3E0;
+        border-radius: var(--radius-md);
+        margin-bottom: var(--spacing-lg);
+        color: #E65100;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: var(--spacing-md);
+    }
+
+    .form-actions {
+        display: flex;
+        gap: var(--spacing-md);
+        justify-content: flex-end;
+        margin-top: var(--spacing-xl);
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const latInput = document.getElementById('latitude');
+        const lngInput = document.getElementById('longitude');
+
+        if (latInput && lngInput) {
+            latInput.addEventListener('input', function (e) {
+                const value = e.target.value;
+                if (value.includes(',')) {
+                    const parts = value.split(',');
+                    if (parts.length === 2) {
+                        const lat = parts[0].trim();
+                        const lng = parts[1].trim();
+                        latInput.value = lat;
+                        lngInput.value = lng;
+                        lngInput.focus();
+                    }
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,205 @@
+{% extends 'base.html' %}
+
+{% block title %}농사 일지 - 피크민 다이어리{% endblock %}
+
+{% block content %}
+<div class="container journal-list-page">
+    <div class="page-header">
+        <div>
+            <h1>📔 농사 일지</h1>
+            <p>나의 농사 기록을 공유해보세요!</p>
+        </div>
+        <a href="{% url 'farming:journal_create' %}" class="btn btn-primary">✏️ 일지 작성</a>
+    </div>
+
+    <!-- 필터 -->
+    <div class="filter-bar">
+        <a href="{% url 'farming:journal_list' %}" class="filter-btn {% if not flower_type %}active{% endif %}">전체</a>
+        {% for value, label in flower_choices %}
+        <a href="?flower={{ value }}" class="filter-btn {% if flower_type == value %}active{% endif %}">{{ label }}</a>
+        {% endfor %}
+    </div>
+
+    <!-- 일지 목록 -->
+    <div class="journal-grid">
+        {% for journal in journals %}
+        <a href="{% url 'farming:journal_detail' journal.pk %}" class="journal-card card">
+            {% if journal.image %}
+            <img src="{{ journal.image.url }}" alt="{{ journal.title }}" class="journal-img">
+            {% else %}
+            <div class="journal-placeholder">🌻</div>
+            {% endif %}
+            <div class="journal-content">
+                {% if journal.flower_type %}
+                <span class="badge badge-{{ journal.flower_type }}">{{ journal.get_flower_type_display }}</span>
+                {% endif %}
+                <h3>{{ journal.title }}</h3>
+                <p class="journal-meta">
+                    <span>{{ journal.author.nickname }}</span>
+                    <span>{{ journal.created_at|date:"n/j" }}</span>
+                </p>
+                {% if journal.location_name %}
+                <p class="journal-location">📍 {{ journal.location_name }}</p>
+                {% endif %}
+            </div>
+        </a>
+        {% empty %}
+        <div class="empty-state">
+            <div class="empty-state-icon">📔</div>
+            <h3 class="empty-state-title">아직 농사 일지가 없어요</h3>
+            <p class="empty-state-desc">첫 번째 농사 일지를 작성해보세요!</p>
+            <a href="{% url 'farming:journal_create' %}" class="btn btn-primary">일지 작성하기</a>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- 페이지네이션 -->
+    {% if journals.has_other_pages %}
+    <div class="pagination">
+        {% if journals.has_previous %}
+        <a
+            href="?page={{ journals.previous_page_number }}{% if flower_type %}&flower={{ flower_type }}{% endif %}">이전</a>
+        {% endif %}
+        <span class="current">{{ journals.number }} / {{ journals.paginator.num_pages }}</span>
+        {% if journals.has_next %}
+        <a href="?page={{ journals.next_page_number }}{% if flower_type %}&flower={{ flower_type }}{% endif %}">다음</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: var(--spacing-xl);
+        padding: var(--spacing-lg);
+        background: var(--bg-primary);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .page-header h1 {
+        font-size: 1.8rem;
+        color: var(--text-primary);
+    }
+
+    .page-header p {
+        color: var(--text-secondary);
+    }
+
+    .filter-bar {
+        display: flex;
+        gap: var(--spacing-sm);
+        margin-bottom: var(--spacing-xl);
+        flex-wrap: wrap;
+        padding: var(--spacing-md);
+        background: var(--bg-primary);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .filter-btn {
+        padding: var(--spacing-sm) var(--spacing-md);
+        border-radius: var(--radius-full);
+        background: var(--bg-secondary);
+        color: #212121;
+        font-size: 0.9rem;
+        font-weight: 600;
+        transition: all var(--transition-fast);
+        border: 1px solid var(--bg-tertiary);
+    }
+
+    .filter-btn:hover,
+    .filter-btn.active {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+    }
+
+    .journal-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: var(--spacing-lg);
+    }
+
+    .journal-card {
+        overflow: hidden;
+    }
+
+    .journal-img {
+        width: 100%;
+        height: 180px;
+        object-fit: cover;
+    }
+
+    .journal-placeholder {
+        height: 180px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 4rem;
+        background: var(--bg-secondary);
+    }
+
+    .journal-content {
+        padding: var(--spacing-md);
+    }
+
+    .journal-content h3 {
+        font-size: 1.1rem;
+        margin: var(--spacing-sm) 0;
+        color: var(--text-primary);
+    }
+
+    .journal-meta {
+        display: flex;
+        gap: var(--spacing-md);
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+    }
+
+    .journal-location {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin-top: var(--spacing-sm);
+    }
+
+    /* 꽃 색상별 뱃지 */
+    .badge-red {
+        background: #FFEBEE;
+        color: #C62828;
+    }
+
+    .badge-yellow {
+        background: #FFF8E1;
+        color: #F57F17;
+    }
+
+    .badge-blue {
+        background: #E3F2FD;
+        color: #1565C0;
+    }
+
+    .badge-white {
+        background: #F5F5F5;
+        color: #616161;
+    }
+
+    .badge-pink {
+        background: #FCE4EC;
+        color: #AD1457;
+    }
+
+    .badge-purple {
+        background: #F3E5F5;
+        color: #7B1FA2;
+    }
+
+    .badge-any {
+        background: #E8F5E9;
+        color: #2E7D32;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,465 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ journal.title }} - 피크민 다이어리{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="journal-detail">
+        <div class="journal-header">
+            {% if journal.flower_type %}
+            <span class="badge badge-{{ journal.flower_type }}">{{ journal.get_flower_type_display }}</span>
+            {% endif %}
+            <h1>{{ journal.title }}</h1>
+            <div class="journal-meta">
+                <span><a href="{% url 'accounts:user_profile' user_id=journal.author.pk %}" class="author-link">{{ journal.author.nickname }}</a></span>
+                <span>{{ journal.created_at|date:"Y.n.j H:i" }}</span>
+            </div>
+        </div>
+
+        {% if journal.image %}
+        <div class="journal-image">
+            <img src="{{ journal.image.url }}" alt="{{ journal.title }}">
+        </div>
+        {% endif %}
+
+        <div class="journal-content">
+            {{ journal.content|linebreaks }}
+        </div>
+
+        <div class="journal-info">
+            {% if journal.location_name %}
+            <div class="info-item">
+                <span class="info-label">📍 장소</span>
+                <span class="info-value">{{ journal.location_name }}</span>
+            </div>
+            {% endif %}
+            {% if journal.flower_count > 0 %}
+            <div class="info-item">
+                <span class="info-label">🌸 심은 꽃</span>
+                <span class="info-value">{{ journal.flower_count }}개</span>
+            </div>
+            {% endif %}
+            {% if journal.latitude and journal.longitude %}
+            <div class="info-item">
+                <span class="info-label">🗺️ 좌표</span>
+                <span class="info-value">{{ journal.latitude }}, {{ journal.longitude }}</span>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- 좋아요 버튼 -->
+        <div class="journal-interactions">
+            <button type="button" id="like-btn" class="btn-interaction {% if user_liked %}active{% endif %}"
+                data-journal-id="{{ journal.pk }}" {% if user == journal.author %}disabled title="본인 글에는 좋아요를 누를 수 없습니다"
+                {% endif %}>
+                <span class="icon">{% if user_liked %}❤️{% else %}🤍{% endif %}</span>
+                <span class="count" id="like-count">{{ journal.like_count }}</span>
+            </button>
+        </div>
+
+        <div class="journal-actions">
+            <a href="{% url 'farming:journal_list' %}" class="btn btn-outline">목록으로</a>
+            {% if user == journal.author or user.is_staff %}
+            <div class="owner-actions">
+                <a href="{% url 'farming:journal_edit' pk=journal.pk %}" class="btn btn-outline">수정</a>
+                <a href="{% url 'farming:journal_delete' pk=journal.pk %}" class="btn btn-danger-text">삭제</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- 댓글 섹션 -->
+    <div class="comments-section">
+        <h2>💬 댓글 ({{ journal.comment_count }})</h2>
+
+        <!-- 댓글 작성 -->
+        <form action="{% url 'comments:journal_create' journal_id=journal.pk %}" method="post" class="comment-form">
+            {% csrf_token %}
+
+            {% if not user.is_authenticated %}
+            <div class="guest-fields">
+                <input type="text" name="guest_nickname" placeholder="닉네임" class="form-control" required>
+                <input type="password" name="guest_password" placeholder="비밀번호 (수정/삭제용)" class="form-control" required>
+            </div>
+            {% endif %}
+
+            <div class="comment-input">
+                <textarea name="content" placeholder="댓글을 입력하세요..." class="form-control" required></textarea>
+                <button type="submit" class="btn btn-primary">등록</button>
+            </div>
+        </form>
+
+        <!-- 댓글 목록 -->
+        <div class="comment-list">
+            {% for comment in comments %}
+            <div class="comment {% if comment.is_deleted %}deleted{% endif %}">
+                <div class="comment-header">
+                    {% if comment.author %}
+                    <a href="{% url 'accounts:user_profile' user_id=comment.author.pk %}" class="author-link"><strong>{{ comment.author.nickname }}</strong></a>
+                    {% else %}
+                    <strong>{{ comment.display_name }}</strong>
+                    {% endif %}
+                    <span class="comment-date">{{ comment.created_at|date:"m/d H:i" }}</span>
+                </div>
+                <div class="comment-content">
+                    {{ comment.content|linebreaks }}
+                </div>
+
+                {% if not comment.is_deleted %}
+                <div class="comment-actions">
+                    <!-- 답글 버튼 -->
+                    <button class="btn-text reply-btn" onclick="toggleReplyForm({{ comment.pk }})">답글</button>
+
+                    {% if user == comment.author or user.is_staff %}
+                    <form action="{% url 'comments:delete' pk=comment.pk %}" method="post" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-text" onclick="return confirm('삭제하시겠습니까?')">삭제</button>
+                    </form>
+                    {% elif comment.guest_password %}
+                    <button class="btn-text" onclick="toggleDeleteForm({{ comment.pk }})">삭제</button>
+                    <form action="{% url 'comments:delete' pk=comment.pk %}" method="post" class="delete-form hidden"
+                        id="deleteForm{{ comment.pk }}">
+                        {% csrf_token %}
+                        <div class="delete-password-input">
+                            <input type="password" name="password" placeholder="비밀번호" class="form-control" required>
+                            <button type="submit" class="btn btn-sm">확인</button>
+                        </div>
+                    </form>
+                    {% endif %}
+                </div>
+
+                <!-- 답글 폼 -->
+                <form action="{% url 'comments:journal_reply' pk=comment.pk %}" method="post" class="reply-form hidden"
+                    id="replyForm{{ comment.pk }}">
+                    {% csrf_token %}
+                    {% if not user.is_authenticated %}
+                    <div class="guest-fields">
+                        <input type="text" name="guest_nickname" placeholder="닉네임" class="form-control" required>
+                        <input type="password" name="guest_password" placeholder="비밀번호" class="form-control" required>
+                    </div>
+                    {% endif %}
+                    <div class="comment-input">
+                        <textarea name="content" placeholder="답글을 입력하세요..." class="form-control" required></textarea>
+                        <button type="submit" class="btn btn-primary btn-sm">등록</button>
+                    </div>
+                </form>
+                {% endif %}
+
+                <!-- 대댓글 -->
+                {% for reply in comment.replies.all %}
+                {% if not reply.is_deleted or reply.is_deleted %}
+                <div class="comment reply">
+                    <div class="comment-header">
+                        {% if reply.author %}
+                        <a href="{% url 'accounts:user_profile' user_id=reply.author.pk %}" class="author-link"><strong>{{ reply.author.nickname }}</strong></a>
+                        {% else %}
+                        <strong>{{ reply.display_name }}</strong>
+                        {% endif %}
+                        <span class="comment-date">{{ reply.created_at|date:"m/d H:i" }}</span>
+                    </div>
+                    <div class="comment-content">
+                        {{ reply.content|linebreaks }}
+                    </div>
+                </div>
+                {% endif %}
+                {% endfor %}
+            </div>
+            {% empty %}
+            <p class="no-comments">아직 댓글이 없습니다. 첫 댓글을 남겨보세요!</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('like-btn')?.addEventListener('click', function () {
+        if (this.disabled) return;
+
+        const journalId = this.dataset.journalId;
+        const btn = this;
+
+        fetch(`/farming/journals/${journalId}/like/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                    return;
+                }
+
+                const icon = btn.querySelector('.icon');
+                const count = btn.querySelector('.count');
+
+                if (data.liked) {
+                    btn.classList.add('active');
+                    icon.textContent = '❤️';
+                } else {
+                    btn.classList.remove('active');
+                    icon.textContent = '🤍';
+                }
+                count.textContent = data.like_count;
+            })
+            .catch(err => console.error(err));
+    });
+</script>
+
+<style>
+    .journal-detail {
+        max-width: 800px;
+        margin: var(--spacing-xl) auto;
+        background: var(--bg-primary);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-md);
+        overflow: hidden;
+    }
+
+    .journal-header {
+        padding: var(--spacing-xl);
+        border-bottom: 1px solid var(--bg-tertiary);
+    }
+
+    .journal-header h1 {
+        font-size: 1.8rem;
+        margin: var(--spacing-sm) 0;
+    }
+
+    .journal-meta {
+        display: flex;
+        gap: var(--spacing-md);
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+    }
+
+    .author-link {
+        color: var(--text-primary);
+        text-decoration: none;
+    }
+
+    .author-link:hover {
+        color: var(--primary);
+    }
+
+    .journal-image {
+        width: 100%;
+    }
+
+    .journal-image img {
+        width: 100%;
+        max-height: 500px;
+        object-fit: cover;
+    }
+
+    .journal-content {
+        padding: var(--spacing-xl);
+        line-height: 1.8;
+    }
+
+    .journal-info {
+        padding: var(--spacing-lg) var(--spacing-xl);
+        background: var(--bg-secondary);
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--spacing-lg);
+    }
+
+    .info-item {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .info-label {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+    }
+
+    .info-value {
+        font-weight: 600;
+    }
+
+    .journal-interactions {
+        padding: var(--spacing-lg) var(--spacing-xl);
+        border-top: 1px solid var(--bg-tertiary);
+    }
+
+    .btn-interaction {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+        padding: var(--spacing-sm) var(--spacing-lg);
+        border: 1px solid var(--bg-tertiary);
+        border-radius: var(--radius-full);
+        background: var(--bg-primary);
+        cursor: pointer;
+        font-size: 1rem;
+        transition: all 0.2s ease;
+    }
+
+    .btn-interaction:hover:not(:disabled) {
+        border-color: #ff6b6b;
+        background: rgba(255, 107, 107, 0.1);
+    }
+
+    .btn-interaction.active {
+        border-color: #ff6b6b;
+        background: rgba(255, 107, 107, 0.1);
+    }
+
+    .btn-interaction:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .btn-interaction .icon {
+        font-size: 1.2rem;
+    }
+
+    .btn-interaction .count {
+        font-weight: 600;
+        color: var(--text-secondary);
+    }
+
+    .journal-actions {
+        padding: var(--spacing-lg) var(--spacing-xl);
+        display: flex;
+        gap: var(--spacing-md);
+    }
+
+    /* 댓글 섹션 */
+    .comments-section {
+        max-width: 800px;
+        margin: var(--spacing-xl) auto;
+        padding: var(--spacing-xl);
+        background: var(--bg-primary);
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .comments-section h2 {
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .comment-form {
+        margin-bottom: var(--spacing-xl);
+    }
+
+    .guest-fields {
+        display: flex;
+        gap: var(--spacing-sm);
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .comment-input {
+        display: flex;
+        gap: var(--spacing-sm);
+    }
+
+    .comment-input textarea {
+        flex: 1;
+        min-height: 80px;
+    }
+
+    .comment {
+        padding: var(--spacing-md);
+        border-bottom: 1px solid var(--bg-tertiary);
+    }
+
+    .comment.reply {
+        margin-left: var(--spacing-xl);
+        background: var(--bg-secondary);
+        border-radius: var(--radius-md);
+        border: none;
+        margin-top: var(--spacing-sm);
+    }
+
+    .comment.deleted {
+        opacity: 0.5;
+    }
+
+    .comment-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .comment-date {
+        font-size: 0.85rem;
+        color: var(--text-light);
+    }
+
+    .comment-content {
+        color: var(--text-secondary);
+        line-height: 1.6;
+    }
+
+    .comment-actions {
+        margin-top: var(--spacing-sm);
+    }
+
+    .reply-form {
+        margin-top: var(--spacing-md);
+        padding: var(--spacing-md);
+        background: var(--bg-secondary);
+        border-radius: var(--radius-md);
+    }
+
+    .reply-form.hidden {
+        display: none;
+    }
+
+    .delete-form {
+        margin-top: var(--spacing-sm);
+        padding: var(--spacing-sm);
+        background: var(--bg-secondary);
+        border-radius: var(--radius-sm);
+    }
+
+    .delete-form.hidden {
+        display: none;
+    }
+
+    .delete-password-input {
+        display: flex;
+        gap: var(--spacing-xs);
+        align-items: center;
+    }
+
+    .delete-password-input input {
+        width: 120px;
+        padding: var(--spacing-xs) var(--spacing-sm);
+        font-size: 0.85rem;
+    }
+
+    .no-comments {
+        text-align: center;
+        color: var(--text-light);
+        padding: var(--spacing-xl);
+    }
+
+    @media (max-width: 480px) {
+        .guest-fields {
+            flex-direction: column;
+        }
+
+        .comment-input {
+            flex-direction: column;
+        }
+    }
+</style>
+
+<script>
+    function toggleReplyForm(commentId) {
+        const form = document.getElementById('replyForm' + commentId);
+        form.classList.toggle('hidden');
+    }
+
+    function toggleDeleteForm(commentId) {
+        const form = document.getElementById('deleteForm' + commentId);
+        form.classList.toggle('hidden');
+    }
+</script>
+{% endblock %}

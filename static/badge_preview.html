@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>특별 칭호 디자인 미리보기</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background: #f5f5f5;
+            padding: 40px;
+        }
+        h1 { text-align: center; margin-bottom: 40px; color: #333; }
+        h2 { margin: 30px 0 20px; color: #666; border-bottom: 2px solid #ddd; padding-bottom: 10px; }
+
+        .preview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .card-title {
+            font-size: 0.8rem;
+            color: #999;
+            margin-bottom: 15px;
+        }
+
+        .author-area {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nickname {
+            font-weight: 600;
+            font-size: 0.9rem;
+            padding: 6px 12px;
+            border-radius: 20px;
+            display: inline-block;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* ========== 옵션 A: 심플 라인 + 작은 태그 ========== */
+        .option-a .explorer {
+            border: 2px solid #2ecc71;
+            background: rgba(46, 204, 113, 0.1);
+        }
+        .option-a .tag {
+            font-size: 0.6rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: #2ecc71;
+            color: white;
+            margin-left: 6px;
+        }
+
+        /* ========== 옵션 B: 그라데이션 배경 + 아이콘만 ========== */
+        .option-b .explorer {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            border: none;
+            color: #2d3436;
+        }
+        .option-b .icon {
+            margin-left: 4px;
+        }
+
+        /* ========== 옵션 C: 글로우 효과 + 작은 뱃지 ========== */
+        .option-c .explorer {
+            border: 2px solid #00b894;
+            background: white;
+            box-shadow: 0 0 10px rgba(0, 184, 148, 0.4);
+            animation: glow-c 2s ease-in-out infinite;
+        }
+        .option-c .mini-badge {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            background: linear-gradient(135deg, #00b894, #00cec9);
+            border-radius: 50%;
+            margin-left: 6px;
+            font-size: 0.6rem;
+            line-height: 18px;
+            text-align: center;
+        }
+        @keyframes glow-c {
+            0%, 100% { box-shadow: 0 0 8px rgba(0, 184, 148, 0.3); }
+            50% { box-shadow: 0 0 16px rgba(0, 184, 148, 0.6); }
+        }
+
+        /* ========== 옵션 D: 언더라인 스타일 ========== */
+        .option-d .explorer {
+            background: transparent;
+            border: none;
+            border-bottom: 3px solid;
+            border-image: linear-gradient(90deg, #00b894, #00cec9, #81ecec) 1;
+            border-radius: 0;
+            padding: 4px 0;
+        }
+        .option-d .title-text {
+            font-size: 0.65rem;
+            color: #00b894;
+            margin-left: 6px;
+            font-weight: 500;
+        }
+
+        /* ========== 옵션 E: 프리미엄 홀로그램 ========== */
+        .option-e .explorer {
+            border: 2.5px solid transparent;
+            background:
+                linear-gradient(white, white) padding-box,
+                linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb, #a29bfe, #ff6b6b) border-box;
+            background-size: 100% 100%, 400% 100%;
+            animation: holo-e 3s linear infinite;
+            box-shadow: 0 2px 10px rgba(255, 107, 107, 0.2);
+        }
+        .option-e .premium-tag {
+            font-size: 0.55rem;
+            padding: 2px 5px;
+            background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb);
+            background-size: 200% 100%;
+            animation: holo-e 2s linear infinite;
+            color: white;
+            border-radius: 3px;
+            margin-left: 5px;
+            text-shadow: 0 1px 1px rgba(0,0,0,0.2);
+        }
+        @keyframes holo-e {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 200% 50%; }
+        }
+
+        /* ========== 옵션 F: 미니멀 도트 ========== */
+        .option-f .explorer {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+        }
+        .option-f .dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #00b894;
+            border-radius: 50%;
+            margin-right: 6px;
+            animation: pulse-f 1.5s ease-in-out infinite;
+        }
+        .option-f .role {
+            font-size: 0.6rem;
+            color: #00b894;
+            margin-left: 4px;
+        }
+        @keyframes pulse-f {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.7; }
+        }
+
+        /* ========== 옵션 G: 리본 스타일 ========== */
+        .option-g .wrapper {
+            position: relative;
+            display: inline-block;
+        }
+        .option-g .explorer {
+            background: white;
+            border: 1px solid #ddd;
+            padding-right: 70px;
+        }
+        .option-g .ribbon {
+            position: absolute;
+            right: -5px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: linear-gradient(135deg, #00b894, #00cec9);
+            color: white;
+            font-size: 0.55rem;
+            padding: 3px 8px;
+            border-radius: 3px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+        }
+
+        /* ========== 옵션 H: 스타 아이콘 뱃지 ========== */
+        .option-h .explorer {
+            background: linear-gradient(135deg, #fff9e6 0%, #fff 100%);
+            border: 2px solid #f1c40f;
+            box-shadow: 0 0 0 3px rgba(241, 196, 15, 0.2);
+        }
+        .option-h .star {
+            color: #f1c40f;
+            margin-right: 4px;
+            text-shadow: 0 0 5px rgba(241, 196, 15, 0.5);
+        }
+
+        /* ========== 옵션 I: 언더라인 + 홀로그램 (D+E 믹스) ========== */
+        .option-i .explorer {
+            background: transparent;
+            border: none;
+            border-bottom: 3px solid transparent;
+            border-image: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb, #a29bfe, #ff6b6b) 1;
+            border-radius: 0;
+            padding: 4px 2px;
+            animation: underline-holo 3s linear infinite;
+        }
+        .option-i .title-text {
+            font-size: 0.65rem;
+            padding: 2px 6px;
+            background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb, #a29bfe);
+            background-size: 300% 100%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: text-holo 3s linear infinite;
+            font-weight: 600;
+            margin-left: 4px;
+        }
+        @keyframes underline-holo {
+            0% { border-image: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb, #a29bfe, #ff6b6b) 1; }
+            25% { border-image: linear-gradient(90deg, #feca57, #48dbfb, #a29bfe, #ff6b6b, #feca57) 1; }
+            50% { border-image: linear-gradient(90deg, #48dbfb, #a29bfe, #ff6b6b, #feca57, #48dbfb) 1; }
+            75% { border-image: linear-gradient(90deg, #a29bfe, #ff6b6b, #feca57, #48dbfb, #a29bfe) 1; }
+            100% { border-image: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb, #a29bfe, #ff6b6b) 1; }
+        }
+        @keyframes text-holo {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 300% 50%; }
+        }
+
+        /* ========== 옵션 J: 언더라인 홀로그램 + 배경 살짝 ========== */
+        .option-j .explorer {
+            background: linear-gradient(135deg, rgba(255,107,107,0.05), rgba(72,219,251,0.05));
+            border: none;
+            border-bottom: 3px solid;
+            border-image: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb, #a29bfe) 1;
+            border-radius: 0;
+            padding: 6px 8px;
+            position: relative;
+        }
+        .option-j .explorer::after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb, #a29bfe, #ff6b6b);
+            background-size: 200% 100%;
+            animation: slide-holo 2s linear infinite;
+        }
+        .option-j .title-text {
+            font-size: 0.6rem;
+            color: #9b59b6;
+            margin-left: 6px;
+            font-weight: 500;
+        }
+        @keyframes slide-holo {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 200% 50%; }
+        }
+
+        /* ========== 옵션 K: 깔끔한 홀로그램 언더라인 + 작은 태그 ========== */
+        .option-k .explorer {
+            background: white;
+            border: none;
+            border-bottom: 2.5px solid;
+            border-image: linear-gradient(90deg, #667eea, #764ba2, #f093fb, #f5576c, #667eea) 1;
+            border-radius: 0;
+            padding: 5px 4px;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.15);
+        }
+        .option-k .holo-tag {
+            font-size: 0.55rem;
+            padding: 2px 6px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 3px;
+            margin-left: 6px;
+            font-weight: 500;
+        }
+
+        /* ========== 옵션 L: 글로우 언더라인 ========== */
+        .option-l .explorer {
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid #00b894;
+            padding: 4px 2px;
+            box-shadow: 0 4px 15px -5px rgba(0, 184, 148, 0.6);
+            animation: glow-underline 2s ease-in-out infinite;
+        }
+        .option-l .glow-text {
+            font-size: 0.6rem;
+            color: #00b894;
+            margin-left: 6px;
+            font-weight: 600;
+            text-shadow: 0 0 8px rgba(0, 184, 148, 0.4);
+        }
+        @keyframes glow-underline {
+            0%, 100% { box-shadow: 0 4px 15px -5px rgba(0, 184, 148, 0.4); }
+            50% { box-shadow: 0 4px 20px -3px rgba(0, 184, 148, 0.8); }
+        }
+
+        /* ========== 여러 칭호 비교 ========== */
+        .compare-section {
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            margin-top: 40px;
+        }
+
+        .compare-row {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 15px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .compare-row:last-child { border-bottom: none; }
+
+        .compare-label {
+            width: 120px;
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        /* 비교용 칭호들 */
+        .final-coordinator {
+            border: 2.5px solid transparent;
+            background:
+                linear-gradient(white, white) padding-box,
+                linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb, #a29bfe, #ff6b6b) border-box;
+            background-size: 100% 100%, 400% 100%;
+            animation: holo-e 3s linear infinite;
+        }
+
+        .final-explorer {
+            border: 2px solid #00b894;
+            background: rgba(0, 184, 148, 0.08);
+            box-shadow: 0 0 8px rgba(0, 184, 148, 0.3);
+        }
+
+        .final-pioneer {
+            border: 2px solid #9b59b6;
+            background: rgba(155, 89, 182, 0.08);
+            box-shadow: 0 0 8px rgba(155, 89, 182, 0.3);
+        }
+
+        .final-legend {
+            border: 2px solid #3498db;
+            background: linear-gradient(135deg, rgba(52, 152, 219, 0.1), rgba(155, 89, 182, 0.1));
+            box-shadow: 0 0 12px rgba(52, 152, 219, 0.4);
+            animation: glow-legend 2s ease-in-out infinite;
+        }
+        @keyframes glow-legend {
+            0%, 100% { box-shadow: 0 0 8px rgba(52, 152, 219, 0.3); }
+            50% { box-shadow: 0 0 20px rgba(52, 152, 219, 0.6); }
+        }
+
+        .final-supporter {
+            border: 2px solid #e84393;
+            background: rgba(232, 67, 147, 0.08);
+        }
+
+        .final-tag {
+            font-size: 0.58rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: white;
+            margin-left: 6px;
+            font-weight: 500;
+        }
+        .tag-coordinator { background: linear-gradient(90deg, #ff6b6b, #feca57); }
+        .tag-explorer { background: #00b894; }
+        .tag-pioneer { background: #9b59b6; }
+        .tag-legend { background: linear-gradient(90deg, #3498db, #9b59b6); }
+        .tag-supporter { background: #e84393; }
+    </style>
+</head>
+<body>
+    <h1>특별 칭호 디자인 미리보기</h1>
+
+    <h2>옵션 A - 심플 라인 + 작은 태그</h2>
+    <div class="preview-grid">
+        <div class="card option-a">
+            <div class="card-title">카드 미리보기</div>
+            <div class="author-area">
+                <span class="nickname explorer">달리는거북이<span class="tag">피크민 탐험가</span></span>
+            </div>
+        </div>
+    </div>
+
+    <h2>옵션 B - 그라데이션 배경 + 아이콘만</h2>
+    <div class="preview-grid">
+        <div class="card option-b">
+            <div class="card-title">카드 미리보기</div>
+            <div class="author-area">
+                <span class="nickname explorer">달리는거북이 <span class="icon">🧭</span></span>
+            </div>
+        </div>
+    </div>
+
+    <h2>옵션 C - 글로우 효과 + 원형 뱃지</h2>
+    <div class="preview-grid">
+        <div class="card option-c">
+            <div class="card-title">카드 미리보기</div>
+            <div class="author-area">
+                <span class="nickname explorer">달리는거북이<span class="mini-badge">🧭</span></span>
+            </div>
+        </div>
+    </div>
+
+    <h2>옵션 D - 언더라인 스타일</h2>
+    <div class="preview-grid">
+        <div class="card option-d">
+            <div class="card-title">카드 미리보기</div>
+            <div class="author-area">
+                <span class="nickname explorer">달리는거북이<span class="title-text">피크민 탐험가</span></span>
+            </div>
+        </div>
+    </div>
+
+    <h2>옵션 E - 프리미엄 홀로그램 (추천)</h2>
+    <div class="preview-grid">
+        <div class="card option-e">
+            <div class="card-title">카드 미리보기</div>
+            <div class="author-area">
+                <span class="nickname explorer">달리는거북이<span class="premium-tag">탐험가</span></span>
+            </div>
+        </div>
+    </div>
+
+    <h2>옵션 F - 미니멀 도트</h2>
+    <div class="preview-grid">
+        <div class="card option-f">
+            <div class="card-title">카드 미리보기</div>
+            <div class="author-area">
+                <span class="nickname explorer"><span class="dot"></span>달리는거북이<span class="role">탐험가</span></span>
+            </div>
+        </div>
+    </div>
+
+    <h2>옵션 G - 리본 스타일</h2>
+    <div class="preview-grid">
+        <div class="card option-g">
+            <div class="card-title">카드 미리보기</div>
+            <div class="author-area">
+                <span class="wrapper">
+                    <span class="nickname explorer">달리는거북이</span>
+                    <span class="ribbon">탐험가</span>
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <h2>옵션 H - 스타 아이콘</h2>
+    <div class="preview-grid">
+        <div class="card option-h">
+            <div class="card-title">카드 미리보기</div>
+            <div class="author-area">
+                <span class="nickname explorer"><span class="star">★</span>달리는거북이</span>
+            </div>
+        </div>
+    </div>
+
+    <h2 style="color: #e74c3c;">옵션 I - 언더라인 + 홀로그램 텍스트 (D+E 믹스) ⭐추천</h2>
+    <div class="preview-grid">
+        <div class="card option-i">
+            <div class="card-title">카드 미리보기</div>
+            <div class="author-area">
+                <span class="nickname explorer">달리는거북이<span class="title-text">피크민 탐험가</span></span>
+            </div>
+        </div>
+    </div>
+
+    <h2 style="color: #e74c3c;">옵션 J - 언더라인 홀로그램 + 연한 배경 ⭐추천</h2>
+    <div class="preview-grid">
+        <div class="card option-j">
+            <div class="card-title">카드 미리보기</div>
+            <div class="author-area">
+                <span class="nickname explorer">달리는거북이<span class="title-text">탐험가</span></span>
+            </div>
+        </div>
+    </div>
+
+    <h2 style="color: #9b59b6;">옵션 K - 퍼플 홀로그램 언더라인 + 태그</h2>
+    <div class="preview-grid">
+        <div class="card option-k">
+            <div class="card-title">카드 미리보기</div>
+            <div class="author-area">
+                <span class="nickname explorer">달리는거북이<span class="holo-tag">탐험가</span></span>
+            </div>
+        </div>
+    </div>
+
+    <h2 style="color: #00b894;">옵션 L - 글로우 언더라인 (차분한 버전)</h2>
+    <div class="preview-grid">
+        <div class="card option-l">
+            <div class="card-title">카드 미리보기</div>
+            <div class="author-area">
+                <span class="nickname explorer">달리는거북이<span class="glow-text">탐험가</span></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="compare-section">
+        <h2 style="margin-top: 0;">최종 추천안 - 모든 칭호 비교</h2>
+
+        <div class="compare-row">
+            <span class="compare-label">좌표 마스터</span>
+            <span class="nickname final-coordinator">달리는거북이<span class="final-tag tag-coordinator">마스터</span></span>
+        </div>
+
+        <div class="compare-row">
+            <span class="compare-label">피크민 탐험가</span>
+            <span class="nickname final-explorer">달리는거북이<span class="final-tag tag-explorer">탐험가</span></span>
+        </div>
+
+        <div class="compare-row">
+            <span class="compare-label">개척자</span>
+            <span class="nickname final-pioneer">달리는거북이<span class="final-tag tag-pioneer">개척자</span></span>
+        </div>
+
+        <div class="compare-row">
+            <span class="compare-label">전설의 대원</span>
+            <span class="nickname final-legend">달리는거북이<span class="final-tag tag-legend">전설</span></span>
+        </div>
+
+        <div class="compare-row">
+            <span class="compare-label">서포터</span>
+            <span class="nickname final-supporter">달리는거북이<span class="final-tag tag-supporter">서포터</span></span>
+        </div>
+    </div>
+</body>
+</html>
