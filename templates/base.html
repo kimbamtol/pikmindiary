@@ -1,48 +1,35 @@
-{% load static %}{% load i18n %}
+{% load static %}
 <!DOCTYPE html>
-<html lang="{{ LANGUAGE_CODE }}">
+<html lang="ko">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}{% trans "피크민 다이어리" %}{% endblock %}</title>
+    <title>{% block title %}피크민 다이어리{% endblock %}</title>
     <meta name="description"
-        content="{% block description %}{% trans "피크민 블룸 버섯 좌표, 모종 좌표, 빅플라워 위치, 엽서 정보를 공유하는 유저 커뮤니티" %}{% endblock %}">
+        content="{% block description %}피크민 블룸 버섯 좌표, 모종 좌표, 빅플라워 위치, 엽서 정보를 공유하는 유저 커뮤니티{% endblock %}">
 
     <!-- SEO Meta Tags -->
     <meta name="keywords"
         content="{% block keywords %}피크민, 피크민 블룸, Pikmin Bloom, ピクミン ブルーム{% endblock %}">
     <meta name="robots" content="index, follow">
-    <meta name="author" content="{% trans '피크민 다이어리' %}">
+    <meta name="author" content="피크민 다이어리">
 
     <!-- Open Graph (Facebook, KakaoTalk, etc.) -->
     <meta property="og:type" content="website">
-    <meta property="og:site_name" content="{% trans '피크민 다이어리' %}">
-    <meta property="og:title" content="{% block og_title %}{% trans "피크민 다이어리 - 피크민 블룸 좌표 커뮤니티" %}{% endblock %}">
+    <meta property="og:site_name" content="피크민 다이어리">
+    <meta property="og:title" content="{% block og_title %}피크민 다이어리 - 피크민 블룸 좌표 커뮤니티{% endblock %}">
     <meta property="og:description"
-        content="{% block og_description %}{% trans "피크민 블룸 버섯, 모종, 빅플라워 좌표를 공유하고 농사 정보를 나눠요!" %}{% endblock %}">
+        content="{% block og_description %}피크민 블룸 버섯, 모종, 빅플라워 좌표를 공유하고 농사 정보를 나눠요!{% endblock %}">
     <meta property="og:image" content="{% block og_image %}{% static 'img/og-default.png' %}{% endblock %}">
     {% block og_url %}
     <meta property="og:url" content="">{% endblock %}
-    {% get_current_language as CURRENT_LANG %}
-    {% if CURRENT_LANG == 'ko' %}
     <meta property="og:locale" content="ko_KR">
-    <meta property="og:locale:alternate" content="ja_JP">
-    <meta property="og:locale:alternate" content="en_US">
-    {% elif CURRENT_LANG == 'ja' %}
-    <meta property="og:locale" content="ja_JP">
-    <meta property="og:locale:alternate" content="ko_KR">
-    <meta property="og:locale:alternate" content="en_US">
-    {% else %}
-    <meta property="og:locale" content="en_US">
-    <meta property="og:locale:alternate" content="ko_KR">
-    <meta property="og:locale:alternate" content="ja_JP">
-    {% endif %}
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="{% block twitter_title %}{% trans '피크민 다이어리' %}{% endblock %}">
-    <meta name="twitter:description" content="{% block twitter_description %}{% trans '피크민 블룸 좌표 공유 커뮤니티' %}{% endblock %}">
+    <meta name="twitter:title" content="{% block twitter_title %}피크민 다이어리{% endblock %}">
+    <meta name="twitter:description" content="{% block twitter_description %}피크민 블룸 좌표 공유 커뮤니티{% endblock %}">
 
     <!-- Canonical URL -->
     {% block canonical %}{% endblock %}
@@ -54,7 +41,7 @@
         rel="stylesheet">
 
     <!-- CSS -->
-    <link rel="stylesheet" href="{% static 'css/main.css' %}?v=20260211a">
+    <link rel="stylesheet" href="{% static 'css/main.css' %}?v=20260220a">
     <link rel="stylesheet" href="{% static 'css/seasons.css' %}?v=20260103d">
     {% block extra_css %}{% endblock %}
 
@@ -97,201 +84,169 @@
         <div class="container">
             <a href="{% url 'core:landing' %}" class="logo">
                 <span class="logo-icon">🌱</span>
-                <span class="logo-text">{% trans "피크민 다이어리" %}</span>
+                <span class="logo-text">피크민 다이어리</span>
             </a>
 
-            <nav class="main-nav" aria-label="{% trans '메인 내비게이션' %}">
-                <a href="{% url 'coordinates:list' %}" class="nav-link">{% trans "좌표 목록" %}</a>
-                <a href="{% url 'farming:home' %}" class="nav-link">{% trans "농사" %}</a>
-                <a href="{% url 'rankings:list' %}" class="nav-link">{% trans "랭킹" %}</a>
-                <a href="{% url 'core:guide' %}" class="nav-link">{% trans "안내" %}</a>
-                <a href="{% url 'core:suggestion' %}" class="nav-link">{% trans "건의하기" %}</a>
+            <nav class="main-nav" aria-label="메인 내비게이션">
+                <a href="{% url 'coordinates:list' %}" class="nav-link">좌표 목록</a>
+                <a href="{% url 'farming:home' %}" class="nav-link">농사</a>
+                <a href="{% url 'rankings:list' %}" class="nav-link">랭킹</a>
+                <a href="{% url 'core:guide' %}" class="nav-link">안내</a>
+                <a href="{% url 'core:suggestion' %}" class="nav-link">건의하기</a>
             </nav>
 
             <div class="header-actions">
                 <!-- 계절/날씨 선택 -->
                 <div class="theme-selector">
-                    <button class="theme-btn" aria-label="{% trans '테마 선택' %}" aria-expanded="false" aria-haspopup="true">🎨</button>
-                    <div class="theme-dropdown" role="menu" aria-label="{% trans '테마 메뉴' %}">
+                    <button class="theme-btn" aria-label="테마 선택" aria-expanded="false" aria-haspopup="true">🎨</button>
+                    <div class="theme-dropdown" role="menu" aria-label="테마 메뉴">
                         <div class="season-menu">
                             <div class="season-item" data-season="spring">
-                                <span class="season-label">🌸 {% trans "봄" %}</span>
-                                <div class="weather-submenu" role="group" aria-label="{% trans '봄 날씨' %}">
-                                    <button role="menuitem" onclick="setTheme('spring', 'clear')">☀️ {% trans "맑음" %}</button>
-                                    <button role="menuitem" onclick="setTheme('spring', 'rain')">🌧️ {% trans "비" %}</button>
-                                    <button role="menuitem" onclick="setTheme('spring', 'cloudy')">☁️ {% trans "흐림" %}</button>
+                                <span class="season-label">🌸 봄</span>
+                                <div class="weather-submenu" role="group" aria-label="봄 날씨">
+                                    <button role="menuitem" onclick="setTheme('spring', 'clear')">☀️ 맑음</button>
+                                    <button role="menuitem" onclick="setTheme('spring', 'rain')">🌧️ 비</button>
+                                    <button role="menuitem" onclick="setTheme('spring', 'cloudy')">☁️ 흐림</button>
                                 </div>
                             </div>
                             <div class="season-item" data-season="summer">
-                                <span class="season-label">🌻 {% trans "여름" %}</span>
-                                <div class="weather-submenu" role="group" aria-label="{% trans '여름 날씨' %}">
-                                    <button role="menuitem" onclick="setTheme('summer', 'clear')">☀️ {% trans "맑음" %}</button>
-                                    <button role="menuitem" onclick="setTheme('summer', 'rain')">🌧️ {% trans "비" %}</button>
-                                    <button role="menuitem" onclick="setTheme('summer', 'storm')">⛈️ {% trans "폭풍" %}</button>
+                                <span class="season-label">🌻 여름</span>
+                                <div class="weather-submenu" role="group" aria-label="여름 날씨">
+                                    <button role="menuitem" onclick="setTheme('summer', 'clear')">☀️ 맑음</button>
+                                    <button role="menuitem" onclick="setTheme('summer', 'rain')">🌧️ 비</button>
+                                    <button role="menuitem" onclick="setTheme('summer', 'storm')">⛈️ 폭풍</button>
                                 </div>
                             </div>
                             <div class="season-item" data-season="fall">
-                                <span class="season-label">🍂 {% trans "가을" %}</span>
-                                <div class="weather-submenu" role="group" aria-label="{% trans '가을 날씨' %}">
-                                    <button role="menuitem" onclick="setTheme('fall', 'clear')">☀️ {% trans "맑음" %}</button>
-                                    <button role="menuitem" onclick="setTheme('fall', 'cloudy')">☁️ {% trans "흐림" %}</button>
-                                    <button role="menuitem" onclick="setTheme('fall', 'wind')">💨 {% trans "바람" %}</button>
+                                <span class="season-label">🍂 가을</span>
+                                <div class="weather-submenu" role="group" aria-label="가을 날씨">
+                                    <button role="menuitem" onclick="setTheme('fall', 'clear')">☀️ 맑음</button>
+                                    <button role="menuitem" onclick="setTheme('fall', 'cloudy')">☁️ 흐림</button>
+                                    <button role="menuitem" onclick="setTheme('fall', 'wind')">💨 바람</button>
                                 </div>
                             </div>
                             <div class="season-item" data-season="winter">
-                                <span class="season-label">❄️ {% trans "겨울" %}</span>
-                                <div class="weather-submenu" role="group" aria-label="{% trans '겨울 날씨' %}">
-                                    <button role="menuitem" onclick="setTheme('winter', 'clear')">☀️ {% trans "맑음" %}</button>
-                                    <button role="menuitem" onclick="setTheme('winter', 'snow')">🌨️ {% trans "눈" %}</button>
-                                    <button role="menuitem" onclick="setTheme('winter', 'cloudy')">☁️ {% trans "흐림" %}</button>
+                                <span class="season-label">❄️ 겨울</span>
+                                <div class="weather-submenu" role="group" aria-label="겨울 날씨">
+                                    <button role="menuitem" onclick="setTheme('winter', 'clear')">☀️ 맑음</button>
+                                    <button role="menuitem" onclick="setTheme('winter', 'snow')">🌨️ 눈</button>
+                                    <button role="menuitem" onclick="setTheme('winter', 'cloudy')">☁️ 흐림</button>
                                 </div>
                             </div>
                             <div class="season-divider"></div>
                             <!-- 낮/밤 선택 -->
                             <div class="time-toggle">
-                                <span class="toggle-label">{% trans "시간대" %}</span>
+                                <span class="toggle-label">시간대</span>
                                 <div class="toggle-buttons">
-                                    <button onclick="setTimeMode('day')" class="time-btn" data-time="day">🌤️ {% trans "낮" %}</button>
+                                    <button onclick="setTimeMode('day')" class="time-btn" data-time="day">🌤️ 낮</button>
                                     <button onclick="setTimeMode('night')" class="time-btn" data-time="night">🌙
-                                        {% trans "밤" %}</button>
+                                        밤</button>
                                 </div>
                             </div>
                             <div class="season-divider"></div>
-                            <button class="auto-theme-btn" onclick="setAutoTheme()">🔄 {% trans "자동 (위치 기반)" %}</button>
+                            <button class="auto-theme-btn" onclick="setAutoTheme()">🔄 자동 (위치 기반)</button>
                         </div>
-                    </div>
-                </div>
-
-                <!-- 언어 선택 -->
-                <div class="language-selector">
-                    <button class="lang-btn" aria-label="{% trans '언어 선택' %}" aria-expanded="false" aria-haspopup="true">🌐</button>
-                    <div class="lang-dropdown">
-                        <form action="{% url 'set_language' %}" method="post" id="langForm">
-                            {% csrf_token %}
-                            <input type="hidden" name="next" value="{{ request.path }}">
-                            <button type="submit" name="language" value="ko" class="lang-option{% if CURRENT_LANG == 'ko' %} active{% endif %}">
-                                <span class="lang-flag">🇰🇷</span> 한국어
-                            </button>
-                            <button type="submit" name="language" value="ja" class="lang-option{% if CURRENT_LANG == 'ja' %} active{% endif %}">
-                                <span class="lang-flag">🇯🇵</span> 日本語
-                            </button>
-                            <button type="submit" name="language" value="en" class="lang-option{% if CURRENT_LANG == 'en' %} active{% endif %}">
-                                <span class="lang-flag">🇬🇧</span> English
-                            </button>
-                        </form>
                     </div>
                 </div>
 
                 <!-- 알림 (모든 사용자에게 표시) -->
                 <div class="notification-wrapper">
-                    <button class="notification-btn" id="notificationBtn" aria-label="{% trans '알림' %}" aria-expanded="false" aria-haspopup="true">
+                    <button class="notification-btn" id="notificationBtn" aria-label="알림" aria-expanded="false" aria-haspopup="true">
                         🔔
                         {% if user.is_authenticated %}
                         <span class="notification-badge" id="notificationBadge" style="display: none;">0</span>
                         {% endif %}
                     </button>
-                    <div class="notification-dropdown" id="notificationDropdown" role="region" aria-label="{% trans '알림 목록' %}">
+                    <div class="notification-dropdown" id="notificationDropdown" role="region" aria-label="알림 목록">
                         <div class="notification-dropdown-inner">
-                            <div class="notification-header">{% trans "알림" %}</div>
+                            {% if user.is_authenticated %}
+                            <div class="notification-tabs">
+                                <button class="notification-tab active" data-tab="comment">💬 댓글 <span class="tab-badge" id="tabBadgeComment" style="display:none;">0</span></button>
+                                <button class="notification-tab" data-tab="other">🔔 기타 <span class="tab-badge" id="tabBadgeOther" style="display:none;">0</span></button>
+                            </div>
+                            {% else %}
+                            <div class="notification-header">알림</div>
+                            {% endif %}
                             <div class="notification-list" id="notificationList" aria-live="polite">
                                 {% if user.is_authenticated %}
-                                <div class="notification-empty">{% trans "알림이 없습니다" %}</div>
+                                <div class="notification-empty">알림이 없습니다</div>
                                 {% else %}
-                                <div class="notification-empty notification-guest">🔒 {% trans "비회원은 확인할 수 없습니다" %}<br><a
-                                        href="{% url 'account_login' %}">{% trans "로그인하기" %}</a></div>
+                                <div class="notification-empty notification-guest">🔒 비회원은 확인할 수 없습니다<br><a
+                                        href="{% url 'account_login' %}">로그인하기</a></div>
                                 {% endif %}
                             </div>
                             {% if user.is_authenticated %}
                             <div class="notification-footer">
-                                <button class="notification-mark-all" id="markAllReadBtn">{% trans "모두 읽음 처리" %}</button>
-                                <button class="notification-delete-all" id="deleteAllBtn">{% trans "모두 삭제" %}</button>
+                                <button class="notification-mark-all" id="markAllReadBtn">모두 읽음 처리</button>
+                                <button class="notification-delete-all" id="deleteAllBtn">모두 삭제</button>
                             </div>
                             {% endif %}
                         </div>
                     </div>
                 </div>
                 {% if user.is_authenticated %}
-                <a href="{% url 'accounts:my_page' %}" class="btn btn-outline">{% trans "마이페이지" %}</a>
-                <a href="{% url 'account_logout' %}" class="btn btn-text">{% trans "로그아웃" %}</a>
+                <a href="{% url 'accounts:my_page' %}" class="btn btn-outline">마이페이지</a>
+                <a href="{% url 'account_logout' %}" class="btn btn-text">로그아웃</a>
                 {% else %}
-                <a href="{% url 'account_login' %}" class="btn btn-primary">{% trans "로그인" %}</a>
+                <a href="{% url 'account_login' %}" class="btn btn-primary">로그인</a>
                 {% endif %}
             </div>
 
-            <!-- 모바일 아이콘들 (🎨 🌐 🔔 옆에 ☰) -->
+            <!-- 모바일 아이콘들 (🎨 🔔 옆에 ☰) -->
             <div class="mobile-header-icons">
                 <div class="theme-selector">
-                    <button class="theme-btn" aria-label="{% trans '테마 선택' %}">🎨</button>
+                    <button class="theme-btn" aria-label="테마 선택">🎨</button>
                     <div class="theme-dropdown">
                         <div class="season-menu">
                             <div class="season-item" data-season="spring">
-                                <span class="season-label">🌸 {% trans "봄" %}</span>
+                                <span class="season-label">🌸 봄</span>
                                 <div class="weather-submenu">
-                                    <button onclick="setTheme('spring', 'clear')">☀️ {% trans "맑음" %}</button>
-                                    <button onclick="setTheme('spring', 'rain')">🌧️ {% trans "비" %}</button>
-                                    <button onclick="setTheme('spring', 'cloudy')">☁️ {% trans "흐림" %}</button>
+                                    <button onclick="setTheme('spring', 'clear')">☀️ 맑음</button>
+                                    <button onclick="setTheme('spring', 'rain')">🌧️ 비</button>
+                                    <button onclick="setTheme('spring', 'cloudy')">☁️ 흐림</button>
                                 </div>
                             </div>
                             <div class="season-item" data-season="summer">
-                                <span class="season-label">🌻 {% trans "여름" %}</span>
+                                <span class="season-label">🌻 여름</span>
                                 <div class="weather-submenu">
-                                    <button onclick="setTheme('summer', 'clear')">☀️ {% trans "맑음" %}</button>
-                                    <button onclick="setTheme('summer', 'rain')">🌧️ {% trans "비" %}</button>
-                                    <button onclick="setTheme('summer', 'storm')">⛈️ {% trans "폭풍" %}</button>
+                                    <button onclick="setTheme('summer', 'clear')">☀️ 맑음</button>
+                                    <button onclick="setTheme('summer', 'rain')">🌧️ 비</button>
+                                    <button onclick="setTheme('summer', 'storm')">⛈️ 폭풍</button>
                                 </div>
                             </div>
                             <div class="season-item" data-season="fall">
-                                <span class="season-label">🍂 {% trans "가을" %}</span>
+                                <span class="season-label">🍂 가을</span>
                                 <div class="weather-submenu">
-                                    <button onclick="setTheme('fall', 'clear')">☀️ {% trans "맑음" %}</button>
-                                    <button onclick="setTheme('fall', 'cloudy')">☁️ {% trans "흐림" %}</button>
-                                    <button onclick="setTheme('fall', 'wind')">💨 {% trans "바람" %}</button>
+                                    <button onclick="setTheme('fall', 'clear')">☀️ 맑음</button>
+                                    <button onclick="setTheme('fall', 'cloudy')">☁️ 흐림</button>
+                                    <button onclick="setTheme('fall', 'wind')">💨 바람</button>
                                 </div>
                             </div>
                             <div class="season-item" data-season="winter">
-                                <span class="season-label">❄️ {% trans "겨울" %}</span>
+                                <span class="season-label">❄️ 겨울</span>
                                 <div class="weather-submenu">
-                                    <button onclick="setTheme('winter', 'clear')">☀️ {% trans "맑음" %}</button>
-                                    <button onclick="setTheme('winter', 'snow')">🌨️ {% trans "눈" %}</button>
-                                    <button onclick="setTheme('winter', 'cloudy')">☁️ {% trans "흐림" %}</button>
+                                    <button onclick="setTheme('winter', 'clear')">☀️ 맑음</button>
+                                    <button onclick="setTheme('winter', 'snow')">🌨️ 눈</button>
+                                    <button onclick="setTheme('winter', 'cloudy')">☁️ 흐림</button>
                                 </div>
                             </div>
                             <div class="season-divider"></div>
                             <div class="time-toggle">
-                                <span class="toggle-label">{% trans "시간대" %}</span>
+                                <span class="toggle-label">시간대</span>
                                 <div class="toggle-buttons">
-                                    <button onclick="setTimeMode('day')" class="time-btn" data-time="day">🌤️ {% trans "낮" %}</button>
+                                    <button onclick="setTimeMode('day')" class="time-btn" data-time="day">🌤️ 낮</button>
                                     <button onclick="setTimeMode('night')" class="time-btn" data-time="night">🌙
-                                        {% trans "밤" %}</button>
+                                        밤</button>
                                 </div>
                             </div>
                             <div class="season-divider"></div>
-                            <button class="auto-theme-btn" onclick="setAutoTheme()">🔄 {% trans "자동 (위치 기반)" %}</button>
+                            <button class="auto-theme-btn" onclick="setAutoTheme()">🔄 자동 (위치 기반)</button>
                         </div>
-                    </div>
-                </div>
-                <!-- 모바일 언어 선택 -->
-                <div class="language-selector">
-                    <button class="lang-btn" aria-label="{% trans '언어 선택' %}">🌐</button>
-                    <div class="lang-dropdown">
-                        <form action="{% url 'set_language' %}" method="post" id="langFormMobile">
-                            {% csrf_token %}
-                            <input type="hidden" name="next" value="{{ request.path }}">
-                            <button type="submit" name="language" value="ko" class="lang-option{% if CURRENT_LANG == 'ko' %} active{% endif %}">
-                                <span class="lang-flag">🇰🇷</span> 한국어
-                            </button>
-                            <button type="submit" name="language" value="ja" class="lang-option{% if CURRENT_LANG == 'ja' %} active{% endif %}">
-                                <span class="lang-flag">🇯🇵</span> 日本語
-                            </button>
-                            <button type="submit" name="language" value="en" class="lang-option{% if CURRENT_LANG == 'en' %} active{% endif %}">
-                                <span class="lang-flag">🇬🇧</span> English
-                            </button>
-                        </form>
                     </div>
                 </div>
                 <!-- 알림 (모든 사용자에게 표시) -->
                 <div class="notification-wrapper">
-                    <button class="notification-btn" id="notificationBtnMobile" aria-label="{% trans '알림' %}">
+                    <button class="notification-btn" id="notificationBtnMobile" aria-label="알림">
                         🔔
                         {% if user.is_authenticated %}
                         <span class="notification-badge" id="notificationBadgeMobile" style="display: none;">0</span>
@@ -299,25 +254,32 @@
                     </button>
                     <div class="notification-dropdown" id="notificationDropdownMobile">
                         <div class="notification-dropdown-inner">
-                            <div class="notification-header">{% trans "알림" %}</div>
+                            {% if user.is_authenticated %}
+                            <div class="notification-tabs">
+                                <button class="notification-tab active" data-tab="comment">💬 댓글 <span class="tab-badge" id="tabBadgeCommentMobile" style="display:none;">0</span></button>
+                                <button class="notification-tab" data-tab="other">🔔 기타 <span class="tab-badge" id="tabBadgeOtherMobile" style="display:none;">0</span></button>
+                            </div>
+                            {% else %}
+                            <div class="notification-header">알림</div>
+                            {% endif %}
                             <div class="notification-list" id="notificationListMobile">
                                 {% if user.is_authenticated %}
-                                <div class="notification-empty">{% trans "알림이 없습니다" %}</div>
+                                <div class="notification-empty">알림이 없습니다</div>
                                 {% else %}
-                                <div class="notification-empty notification-guest">🔒 {% trans "비회원은 확인할 수 없습니다" %}<br><a
-                                        href="{% url 'account_login' %}">{% trans "로그인하기" %}</a></div>
+                                <div class="notification-empty notification-guest">🔒 비회원은 확인할 수 없습니다<br><a
+                                        href="{% url 'account_login' %}">로그인하기</a></div>
                                 {% endif %}
                             </div>
                             {% if user.is_authenticated %}
                             <div class="notification-footer">
-                                <button class="notification-mark-all" id="markAllReadBtnMobile">{% trans "모두 읽음 처리" %}</button>
-                                <button class="notification-delete-all" id="deleteAllBtnMobile">{% trans "모두 삭제" %}</button>
+                                <button class="notification-mark-all" id="markAllReadBtnMobile">모두 읽음 처리</button>
+                                <button class="notification-delete-all" id="deleteAllBtnMobile">모두 삭제</button>
                             </div>
                             {% endif %}
                         </div>
                     </div>
                 </div>
-                <button class="mobile-menu-btn" aria-label="{% trans '메뉴 열기' %}" aria-expanded="false" aria-controls="mobileMenu">
+                <button class="mobile-menu-btn" aria-label="메뉴 열기" aria-expanded="false" aria-controls="mobileMenu">
                     <span></span>
                     <span></span>
                     <span></span>
@@ -325,19 +287,19 @@
             </div>
 
             <!-- 모바일 메뉴 (드롭다운) -->
-            <div class="mobile-menu" id="mobileMenu" role="navigation" aria-label="{% trans '모바일 메뉴' %}">
+            <div class="mobile-menu" id="mobileMenu" role="navigation" aria-label="모바일 메뉴">
                 {% if user.is_authenticated %}
-                <a href="{% url 'accounts:my_page' %}" class="mobile-menu-item mobile-menu-auth">{% trans "마이페이지" %}</a>
-                <a href="{% url 'account_logout' %}" class="mobile-menu-item mobile-menu-logout">{% trans "로그아웃" %}</a>
+                <a href="{% url 'accounts:my_page' %}" class="mobile-menu-item mobile-menu-auth">마이페이지</a>
+                <a href="{% url 'account_logout' %}" class="mobile-menu-item mobile-menu-logout">로그아웃</a>
                 {% else %}
-                <a href="{% url 'account_login' %}" class="mobile-menu-item mobile-menu-login">{% trans "로그인" %}</a>
+                <a href="{% url 'account_login' %}" class="mobile-menu-item mobile-menu-login">로그인</a>
                 {% endif %}
                 <div class="mobile-menu-divider"></div>
-                <a href="{% url 'coordinates:list' %}" class="mobile-menu-item">{% trans "좌표 목록" %}</a>
-                <a href="{% url 'farming:home' %}" class="mobile-menu-item">{% trans "농사" %}</a>
-                <a href="{% url 'rankings:list' %}" class="mobile-menu-item">{% trans "랭킹" %}</a>
-                <a href="{% url 'core:guide' %}" class="mobile-menu-item">{% trans "안내" %}</a>
-                <a href="{% url 'core:suggestion' %}" class="mobile-menu-item">💌 {% trans "건의하기" %}</a>
+                <a href="{% url 'coordinates:list' %}" class="mobile-menu-item">좌표 목록</a>
+                <a href="{% url 'farming:home' %}" class="mobile-menu-item">농사</a>
+                <a href="{% url 'rankings:list' %}" class="mobile-menu-item">랭킹</a>
+                <a href="{% url 'core:guide' %}" class="mobile-menu-item">안내</a>
+                <a href="{% url 'core:suggestion' %}" class="mobile-menu-item">💌 건의하기</a>
             </div>
         </div>
     </header>
@@ -349,7 +311,7 @@
         {% for message in messages %}
         <div class="message message-{{ message.tags }}">
             {{ message }}
-            <button class="message-close" onclick="this.parentElement.remove()" aria-label="{% trans '닫기' %}">×</button>
+            <button class="message-close" onclick="this.parentElement.remove()" aria-label="닫기">×</button>
         </div>
         {% endfor %}
     </div>
@@ -362,8 +324,8 @@
     {% block footer %}
     <footer class="main-footer">
         <div class="container">
-            <p>© {% now "Y" %} {% trans "피크민 다이어리 커뮤니티" %}</p>
-            <p class="footer-note">{% trans "이 사이트는 Nintendo 또는 Niantic과 관련이 없습니다." %}</p>
+            <p>© {% now "Y" %} 피크민 다이어리 커뮤니티</p>
+            <p class="footer-note">이 사이트는 Nintendo 또는 Niantic과 관련이 없습니다.</p>
         </div>
     </footer>
     {% endblock %}
@@ -371,33 +333,33 @@
     <!-- JS 번역 문자열 -->
     <script>
     var TRANSLATIONS = {
-        themeApplied: "{% trans '테마 적용!' %}",
-        autoThemeSwitch: "{% trans '자동 테마 모드로 전환합니다...' %}",
-        dayMode: "{% trans '낮 모드 적용!' %}",
-        nightMode: "{% trans '밤 모드 적용!' %}",
-        coordsCopied: "{% trans '좌표가 클립보드에 복사되었습니다!' %}",
-        copyFailed: "{% trans '복사에 실패했습니다.' %}",
-        copied: "{% trans '복사됨' %}",
-        copy: "{% trans '복사' %}",
-        noNotifications: "{% trans '알림이 없습니다' %}",
-        loadNotifFailed: "{% trans '알림을 불러올 수 없습니다' %}",
-        deleteAllConfirm: "{% trans '모든 알림을 삭제하시겠습니까?' %}",
-        spring: "{% trans '봄' %}",
-        summer: "{% trans '여름' %}",
-        fall: "{% trans '가을' %}",
-        winter: "{% trans '겨울' %}",
-        clear: "{% trans '맑음' %}",
-        rain: "{% trans '비' %}",
-        snow: "{% trans '눈' %}",
-        storm: "{% trans '폭풍' %}",
-        cloudy: "{% trans '흐림' %}",
-        wind: "{% trans '바람' %}"
+        themeApplied: "테마 적용!",
+        autoThemeSwitch: "자동 테마 모드로 전환합니다...",
+        dayMode: "낮 모드 적용!",
+        nightMode: "밤 모드 적용!",
+        coordsCopied: "좌표가 클립보드에 복사되었습니다!",
+        copyFailed: "복사에 실패했습니다.",
+        copied: "복사됨",
+        copy: "복사",
+        noNotifications: "알림이 없습니다",
+        loadNotifFailed: "알림을 불러올 수 없습니다",
+        deleteAllConfirm: "모든 알림을 삭제하시겠습니까?",
+        spring: "봄",
+        summer: "여름",
+        fall: "가을",
+        winter: "겨울",
+        clear: "맑음",
+        rain: "비",
+        snow: "눈",
+        storm: "폭풍",
+        cloudy: "흐림",
+        wind: "바람"
     };
     </script>
 
     <!-- JavaScript -->
     <script src="{% static 'js/weather-theme.js' %}?v=20260103e"></script>
-    <script src="{% static 'js/main.js' %}?v=20260211a"></script>
+    <script src="{% static 'js/main.js' %}?v=20260220a"></script>
     {% block extra_js %}{% endblock %}
 </body>
 

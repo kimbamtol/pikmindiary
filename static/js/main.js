@@ -376,7 +376,7 @@ document.addEventListener('DOMContentLoaded', () => {
             e.stopPropagation();
             notificationDropdownMobile?.classList.toggle('show');
             if (notificationDropdownMobile?.classList.contains('show')) {
-                loadNotificationsMobile();
+                loadNotificationsMobile(currentNotifTabMobile);
             }
         });
     }
@@ -385,7 +385,6 @@ document.addEventListener('DOMContentLoaded', () => {
         markAllReadBtnMobile.addEventListener('click', (e) => {
             e.stopPropagation();
             markAllNotificationsRead();
-            loadNotificationsMobile();
         });
     }
 
@@ -394,7 +393,35 @@ document.addEventListener('DOMContentLoaded', () => {
         deleteAllBtnMobile.addEventListener('click', (e) => {
             e.stopPropagation();
             deleteAllNotifications();
-            loadNotificationsMobile();
+        });
+    }
+
+    // 데스크톱 알림 탭 클릭
+    const desktopDropdown = document.getElementById('notificationDropdown');
+    if (desktopDropdown) {
+        desktopDropdown.querySelectorAll('.notification-tab').forEach(tabBtn => {
+            tabBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const tab = tabBtn.dataset.tab;
+                currentNotifTab = tab;
+                desktopDropdown.querySelectorAll('.notification-tab').forEach(b => b.classList.remove('active'));
+                tabBtn.classList.add('active');
+                loadNotifications(tab);
+            });
+        });
+    }
+
+    // 모바일 알림 탭 클릭
+    if (notificationDropdownMobile) {
+        notificationDropdownMobile.querySelectorAll('.notification-tab').forEach(tabBtn => {
+            tabBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const tab = tabBtn.dataset.tab;
+                currentNotifTabMobile = tab;
+                notificationDropdownMobile.querySelectorAll('.notification-tab').forEach(b => b.classList.remove('active'));
+                tabBtn.classList.add('active');
+                loadNotificationsMobile(tab);
+            });
         });
     }
 
@@ -447,6 +474,10 @@ function removePreviewImage(index) {
 // 알림 시스템
 // ============================================
 
+// 현재 활성 탭 (데스크톱/모바일 각각)
+var currentNotifTab = 'comment';
+var currentNotifTabMobile = 'comment';
+
 // 알림 드롭다운 토글
 function toggleNotificationDropdown() {
     const dropdown = document.getElementById('notificationDropdown');
@@ -455,23 +486,23 @@ function toggleNotificationDropdown() {
         const isOpen = dropdown.classList.toggle('show');
         if (btn) btn.setAttribute('aria-expanded', isOpen);
         if (isOpen) {
-            loadNotifications();
+            loadNotifications(currentNotifTab);
         }
     }
 }
 
-// 알림 목록 로드
-async function loadNotifications() {
+// 알림 목록 로드 (탭 지원)
+async function loadNotifications(tab) {
+    tab = tab || 'comment';
     const list = document.getElementById('notificationList');
     if (!list) return;
 
     try {
-        const response = await fetch('/interactions/notifications/');
+        const response = await fetch('/interactions/notifications/?tab=' + tab);
         const data = await response.json();
 
         if (data.notifications && data.notifications.length > 0) {
             list.innerHTML = data.notifications.map(notif => {
-                // 건의사항 알림은 내 건의사항 페이지로, 그 외에는 좌표 상세 페이지로
                 const url = notif.type === 'SUGGESTION_REPLY'
                     ? '/accounts/my/suggestions/'
                     : `/coordinates/${notif.coordinate_id}/`;
@@ -494,13 +525,14 @@ async function loadNotifications() {
     }
 }
 
-// 모바일용 알림 목록 로드
-async function loadNotificationsMobile() {
+// 모바일용 알림 목록 로드 (탭 지원)
+async function loadNotificationsMobile(tab) {
+    tab = tab || 'comment';
     const list = document.getElementById('notificationListMobile');
     if (!list) return;
 
     try {
-        const response = await fetch('/interactions/notifications/');
+        const response = await fetch('/interactions/notifications/?tab=' + tab);
         const data = await response.json();
 
         if (data.notifications && data.notifications.length > 0) {
@@ -536,7 +568,7 @@ async function updateUnreadCount() {
         const response = await fetch('/interactions/notifications/unread-count/');
         const data = await response.json();
 
-        // 데스크톱 뱃지
+        // 데스크톱 벨 뱃지
         if (data.unread_count > 0) {
             badge.textContent = data.unread_count > 99 ? '99+' : data.unread_count;
             badge.style.display = 'flex';
@@ -544,7 +576,7 @@ async function updateUnreadCount() {
             badge.style.display = 'none';
         }
 
-        // 모바일 뱃지
+        // 모바일 벨 뱃지
         const badgeMobile = document.getElementById('notificationBadgeMobile');
         if (badgeMobile) {
             if (data.unread_count > 0) {
@@ -554,8 +586,25 @@ async function updateUnreadCount() {
                 badgeMobile.style.display = 'none';
             }
         }
+
+        // 탭별 뱃지 업데이트
+        updateTabBadge('tabBadgeComment', data.comment_unread);
+        updateTabBadge('tabBadgeOther', data.other_unread);
+        updateTabBadge('tabBadgeCommentMobile', data.comment_unread);
+        updateTabBadge('tabBadgeOtherMobile', data.other_unread);
     } catch (error) {
         console.error('Failed to get unread count:', error);
+    }
+}
+
+function updateTabBadge(id, count) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (count > 0) {
+        el.textContent = count > 99 ? '99+' : count;
+        el.style.display = 'inline-flex';
+    } else {
+        el.style.display = 'none';
     }
 }
 
@@ -578,7 +627,8 @@ async function markAllNotificationsRead() {
             method: 'POST'
         });
         updateUnreadCount();
-        loadNotifications();
+        loadNotifications(currentNotifTab);
+        loadNotificationsMobile(currentNotifTabMobile);
     } catch (error) {
         console.error('Failed to mark all notifications as read:', error);
     }
@@ -593,7 +643,8 @@ async function deleteAllNotifications() {
             method: 'POST'
         });
         updateUnreadCount();
-        loadNotifications();
+        loadNotifications(currentNotifTab);
+        loadNotificationsMobile(currentNotifTabMobile);
     } catch (error) {
         console.error('Failed to delete all notifications:', error);
     }

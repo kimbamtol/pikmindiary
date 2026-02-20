@@ -161,11 +161,18 @@ from django.contrib.auth.decorators import login_required
 
 @login_required
 def get_notifications(request):
-    """알림 목록 조회 (최근 20개)"""
-    notifications = Notification.objects.filter(
-        recipient=request.user
-    ).select_related('actor', 'coordinate')[:20]
-    
+    """알림 목록 조회 (탭별 최근 30개)"""
+    tab = request.GET.get('tab', 'comment')
+
+    qs = Notification.objects.filter(recipient=request.user)
+
+    if tab == 'comment':
+        qs = qs.filter(notification_type='COMMENT')
+    else:
+        qs = qs.exclude(notification_type='COMMENT')
+
+    notifications = qs.select_related('actor', 'coordinate')[:30]
+
     data = []
     for notif in notifications:
         data.append({
@@ -178,19 +185,26 @@ def get_notifications(request):
             'is_read': notif.is_read,
             'created_at': notif.created_at.strftime('%Y-%m-%d %H:%M'),
         })
-    
+
     return JsonResponse({'notifications': data})
 
 
 @login_required
 def get_unread_count(request):
-    """읽지 않은 알림 개수"""
-    count = Notification.objects.filter(
+    """읽지 않은 알림 개수 (전체 + 탭별)"""
+    base_qs = Notification.objects.filter(
         recipient=request.user,
         is_read=False
-    ).count()
-    
-    return JsonResponse({'unread_count': count})
+    )
+    total = base_qs.count()
+    comment_unread = base_qs.filter(notification_type='COMMENT').count()
+    other_unread = total - comment_unread
+
+    return JsonResponse({
+        'unread_count': total,
+        'comment_unread': comment_unread,
+        'other_unread': other_unread,
+    })
 
 
 @login_required

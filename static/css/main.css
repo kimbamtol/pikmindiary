@@ -1226,6 +1226,54 @@ textarea.form-control {
     margin-bottom: var(--spacing-xs);
 }
 
+.notification-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--bg-tertiary);
+    margin-bottom: var(--spacing-xs);
+}
+
+.notification-tab {
+    flex: 1;
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    transition: all var(--transition-fast);
+    text-align: center;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+}
+
+.notification-tab.active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+}
+
+.notification-tab:hover {
+    color: var(--primary);
+    background: var(--bg-secondary);
+}
+
+.tab-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 16px;
+    height: 16px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    background: #F44336;
+    color: white;
+    border-radius: var(--radius-full);
+    padding: 0 4px;
+}
+
 .notification-list {
     max-height: 300px;
     overflow-y: auto;
