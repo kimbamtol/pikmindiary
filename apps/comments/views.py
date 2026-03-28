@@ -100,11 +100,6 @@ def comment_create(request, coordinate_id):
             message=_("%(name)s님이 '%(title)s'에 %(emoji)s 댓글을 남겼어요") % {'name': actor_name, 'title': coordinate.title, 'emoji': emoji}
         )
 
-    # 번역 생성
-    if content:
-        from apps.translations.services import translate_on_create
-        translate_on_create(comment, ['content'])
-
     _update_comment_count(coordinate=coordinate)
 
     if request.headers.get('HX-Request'):
@@ -228,11 +223,6 @@ def comment_reply(request, pk):
             message=_("%(name)s님이 회원님의 댓글에 %(emoji)s 답글을 남겼어요") % {'name': actor_name, 'emoji': emoji}
         )
 
-    # 번역 생성
-    if content:
-        from apps.translations.services import translate_on_create
-        translate_on_create(comment, ['content'])
-
     _update_comment_count(coordinate=coordinate)
 
     messages.success(request, _('답글이 등록되었습니다.'))
@@ -260,11 +250,6 @@ def journal_comment_create(request, journal_id):
         messages.error(request, actor_name)
         return redirect('farming:journal_detail', pk=journal_id)
 
-    # 번역 생성
-    if content:
-        from apps.translations.services import translate_on_create
-        translate_on_create(comment, ['content'])
-
     _update_comment_count(farming_journal=journal)
 
     messages.success(request, _('댓글이 등록되었습니다.'))
@@ -288,11 +273,6 @@ def journal_comment_reply(request, pk):
     if comment is None:
         messages.error(request, actor_name)
         return redirect('farming:journal_detail', pk=journal.pk)
-
-    # 번역 생성
-    if content:
-        from apps.translations.services import translate_on_create
-        translate_on_create(comment, ['content'])
 
     _update_comment_count(farming_journal=journal)
 

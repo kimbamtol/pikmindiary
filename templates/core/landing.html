@@ -26,15 +26,6 @@
             {% trans "유저들이 함께 하는 버섯, 빅플라워, 농사 정보" %}
         </p>
 
-        <!-- 위치 안내 박스 -->
-        <div class="location-notice">
-            <span class="location-notice-icon">📍</span>
-            <p>
-                {% trans "위치를 허용하면 입장 후" %}<br>
-                <strong>{% trans "내 지역 계절에 맞는 화면" %}</strong>{% trans "이 펼쳐집니다!" %}
-            </p>
-        </div>
-
         <!-- 입장/지도 버튼 -->
         <div class="landing-main-buttons">
             <button class="btn btn-primary btn-lg btn-enter" onclick="weatherTheme.handleEnterClick()">
@@ -45,15 +36,32 @@
             </a>
         </div>
 
-        <!-- 안내 버튼 -->
-        <div class="landing-links">
-            <a href="{% url 'core:guide' %}" class="btn btn-outline">
-                📖 {% trans "사이트 안내" %}
-            </a>
-            <a href="{% url 'core:mypage_guide' %}" class="btn btn-outline">
-                👤 {% trans "마이페이지 안내" %}
-            </a>
+        <!-- 이 달의 Top 기여자 -->
+        {% if top_contributors %}
+        <div class="top-contributors">
+            <div class="contributors-title">⭐ {{ current_month|date:"n" }}{% trans "월의 Top 기여자" %}</div>
+            <div class="contributors-grid">
+                {% for r in top_contributors %}
+                <a href="{% url 'accounts:user_profile' user_id=r.user.pk %}" class="contributor-card {% if forloop.counter == 1 %}gold{% elif forloop.counter == 2 %}silver{% elif forloop.counter == 3 %}bronze{% endif %}">
+                    <div class="contributor-medal">
+                        {% if forloop.counter == 1 %}🥇{% elif forloop.counter == 2 %}🥈{% elif forloop.counter == 3 %}🥉{% endif %}
+                    </div>
+                    <div class="contributor-avatar">
+                        {% if r.user.profile_image %}
+                        <img src="{{ r.user.profile_image.url }}" alt="{{ r.user.nickname }}">
+                        {% else %}
+                        <div class="avatar-placeholder">{{ r.user.nickname|slice:":1" }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="contributor-name">{{ r.user.nickname }}</div>
+                    <div class="contributor-score">{{ r.score }}{% trans "점" %}</div>
+                    <div class="contributor-stats">📝 {{ r.approved_posts_count }} ❤️ {{ r.likes_received_count }}</div>
+                </a>
+                {% endfor %}
+            </div>
+            <a href="{% url 'rankings:list' %}?period=MONTHLY" class="contributors-more">{% trans "전체 랭킹 보기" %} →</a>
         </div>
+        {% endif %}
     </div>
 
     <!-- 하단 정보 -->
@@ -137,29 +145,6 @@
         margin-bottom: var(--spacing-xl);
     }
 
-    .location-notice {
-        background: rgba(76, 175, 80, 0.1);
-        border: 2px dashed var(--primary);
-        border-radius: var(--radius-lg);
-        padding: var(--spacing-md);
-        margin-bottom: var(--spacing-xl);
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-md);
-        text-align: left;
-    }
-
-    .location-notice-icon {
-        font-size: 2rem;
-        flex-shrink: 0;
-    }
-
-    .location-notice p {
-        font-size: 0.95rem;
-        color: var(--text-secondary);
-        line-height: 1.5;
-    }
-
     .landing-main-buttons {
         display: flex;
         gap: var(--spacing-md);
@@ -202,28 +187,133 @@
         }
     }
 
-    .landing-links {
+    /* Top 기여자 섹션 */
+    .top-contributors {
+        margin-top: var(--spacing-xs);
+        padding-top: var(--spacing-lg);
+        border-top: 1px dashed rgba(76, 175, 80, 0.3);
+    }
+
+    .contributors-title {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: var(--text-secondary);
+        margin-bottom: var(--spacing-md);
+    }
+
+    .contributors-grid {
         display: flex;
-        gap: var(--spacing-md);
+        gap: var(--spacing-sm);
         justify-content: center;
-        flex-wrap: wrap;
     }
 
-    .landing-links .btn {
+    .contributor-card {
         flex: 1;
-        min-width: 140px;
-        background: rgba(255, 255, 255, 0.95);
-        border: 2px solid var(--primary);
-        color: var(--primary);
-        font-weight: 600;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        max-width: 140px;
+        background: var(--bg-secondary);
+        border-radius: var(--radius-lg);
+        padding: var(--spacing-md) var(--spacing-sm) var(--spacing-sm);
+        text-align: center;
+        position: relative;
+        transition: transform 0.2s, box-shadow 0.2s;
+        color: var(--text-primary);
     }
 
-    .landing-links .btn:hover {
+    .contributor-card:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .contributor-card.gold {
+        background: linear-gradient(135deg, #FFF9C4, #FFF3E0);
+        border: 2px solid #FFD54F;
+    }
+
+    .contributor-card.silver {
+        background: linear-gradient(135deg, #FAFAFA, #F5F5F5);
+        border: 2px solid #BDBDBD;
+    }
+
+    .contributor-card.bronze {
+        background: linear-gradient(135deg, #FFF3E0, #FFCCBC);
+        border: 2px solid #FF8A65;
+    }
+
+    .contributor-medal {
+        position: absolute;
+        top: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 1.3rem;
+        background: white;
+        border-radius: 50%;
+        width: 28px;
+        height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .contributor-avatar {
+        width: 52px;
+        height: 52px;
+        border-radius: 50%;
+        margin: var(--spacing-xs) auto var(--spacing-sm);
+        overflow: hidden;
+        border: 3px solid white;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .contributor-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .contributor-avatar .avatar-placeholder {
+        width: 100%;
+        height: 100%;
         background: var(--primary);
         color: white;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1.2rem;
+    }
+
+    .contributor-name {
+        font-weight: 700;
+        font-size: 0.85rem;
+        margin-bottom: 2px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .contributor-score {
+        font-size: 0.75rem;
+        color: var(--primary);
+        font-weight: 600;
+    }
+
+    .contributor-stats {
+        font-size: 0.65rem;
+        color: var(--text-tertiary);
+        margin-top: 4px;
+    }
+
+    .contributors-more {
+        display: block;
+        margin-top: var(--spacing-sm);
+        font-size: 0.8rem;
+        color: var(--primary);
+        font-weight: 600;
+    }
+
+    .contributors-more:hover {
+        text-decoration: underline;
     }
 
     .landing-footer {
@@ -249,23 +339,21 @@
             font-size: 1.5rem;
         }
 
-        .landing-links {
-            flex-direction: column;
+        .contributors-grid {
+            gap: var(--spacing-xs);
+        }
+
+        .contributor-card {
+            padding: var(--spacing-sm) var(--spacing-xs) var(--spacing-xs);
+        }
+
+        .contributor-avatar {
+            width: 44px;
+            height: 44px;
         }
     }
 
-    /* 밤 모드에서 버튼 가시성 */
-    body[data-time="night"] .landing-links .btn {
-        background: rgba(255, 255, 255, 0.98);
-        color: #1A202C;
-        border-color: #4CAF50;
-    }
-
-    body[data-time="night"] .landing-links .btn:hover {
-        background: #4CAF50;
-        color: white;
-    }
-
+    /* 밤 모드 */
     body[data-time="night"] .landing-card {
         background: rgba(255, 255, 255, 0.95);
     }

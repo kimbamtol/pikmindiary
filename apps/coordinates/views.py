@@ -60,12 +60,32 @@ def coordinate_list(request):
     offset = (page_number - 1) * PAGE_SIZE
     first_page_items = list(queryset[offset:offset + PAGE_SIZE])
     has_next = queryset.count() > offset + PAGE_SIZE
-    
+
+    # 좋아요/북마크 상태 조회
+    coord_ids = [c.pk for c in first_page_items]
+    user_liked_coords = set()
+    user_bookmarked_coords = set()
+
+    if request.user.is_authenticated:
+        user_liked_coords = set(
+            Like.objects.filter(user=request.user, coordinate_id__in=coord_ids)
+            .values_list('coordinate_id', flat=True)
+        )
+        user_bookmarked_coords = set(
+            Bookmark.objects.filter(user=request.user, coordinate_id__in=coord_ids)
+            .values_list('coordinate_id', flat=True)
+        )
+    else:
+        liked_list = request.session.get('liked_coords', [])
+        user_liked_coords = set(pk for pk in liked_list if pk in coord_ids)
+
     # AJAX 요청인 경우 JSON으로 카드 HTML 반환
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         from django.template.loader import render_to_string
         cards_html = render_to_string('coordinates/_card_list.html', {
             'coords': first_page_items,
+            'user_liked_coords': user_liked_coords,
+            'user_bookmarked_coords': user_bookmarked_coords,
         }, request=request)
         return JsonResponse({
             'html': cards_html,
@@ -130,6 +150,8 @@ def coordinate_list(request):
         'ranker_stats': ranker_stats,
         'has_next': has_next,
         'site_notice': site_notice,
+        'user_liked_coords': user_liked_coords,
+        'user_bookmarked_coords': user_bookmarked_coords,
     }
     return render(request, 'coordinates/list.html', context)
 
@@ -338,10 +360,6 @@ def coordinate_create(request):
                 order=i
             )
         
-        # 번역 생성
-        from apps.translations.services import translate_on_create
-        translate_on_create(coordinate, ['title', 'description', 'postcard_name'])
-
         # 랭킹 갱신 (회원인 경우)
         if author:
             update_user_ranking(author)

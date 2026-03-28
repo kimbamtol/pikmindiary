@@ -5,14 +5,26 @@ from django.conf import settings
 from django.contrib import messages
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST, require_http_methods
+from django.utils import timezone
 
 from .models import Suggestion
 
 
 def landing_page(request):
     """랜딩 페이지 - 서버 위치 기준 계절/날씨 UI"""
+    from apps.rankings.models import Ranking
+
+    month_start = timezone.now().date().replace(day=1)
+    top_contributors = Ranking.objects.filter(
+        period_type=Ranking.PeriodType.MONTHLY,
+        period_start=month_start,
+        approved_posts_count__gt=0
+    ).select_related('user').order_by('rank')[:3]
+
     context = {
         'default_location': settings.DEFAULT_LOCATION,
+        'top_contributors': top_contributors,
+        'current_month': month_start,
     }
     return render(request, 'core/landing.html', context)
 
@@ -64,10 +76,6 @@ def suggestion_form(request):
             suggestion_data['email'] = email
         
         suggestion = Suggestion.objects.create(**suggestion_data)
-
-        # 번역 생성
-        from apps.translations.services import translate_on_create
-        translate_on_create(suggestion, ['title', 'content'])
 
         messages.success(request, _('건의사항이 성공적으로 접수되었습니다!'))
         return redirect('core:suggestion_done')

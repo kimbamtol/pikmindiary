@@ -1,15 +1,13 @@
 {% extends 'base.html' %}
-{% load i18n %}
-{% load translate_content %}
 
-{% block title %}{% trans "내 건의사항" %} - {% trans "피크민 다이어리" %}{% endblock %}
+{% block title %}내 건의사항 - 피크민 다이어리{% endblock %}
 
 {% block content %}
 <div class="container">
     <div class="suggestions-page">
-        <a href="{% url 'accounts:my_page' %}" class="back-link">← {% trans "마이페이지로" %}</a>
+        <a href="{% url 'accounts:my_page' %}" class="back-link">← 마이페이지로</a>
 
-        <h1 class="page-title">📋 {% trans "내 건의사항" %}</h1>
+        <h1 class="page-title">📋 내 건의사항</h1>
 
         {% if page_obj %}
         <div class="suggestions-list">
@@ -26,21 +24,21 @@
                     <span class="suggestion-date">{{ suggestion.created_at|date:"Y.m.d H:i" }}</span>
                 </div>
 
-                <h3 class="suggestion-title">{{ suggestion|translate_field:"title" }}</h3>
-                <p class="suggestion-content">{{ suggestion|translate_field:"content"|linebreaksbr }}</p>
+                <h3 class="suggestion-title">{{ suggestion.title }}</h3>
+                <p class="suggestion-content">{{ suggestion.content|linebreaksbr }}</p>
 
                 {% if suggestion.admin_reply %}
                 <div class="admin-reply">
                     <div class="reply-header">
                         <span class="reply-icon">💬</span>
-                        <span class="reply-label">{% trans "운영자 답변" %}</span>
+                        <span class="reply-label">운영자 답변</span>
                         <span class="reply-date">{{ suggestion.replied_at|date:"Y.m.d H:i" }}</span>
                     </div>
                     <p class="reply-content">{{ suggestion.admin_reply|linebreaksbr }}</p>
                 </div>
                 {% else %}
                 <div class="no-reply">
-                    <span>⏳ {% trans "아직 답변이 없습니다" %}</span>
+                    <span>⏳ 아직 답변이 없습니다</span>
                 </div>
                 {% endif %}
             </div>
@@ -51,11 +49,11 @@
         {% if page_obj.has_other_pages %}
         <div class="pagination">
             {% if page_obj.has_previous %}
-            <a href="?page={{ page_obj.previous_page_number }}" class="btn btn-secondary">← {% trans "이전" %}</a>
+            <a href="?page={{ page_obj.previous_page_number }}" class="btn btn-secondary">← 이전</a>
             {% endif %}
             <span class="page-info">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
             {% if page_obj.has_next %}
-            <a href="?page={{ page_obj.next_page_number }}" class="btn btn-secondary">{% trans "다음" %} →</a>
+            <a href="?page={{ page_obj.next_page_number }}" class="btn btn-secondary">다음 →</a>
             {% endif %}
         </div>
         {% endif %}
@@ -63,9 +61,9 @@
         {% else %}
         <div class="empty-state">
             <div class="empty-state-icon">📭</div>
-            <h2 class="empty-state-title">{% trans "건의사항이 없습니다" %}</h2>
-            <p class="empty-state-desc">{% trans "운영자에게 건의할 내용이 있다면 건의하기 페이지를 이용해주세요." %}</p>
-            <a href="{% url 'core:suggestion_form' %}" class="btn btn-primary">{% trans "건의하기" %}</a>
+            <h2 class="empty-state-title">건의사항이 없습니다</h2>
+            <p class="empty-state-desc">운영자에게 건의할 내용이 있다면 건의하기 페이지를 이용해주세요.</p>
+            <a href="{% url 'core:suggestion_form' %}" class="btn btn-primary">건의하기</a>
         </div>
         {% endif %}
     </div>

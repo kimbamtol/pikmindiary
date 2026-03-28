@@ -94,10 +94,6 @@ def journal_create(request):
 
         journal.save()
 
-        # 번역 생성
-        from apps.translations.services import translate_on_create
-        translate_on_create(journal, ['title', 'content'])
-
         messages.success(request, _('농사 일지가 등록되었습니다!'))
         return redirect('farming:journal_detail', pk=journal.pk)
     
@@ -258,10 +254,6 @@ def request_create(request):
             farming_request.deadline = deadline
         
         farming_request.save()
-
-        # 번역 생성
-        from apps.translations.services import translate_on_create
-        translate_on_create(farming_request, ['title', 'content'])
 
         messages.success(request, _('농사 요청이 등록되었습니다!'))
         return redirect('farming:request_detail', pk=farming_request.pk)

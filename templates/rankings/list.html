@@ -17,60 +17,73 @@
 
         <p class="period-label">{{ period_label }}</p>
 
-        <!-- 점수 설명 -->
-        <div class="score-info card">
-            <h3>📊 {% trans "점수 계산 방식" %}</h3>
-            <ul>
-                <li>{% trans "승인된 글 작성" %}: <strong>+10{% trans "점" %}</strong></li>
-                <li>{% trans "받은 좋아요 (좌표)" %}: <strong>+5{% trans "점" %}</strong></li>
-                <li>{% trans "받은 복사" %}: <strong>+2{% trans "점" %}</strong></li>
-                <li>🌱 {% trans "농사 일지 좋아요" %}: <strong>+10{% trans "점" %}</strong></li>
-            </ul>
-            <div class="period-info">
-                <p>📅 <strong>{% trans "주간" %}</strong>: {% trans "매주 월요일 00:00 ~ 일요일 24:00" %}</p>
-                <p>📅 <strong>{% trans "월간" %}</strong>: {% trans "매월 1일 00:00 ~ 말일 24:00" %}</p>
-            </div>
-        </div>
-
         <!-- 랭킹 목록 -->
         {% if rankings %}
-        <div class="ranking-list">
+
+        <!-- 명예의 전당 Top 3 -->
+        <div class="hall-of-fame">
             {% for ranking in rankings %}
-            <div class="ranking-item card {% if forloop.counter <= 3 %}top-{{ forloop.counter }}{% endif %}">
-                <div class="rank">
-                    {% if forloop.counter == 1 %}
-                    🥇
-                    {% elif forloop.counter == 2 %}
-                    🥈
-                    {% elif forloop.counter == 3 %}
-                    🥉
+            {% if forloop.counter <= 3 %}
+            <a href="{% url 'accounts:user_profile' user_id=ranking.user.pk %}" class="hof-card {% if forloop.counter == 1 %}first{% elif forloop.counter == 2 %}second{% elif forloop.counter == 3 %}third{% endif %}">
+                <div class="hof-medal">
+                    {% if forloop.counter == 1 %}🥇{% elif forloop.counter == 2 %}🥈{% elif forloop.counter == 3 %}🥉{% endif %}
+                </div>
+                <div class="hof-avatar">
+                    {% if ranking.user.profile_image %}
+                    <img src="{{ ranking.user.profile_image.url }}" alt="{{ ranking.user.nickname }}">
                     {% else %}
-                    {{ ranking.rank }}
+                    <div class="avatar-placeholder">{{ ranking.user.nickname|slice:":1" }}</div>
                     {% endif %}
                 </div>
-                <a href="{% url 'accounts:user_profile' user_id=ranking.user.pk %}" class="user-info">
-                    <div class="avatar">
-                        {% if ranking.user.profile_image %}
-                        <img src="{{ ranking.user.profile_image.url }}" alt="{{ ranking.user.nickname }}">
-                        {% else %}
-                        <div class="avatar-placeholder">{{ ranking.user.nickname|slice:":1" }}</div>
-                        {% endif %}
+                <div class="hof-name">{{ ranking.user.nickname }}</div>
+                {% if ranking.user.bio %}
+                <div class="hof-bio">{{ ranking.user.bio|truncatechars:20 }}</div>
+                {% endif %}
+                <div class="hof-pedestal">
+                    <div class="hof-score">{{ ranking.score }}</div>
+                    <div class="hof-score-label">{% trans "점" %}</div>
+                    <div class="hof-detail">
+                        <span title="{% trans "승인된 글" %}">📝 {{ ranking.approved_posts_count }}</span>
+                        <span title="{% trans "받은 좋아요" %}">❤️ {{ ranking.likes_received_count }}</span>
                     </div>
-                    <span class="nickname">{{ ranking.user.nickname }}</span>
-                </a>
+                </div>
+            </a>
+            {% endif %}
+            {% endfor %}
+        </div>
+
+        <!-- 4위부터 리스트 -->
+        {% with rest_rankings=rankings|slice:"3:" %}
+        {% if rest_rankings %}
+        <div class="ranking-divider">{% trans "4위부터" %}</div>
+        <div class="ranking-list">
+            {% for ranking in rest_rankings %}
+            <a href="{% url 'accounts:user_profile' user_id=ranking.user.pk %}" class="ranking-item card">
+                <div class="rank">{{ ranking.rank }}</div>
+                <div class="avatar">
+                    {% if ranking.user.profile_image %}
+                    <img src="{{ ranking.user.profile_image.url }}" alt="{{ ranking.user.nickname }}">
+                    {% else %}
+                    <div class="avatar-placeholder">{{ ranking.user.nickname|slice:":1" }}</div>
+                    {% endif %}
+                </div>
+                <span class="nickname">{{ ranking.user.nickname }}</span>
+                <div class="score-detail">
+                    <span title="{% trans "승인된 글" %}">📝 {{ ranking.approved_posts_count }}</span>
+                    <span title="{% trans "받은 좋아요" %}">❤️ {{ ranking.likes_received_count }}</span>
+                    <span title="{% trans "받은 복사" %}">📋 {{ ranking.copy_received_count }}</span>
+                    <span title="{% trans "농사 좋아요" %}">🌱 {{ ranking.farming_likes_received_count }}</span>
+                </div>
                 <div class="score">
                     <span class="score-value">{{ ranking.score }}</span>
                     <span class="score-label">{% trans "점" %}</span>
                 </div>
-                <div class="score-detail">
-                    <span title="{% trans "승인된 글" %}">📝 {{ ranking.approved_posts_count }}</span>
-                    <span title="{% trans "받은 좋아요 (좌표)" %}">❤️ {{ ranking.likes_received_count }}</span>
-                    <span title="{% trans "받은 복사" %}">📋 {{ ranking.copy_received_count }}</span>
-                    <span title="{% trans "농사 좋아요" %}">🌱 {{ ranking.farming_likes_received_count }}</span>
-                </div>
-            </div>
+            </a>
             {% endfor %}
         </div>
+        {% endif %}
+        {% endwith %}
+
         {% else %}
         <div class="empty-state">
             <div class="empty-state-icon">🏆</div>
@@ -128,97 +141,203 @@
         margin-bottom: var(--spacing-lg);
     }
 
-    .score-info {
-        padding: var(--spacing-md);
-        margin-bottom: var(--spacing-xl);
-        background: var(--bg-secondary);
-        border-radius: var(--radius-xl);
-    }
-
-    .score-info h3 {
-        margin-bottom: var(--spacing-sm);
-        font-size: 0.95rem;
-    }
-
-    .score-info ul {
+    /* 명예의 전당 */
+    .hall-of-fame {
         display: flex;
-        gap: var(--spacing-lg);
-        flex-wrap: wrap;
+        justify-content: center;
+        align-items: flex-end;
+        gap: var(--spacing-md);
+        margin-bottom: var(--spacing-xl);
+        padding: var(--spacing-lg) 0;
     }
 
-    .score-info li {
+    .hof-card {
+        text-align: center;
+        position: relative;
+        transition: transform 0.2s;
+        color: var(--text-primary);
+    }
+
+    .hof-card:hover {
+        transform: translateY(-4px);
+    }
+
+    .hof-card.first { order: 2; }
+    .hof-card.second { order: 1; }
+    .hof-card.third { order: 3; }
+
+    .hof-medal {
+        font-size: 2rem;
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .hof-card.first .hof-medal {
+        font-size: 2.5rem;
+    }
+
+    .hof-avatar {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        margin: 0 auto var(--spacing-sm);
+        overflow: hidden;
+        border: 3px solid white;
+        box-shadow: var(--shadow-md);
+    }
+
+    .hof-card.first .hof-avatar {
+        width: 80px;
+        height: 80px;
+        border-width: 4px;
+    }
+
+    .hof-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .hof-avatar .avatar-placeholder {
+        width: 100%;
+        height: 100%;
+        background: var(--primary);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1.4rem;
+    }
+
+    .hof-card.first .hof-avatar .avatar-placeholder {
+        font-size: 1.8rem;
+    }
+
+    .hof-name {
+        font-weight: 700;
         font-size: 0.9rem;
+        margin-bottom: 2px;
+    }
+
+    .hof-card.first .hof-name {
+        font-size: 1.05rem;
+    }
+
+    .hof-bio {
+        font-size: 0.7rem;
+        color: var(--text-tertiary);
+        margin-bottom: var(--spacing-xs);
+        max-width: 120px;
+        margin-left: auto;
+        margin-right: auto;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .hof-pedestal {
+        border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+        padding: var(--spacing-md) var(--spacing-md) var(--spacing-sm);
+        min-width: 120px;
+    }
+
+    .hof-card.first .hof-pedestal {
+        background: linear-gradient(180deg, #FFF9C4, #FFD54F);
+        min-height: 100px;
+    }
+
+    .hof-card.second .hof-pedestal {
+        background: linear-gradient(180deg, #F5F5F5, #E0E0E0);
+        min-height: 80px;
+    }
+
+    .hof-card.third .hof-pedestal {
+        background: linear-gradient(180deg, #FFF3E0, #FFCCBC);
+        min-height: 60px;
+    }
+
+    .hof-score {
+        font-weight: 800;
+        color: var(--primary);
+        font-size: 1.1rem;
+    }
+
+    .hof-card.first .hof-score {
+        font-size: 1.3rem;
+    }
+
+    .hof-score-label {
+        font-size: 0.7rem;
         color: var(--text-secondary);
     }
 
-    .period-info {
-        margin-top: var(--spacing-md);
-        padding-top: var(--spacing-md);
-        border-top: 1px dashed var(--bg-tertiary);
+    .hof-detail {
+        display: flex;
+        justify-content: center;
+        gap: var(--spacing-sm);
+        margin-top: var(--spacing-xs);
+        font-size: 0.7rem;
+        color: var(--text-tertiary);
     }
 
-    .period-info p {
+    /* 구분선 */
+    .ranking-divider {
+        text-align: center;
+        color: var(--text-tertiary);
         font-size: 0.85rem;
-        color: var(--text-secondary);
-        margin: var(--spacing-xs) 0;
+        margin-bottom: var(--spacing-md);
+        position: relative;
     }
 
-    .negative {
-        color: #C62828;
+    .ranking-divider::before,
+    .ranking-divider::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        width: 30%;
+        height: 1px;
+        background: var(--bg-tertiary);
     }
 
+    .ranking-divider::before { left: 0; }
+    .ranking-divider::after { right: 0; }
+
+    /* 4위부터 리스트 */
     .ranking-list {
         display: flex;
         flex-direction: column;
-        gap: var(--spacing-md);
+        gap: var(--spacing-sm);
     }
 
     .ranking-item {
         display: flex;
         align-items: center;
         gap: var(--spacing-md);
-        padding: var(--spacing-md) var(--spacing-lg);
-        border-radius: var(--radius-xl);
+        padding: var(--spacing-sm) var(--spacing-md);
+        border-radius: var(--radius-lg);
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+        transition: background 0.2s;
     }
 
-    .ranking-item.top-1 {
-        background: linear-gradient(135deg, #FFF9C4, #FFD54F);
-        border: 2px solid #FFD54F;
-        border-radius: var(--radius-xl);
-    }
-
-    .ranking-item.top-2 {
-        background: linear-gradient(135deg, #F5F5F5, #E0E0E0);
-        border: 2px solid #BDBDBD;
-        border-radius: var(--radius-xl);
-    }
-
-    .ranking-item.top-3 {
-        background: linear-gradient(135deg, #FFCCBC, #FFAB91);
-        border: 2px solid #FF8A65;
-        border-radius: var(--radius-xl);
+    .ranking-item:hover {
+        background: var(--bg-tertiary);
     }
 
     .rank {
-        font-size: 1.5rem;
+        font-size: 1rem;
         font-weight: 700;
-        min-width: 50px;
+        min-width: 32px;
         text-align: center;
-    }
-
-    .user-info {
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-sm);
-        flex: 1;
-        color: var(--text-primary);
+        color: var(--text-secondary);
     }
 
     .avatar {
-        width: 40px;
-        height: 40px;
+        width: 36px;
+        height: 36px;
         border-radius: 50%;
         overflow: hidden;
+        flex-shrink: 0;
     }
 
     .avatar img {
@@ -236,43 +355,65 @@
         align-items: center;
         justify-content: center;
         font-weight: 600;
+        font-size: 0.9rem;
     }
 
     .nickname {
         font-weight: 600;
+        font-size: 0.9rem;
+        flex: 1;
     }
 
     .score {
         text-align: right;
-        min-width: 80px;
+        min-width: 60px;
     }
 
     .score-value {
-        font-size: 1.3rem;
         font-weight: 700;
         color: var(--primary);
+        font-size: 1rem;
     }
 
     .score-label {
-        font-size: 0.85rem;
+        font-size: 0.75rem;
         color: var(--text-secondary);
     }
 
     .score-detail {
         display: flex;
         gap: var(--spacing-sm);
-        font-size: 0.85rem;
-        color: var(--text-secondary);
+        font-size: 0.8rem;
+        color: var(--text-tertiary);
     }
 
     @media (max-width: 600px) {
+        .hall-of-fame {
+            gap: var(--spacing-sm);
+        }
+
+        .hof-pedestal {
+            min-width: 90px;
+            padding: var(--spacing-sm) var(--spacing-sm) var(--spacing-xs);
+        }
+
+        .hof-avatar {
+            width: 48px;
+            height: 48px;
+        }
+
+        .hof-card.first .hof-avatar {
+            width: 60px;
+            height: 60px;
+        }
+
         .ranking-item {
             flex-wrap: wrap;
         }
 
         .score-detail {
             width: 100%;
-            margin-top: var(--spacing-sm);
+            margin-top: var(--spacing-xs);
             justify-content: flex-end;
         }
     }

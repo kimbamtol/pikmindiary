@@ -1,15 +1,13 @@
 {% extends 'base.html' %}
 {% load static %}
-{% load i18n %}
-{% load translate_content %}
 
-{% block title %}{{ coordinate|translate_field:"title" }} - {% trans "피크민 다이어리" %}{% endblock %}
+{% block title %}{{ coordinate.title }} - 피크민 다이어리{% endblock %}
 
 {% block content %}
 <div class="container">
     <div class="detail-page">
         <!-- 뒤로가기 -->
-        <a href="{% url 'coordinates:list' %}" class="back-link">← {% trans "목록으로" %}</a>
+        <a href="{% url 'coordinates:list' %}" class="back-link" onclick="if(history.length>1){history.back();return false;}">← 목록으로</a>
 
         <!-- 메인 카드 -->
         <div class="detail-card">
@@ -17,7 +15,7 @@
             <div class="detail-images">
                 {% if images %}
                 <div class="image-main">
-                    <img src="{{ images.0.image.url }}" alt="{{ coordinate|translate_field:"title" }}" id="mainImage">
+                    <img src="{{ images.0.image.url }}" alt="{{ coordinate.title }}" id="mainImage">
                 </div>
                 {% if images.count > 1 %}
                 <div class="image-thumbs">
@@ -29,7 +27,7 @@
                 </div>
                 {% endif %}
                 {% else %}
-                <div class="image-placeholder">🗺️ {% trans "이미지 없음" %}</div>
+                <div class="image-placeholder">🗺️ 이미지 없음</div>
                 {% endif %}
             </div>
 
@@ -38,33 +36,33 @@
                 <div class="detail-header">
                     <span class="badge badge-primary">{{ coordinate.get_category_display }}</span>
                     {% if coordinate.status == 'PENDING' %}
-                    <span class="badge badge-pending">{% trans "승인 대기" %}</span>
+                    <span class="badge badge-pending">승인 대기</span>
                     {% endif %}
                 </div>
 
-                <h1 class="detail-title">{{ coordinate|translate_field:"title" }}</h1>
+                <h1 class="detail-title">{{ coordinate.title }}</h1>
 
                 <div class="detail-meta">
-                    <span>{% trans "작성자" %}: {% if coordinate.author %}<a href="{% url 'accounts:user_profile' user_id=coordinate.author.pk %}" class="author-link"><strong>{{ coordinate.author.nickname }}</strong></a>{% else %}<strong>{% trans "익명" %}</strong>{% endif %}</span>
+                    <span>작성자: {% if coordinate.author %}<a href="{% url 'accounts:user_profile' user_id=coordinate.author.pk %}" class="author-link"><strong>{{ coordinate.author.nickname }}</strong></a>{% else %}<strong>익명</strong>{% endif %}</span>
                     <span>{{ coordinate.created_at|date:"Y.m.d H:i" }}</span>
                 </div>
 
                 <!-- 좌표 -->
                 <div class="coords-box">
                     <div class="coords-value">
-                        <span class="coords-label">📍 {% trans "좌표" %}</span>
+                        <span class="coords-label">📍 좌표</span>
                         <code id="coordsText">{{ coordinate.latitude }}, {{ coordinate.longitude }}</code>
                     </div>
                     <button class="btn btn-primary" onclick="copyCoords({{ coordinate.pk }})">
-                        📋 {% trans "복사" %}
+                        📋 복사
                     </button>
                 </div>
 
                 <!-- 설명 -->
                 {% if coordinate.description %}
                 <div class="detail-description">
-                    <h3>{% trans "설명" %}</h3>
-                    <p>{{ coordinate|translate_field:"description"|linebreaks }}</p>
+                    <h3>설명</h3>
+                    <p>{{ coordinate.description|linebreaks }}</p>
                 </div>
                 {% endif %}
 
@@ -76,7 +74,7 @@
                     <button class="btn-interaction {% if user_bookmarked %}active{% endif %}"
                         onclick="toggleBookmark({{ coordinate.pk }}, this)">
                         <span class="bookmark-icon">{% if user_bookmarked %}⭐{% else %}☆{% endif %}</span>
-                        <span>{% trans "북마크" %}</span>
+                        <span>북마크</span>
                     </button>
                     {% else %}
                     <!-- 다른 사람 글 (비회원 포함) -->
@@ -89,22 +87,22 @@
                     <button class="btn-interaction {% if user_bookmarked %}active{% endif %}"
                         onclick="toggleBookmark({{ coordinate.pk }}, this)">
                         <span class="bookmark-icon">{% if user_bookmarked %}⭐{% else %}☆{% endif %}</span>
-                        <span>{% trans "북마크" %}</span>
+                        <span>북마크</span>
                     </button>
                     {% endif %}
                     {% endif %}
 
                     <a href="{% url 'reports:report_coordinate' coordinate_id=coordinate.pk %}"
                         class="btn-interaction btn-report">
-                        🚨 {% trans "신고" %}
+                        🚨 신고
                     </a>
                 </div>
 
                 <!-- 수정/삭제 버튼 (작성자, 관리자, 또는 비회원 글) -->
                 {% if user.is_authenticated and user == coordinate.author or user.is_staff or coordinate.guest_password %}
                 <div class="owner-actions">
-                    <a href="{% url 'coordinates:edit' pk=coordinate.pk %}" class="btn btn-outline">{% trans "수정" %}</a>
-                    <a href="{% url 'coordinates:delete' pk=coordinate.pk %}" class="btn btn-danger-text">{% trans "삭제" %}</a>
+                    <a href="{% url 'coordinates:edit' pk=coordinate.pk %}" class="btn btn-outline">수정</a>
+                    <a href="{% url 'coordinates:delete' pk=coordinate.pk %}" class="btn btn-danger-text">삭제</a>
                 </div>
                 {% endif %}
             </div>
@@ -120,21 +118,21 @@
 
                 {% if not user.is_authenticated %}
                 <div class="guest-fields">
-                    <input type="text" name="guest_nickname" placeholder="{% trans "닉네임" %}" class="form-control" required>
-                    <input type="password" name="guest_password" placeholder="{% trans "비밀번호 (수정/삭제용)" %}" class="form-control"
+                    <input type="text" name="guest_nickname" placeholder="닉네임" class="form-control" required>
+                    <input type="password" name="guest_password" placeholder="비밀번호 (수정/삭제용)" class="form-control"
                         required>
                 </div>
                 {% endif %}
 
                 <div class="comment-input">
-                    <textarea name="content" placeholder="{% trans "댓글을 입력하세요... (사진만 올릴 경우 비워둬도 됩니다)" %}" class="form-control"></textarea>
-                    <button type="submit" class="btn btn-primary">{% trans "등록" %}</button>
+                    <textarea name="content" placeholder="댓글을 입력하세요... (사진만 올릴 경우 비워둬도 됩니다)" class="form-control"></textarea>
+                    <button type="submit" class="btn btn-primary">등록</button>
                 </div>
 
                 <!-- 사진 첨부 -->
                 <div class="photo-upload-section">
                     <label for="photo-input" class="photo-upload-btn">
-                        📷 {% trans "엽서 사진 첨부 (선택)" %}
+                        📷 엽서 사진 첨부 (선택)
                     </label>
                     <input
                         type="file"
@@ -155,9 +153,9 @@
 
             <!-- 댓글 정렬 -->
             <div class="comment-sort">
-                <a href="?sort=likes" class="sort-option {% if comment_sort == 'likes' %}active{% endif %}">❤️ {% trans "좋아요순" %}</a>
-                <a href="?sort=newest" class="sort-option {% if comment_sort == 'newest' %}active{% endif %}">🆕 {% trans "최신순" %}</a>
-                <a href="?sort=oldest" class="sort-option {% if comment_sort == 'oldest' %}active{% endif %}">🕐 {% trans "오래된순" %}</a>
+                <a href="?sort=likes" class="sort-option {% if comment_sort == 'likes' %}active{% endif %}">❤️ 좋아요순</a>
+                <a href="?sort=newest" class="sort-option {% if comment_sort == 'newest' %}active{% endif %}">🆕 최신순</a>
+                <a href="?sort=oldest" class="sort-option {% if comment_sort == 'oldest' %}active{% endif %}">🕐 오래된순</a>
             </div>
 
             <!-- 댓글 목록 -->
@@ -182,7 +180,7 @@
                     </div>
                     <div class="comment-content">
                         {% if comment.content %}
-                            {{ comment|translate_field:"content"|linebreaks }}
+                            {{ comment.content|linebreaks }}
                         {% endif %}
 
                         {% if comment.has_photo %}
@@ -212,23 +210,23 @@
                         </button>
 
                         <!-- 답글 버튼 (비회원도 가능) -->
-                        <button class="btn-text reply-btn" onclick="toggleReplyForm({{ comment.pk }})">{% trans "답글" %}</button>
+                        <button class="btn-text reply-btn" onclick="toggleReplyForm({{ comment.pk }})">답글</button>
 
                         {% if user == comment.author or user.is_staff %}
                         <!-- 로그인 사용자: 바로 삭제 가능 -->
                         <form action="{% url 'comments:delete' pk=comment.pk %}" method="post" style="display:inline;">
                             {% csrf_token %}
-                            <button type="submit" class="btn-text" onclick="return confirm('{% trans "삭제하시겠습니까?" %}')">{% trans "삭제" %}</button>
+                            <button type="submit" class="btn-text" onclick="return confirm('삭제하시겠습니까?')">삭제</button>
                         </form>
                         {% elif comment.guest_password %}
                         <!-- 비회원 댓글: 비밀번호 입력 후 삭제 -->
-                        <button class="btn-text" onclick="toggleDeleteForm({{ comment.pk }})">{% trans "삭제" %}</button>
+                        <button class="btn-text" onclick="toggleDeleteForm({{ comment.pk }})">삭제</button>
                         <form action="{% url 'comments:delete' pk=comment.pk %}" method="post"
                             class="delete-form hidden" id="deleteForm{{ comment.pk }}">
                             {% csrf_token %}
                             <div class="delete-password-input">
-                                <input type="password" name="password" placeholder="{% trans "비밀번호" %}" class="form-control" required>
-                                <button type="submit" class="btn btn-sm">{% trans "확인" %}</button>
+                                <input type="password" name="password" placeholder="비밀번호" class="form-control" required>
+                                <button type="submit" class="btn btn-sm">확인</button>
                             </div>
                         </form>
                         {% endif %}
@@ -240,20 +238,20 @@
                         {% csrf_token %}
                         {% if not user.is_authenticated %}
                         <div class="guest-fields">
-                            <input type="text" name="guest_nickname" placeholder="{% trans "닉네임" %}" class="form-control" required>
+                            <input type="text" name="guest_nickname" placeholder="닉네임" class="form-control" required>
                             <input type="password" name="guest_password" placeholder="비밀번호" class="form-control"
                                 required>
                         </div>
                         {% endif %}
                         <div class="comment-input">
-                            <textarea name="content" placeholder="{% trans "답글을 입력하세요... (사진만 올릴 경우 비워둬도 됩니다)" %}" class="form-control"></textarea>
-                            <button type="submit" class="btn btn-primary btn-sm">{% trans "등록" %}</button>
+                            <textarea name="content" placeholder="답글을 입력하세요... (사진만 올릴 경우 비워둬도 됩니다)" class="form-control"></textarea>
+                            <button type="submit" class="btn btn-primary btn-sm">등록</button>
                         </div>
 
                         <!-- 사진 첨부 -->
                         <div class="photo-upload-section">
                             <label for="photo-input-reply-{{ comment.pk }}" class="photo-upload-btn">
-                                📷 {% trans "엽서 사진 첨부 (선택)" %}
+                                📷 엽서 사진 첨부 (선택)
                             </label>
                             <input
                                 type="file"
@@ -328,7 +326,7 @@
                             <!-- 로그인 사용자: 바로 삭제 가능 -->
                             <form action="{% url 'comments:delete' pk=reply.pk %}" method="post" style="display:inline;">
                                 {% csrf_token %}
-                                <button type="submit" class="btn-text" onclick="return confirm('{% trans "삭제하시겠습니까?" %}')">{% trans "삭제" %}</button>
+                                <button type="submit" class="btn-text" onclick="return confirm('삭제하시겠습니까?')">삭제</button>
                             </form>
                             {% elif reply.guest_password %}
                             <!-- 비회원 댓글: 비밀번호 입력 후 삭제 -->
@@ -337,8 +335,8 @@
                                 class="delete-form hidden" id="deleteForm{{ reply.pk }}">
                                 {% csrf_token %}
                                 <div class="delete-password-input">
-                                    <input type="password" name="password" placeholder="{% trans "비밀번호" %}" class="form-control" required>
-                                    <button type="submit" class="btn btn-sm">{% trans "확인" %}</button>
+                                    <input type="password" name="password" placeholder="비밀번호" class="form-control" required>
+                                    <button type="submit" class="btn btn-sm">확인</button>
                                 </div>
                             </form>
                             {% endif %}
@@ -349,7 +347,7 @@
                     {% endfor %}
                 </div>
                 {% empty %}
-                <p class="no-comments">{% trans "아직 댓글이 없습니다. 첫 댓글을 남겨보세요!" %}</p>
+                <p class="no-comments">아직 댓글이 없습니다. 첫 댓글을 남겨보세요!</p>
                 {% endfor %}
             </div>
         </div>
@@ -1094,7 +1092,7 @@
     }
 </script>
 
-<div id="copy-toast" class="copy-toast">✅ {% trans "복사되었습니다" %}<br><small>{% trans "좋아요와 댓글은 업로더분에게 큰 힘이 됩니다!" %}</small></div>
+<div id="copy-toast" class="copy-toast">✅ 복사되었습니다<br><small>좋아요와 댓글은 업로더분에게 큰 힘이 됩니다!</small></div>
 
 <style>
     .copy-toast {

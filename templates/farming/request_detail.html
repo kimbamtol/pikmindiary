@@ -1,8 +1,6 @@
 {% extends 'base.html' %}
-{% load i18n %}
-{% load translate_content %}
 
-{% block title %}{{ request|translate_field:"title" }} - {% trans "피크민 다이어리" %}{% endblock %}
+{% block title %}{{ request.title }} - 피크민 다이어리{% endblock %}
 
 {% block content %}
 <div class="container">
@@ -10,7 +8,7 @@
         <div class="request-header">
             <div class="status-badge status-{{ request.status }}">{{ request.get_status_display }}</div>
             <span class="badge badge-{{ request.flower_type }}">{{ request.get_flower_type_display }}</span>
-            <h1>{{ request|translate_field:"title" }}</h1>
+            <h1>{{ request.title }}</h1>
             <div class="request-meta">
                 <span>{{ request.author.nickname }}</span>
                 <span>{{ request.created_at|date:"Y.n.j H:i" }}</span>
@@ -18,29 +16,29 @@
         </div>
 
         <div class="request-location">
-            <h3>📍 {% trans "위치" %}</h3>
+            <h3>📍 위치</h3>
             <p class="location-name">{{ request.location_name }}</p>
-            <p class="location-coords">{% trans "좌표" %}: {{ request.latitude }}, {{ request.longitude }}</p>
-            <button onclick="copyCoords()" class="btn btn-outline btn-sm">{% trans "좌표 복사" %}</button>
+            <p class="location-coords">좌표: {{ request.latitude }}, {{ request.longitude }}</p>
+            <button onclick="copyCoords()" class="btn btn-outline btn-sm">좌표 복사</button>
         </div>
 
         {% if request.content %}
         <div class="request-content">
-            <h3>📝 {% trans "설명" %}</h3>
-            {{ request|translate_field:"content"|linebreaks }}
+            <h3>📝 설명</h3>
+            {{ request.content|linebreaks }}
         </div>
         {% endif %}
 
         {% if request.deadline %}
         <div class="request-deadline">
-            <h3>⏰ {% trans "마감 시간" %}</h3>
+            <h3>⏰ 마감 시간</h3>
             <p>{{ request.deadline|date:"Y년 n월 j일 H:i" }}</p>
         </div>
         {% endif %}
 
         <!-- 참여자 목록 -->
         <div class="request-participants">
-            <h3>🙋 {% trans "참여자" %} ({{ participations.count }}{% trans "명" %})</h3>
+            <h3>🙋 참여자 ({{ participations.count }}명)</h3>
             {% if participations %}
             <ul class="participant-list">
                 {% for p in participations %}
@@ -54,35 +52,35 @@
                 {% endfor %}
             </ul>
             {% else %}
-            <p class="empty-text">{% trans "아직 참여자가 없습니다. 첫 번째 봉사자가 되어주세요!" %} 🌸</p>
+            <p class="empty-text">아직 참여자가 없습니다. 첫 번째 봉사자가 되어주세요! 🌸</p>
             {% endif %}
         </div>
 
         <!-- 액션 버튼 -->
         <div class="request-actions">
-            <a href="{% url 'farming:request_list' %}" class="btn btn-outline">{% trans "목록으로" %}</a>
+            <a href="{% url 'farming:request_list' %}" class="btn btn-outline">목록으로</a>
 
             {% if user.is_authenticated %}
             {% if user == request.author %}
             {% if request.status != 'completed' %}
             <form action="{% url 'farming:complete_request' request.pk %}" method="post" style="display:inline;">
                 {% csrf_token %}
-                <button type="submit" class="btn btn-primary">✅ {% trans "완료 처리" %}</button>
+                <button type="submit" class="btn btn-primary">✅ 완료 처리</button>
             </form>
             {% endif %}
             {% else %}
             {% if not user_participated and request.status == 'open' or request.status == 'in_progress' %}
             <form action="{% url 'farming:participate' request.pk %}" method="post" class="participate-form">
                 {% csrf_token %}
-                <input type="text" name="message" placeholder="{% trans "메시지 (선택)" %}" class="form-control">
-                <button type="submit" class="btn btn-primary">🙋 {% trans "참여하기" %}</button>
+                <input type="text" name="message" placeholder="메시지 (선택)" class="form-control">
+                <button type="submit" class="btn btn-primary">🙋 참여하기</button>
             </form>
             {% elif user_participated %}
-            <span class="participated-badge">✅ {% trans "참여 완료" %}</span>
+            <span class="participated-badge">✅ 참여 완료</span>
             {% endif %}
             {% endif %}
             {% else %}
-            <a href="{% url 'account_login' %}" class="btn btn-primary">{% trans "로그인하고 참여하기" %}</a>
+            <a href="{% url 'account_login' %}" class="btn btn-primary">로그인하고 참여하기</a>
             {% endif %}
         </div>
     </div>
@@ -92,7 +90,7 @@
     function copyCoords() {
         const coords = "{{ request.latitude }}, {{ request.longitude }}";
         navigator.clipboard.writeText(coords);
-        alert('{% trans "좌표가 복사되었습니다" %}: ' + coords);
+        alert('좌표가 복사되었습니다: ' + coords);
     }
 </script>
 

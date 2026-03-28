@@ -1,18 +1,16 @@
 {% extends 'base.html' %}
 {% load static %}
-{% load i18n %}
-{% load translate_content %}
 
-{% block title %}{% trans "피크민 좌표 목록 - 버섯, 모종, 빅플라워 좌표 모음 | 피크민 다이어리" %}{% endblock %}
-{% block description %}{% trans "피크민 블룸 버섯 좌표, 모종 좌표, 빅플라워 위치를 한눈에! 유저들이 공유한 피크민 엽서 좌표를 검색하고 복사하세요." %}{% endblock %}
-{% block og_title %}{% trans "피크민 좌표 목록 - 피크민 블룸 좌표 모음" %}{% endblock %}
+{% block title %}피크민 좌표 목록 - 버섯, 모종, 빅플라워 좌표 모음 | 피크민 다이어리{% endblock %}
+{% block description %}피크민 블룸 버섯 좌표, 모종 좌표, 빅플라워 위치를 한눈에! 유저들이 공유한 피크민 엽서 좌표를 검색하고 복사하세요.{% endblock %}
+{% block og_title %}피크민 좌표 목록 - 피크민 블룸 좌표 모음{% endblock %}
 
 {% block content %}
 <div class="container">
     <div class="list-header">
-        <h1 class="page-title">📍 {% trans "좌표 목록" %}</h1>
+        <h1 class="page-title">📍 좌표 목록</h1>
         <a href="{% url 'coordinates:create' %}" class="btn btn-primary">
-            ✏️ {% trans "새 좌표 제보" %}
+            ✏️ 새 좌표 제보
         </a>
     </div>
 
@@ -20,7 +18,7 @@
         <!-- 좌측 랭킹 위젯 -->
         <aside class="ranking-sidebar">
             <div class="ranking-widget">
-                <h3 class="ranking-widget-title">🏆 {% trans "TOP 5 랭커" %}</h3>
+                <h3 class="ranking-widget-title">🏆 TOP 5 랭커</h3>
                 {% if ranker_stats %}
                 <div class="ranking-widget-list">
                     {% for stat in ranker_stats %}
@@ -41,14 +39,14 @@
                             <span title="빅플라워">🌻{{ stat.bigflower }}</span>
                             <span title="모종">🌱{{ stat.seedling }}</span>
                             <span title="복사 수">📋{{ stat.ranking.copy_received_count }}</span>
-                            <span class="ranker-score">{{ stat.ranking.score }}{% trans "점" %}</span>
+                            <span class="ranker-score">{{ stat.ranking.score }}점</span>
                         </div>
                     </a>
                     {% endfor %}
                 </div>
-                <a href="{% url 'rankings:list' %}" class="ranking-widget-more">{% trans "더보기" %} →</a>
+                <a href="{% url 'rankings:list' %}" class="ranking-widget-more">더보기 →</a>
                 {% else %}
-                <p class="ranking-widget-empty">{% trans "아직 랭킹이 없어요" %}</p>
+                <p class="ranking-widget-empty">아직 랭킹이 없어요</p>
                 {% endif %}
             </div>
 
@@ -57,12 +55,12 @@
             <div class="notice-buttons">
                 {% if site_notice.content %}
                 <button class="notice-btn" onclick="openModal('notice-modal')">
-                    📢 {% trans "사이트 공지" %}
+                    📢 사이트 공지
                 </button>
                 {% endif %}
                 {% if site_notice.update_log %}
                 <button class="notice-btn" onclick="openModal('update-modal')">
-                    🔄 {% trans "업데이트 내역" %}
+                    🔄 업데이트 내역
                 </button>
                 {% endif %}
             </div>
@@ -75,21 +73,21 @@
             <div class="filter-bar">
                 <form method="get" class="filter-form">
                     <div class="search-box">
-                        <input type="text" name="q" value="{{ query }}" placeholder="{% trans "제목, 엽서이름, 닉네임 검색..." %}"
+                        <input type="text" name="q" value="{{ query }}" placeholder="제목, 엽서이름, 닉네임 검색..."
                             class="form-control">
                         <button type="submit" class="btn btn-primary">🔍</button>
                     </div>
 
                     <div class="filter-options">
                         <select name="category" class="form-control" onchange="this.form.submit()">
-                            <option value="">{% trans "전체 카테고리" %}</option>
+                            <option value="">전체 카테고리</option>
                             {% for value, label in categories %}
                             <option value="{{ value }}" {% if category == value %}selected{% endif %}>{{ label }}</option>
                             {% endfor %}
                         </select>
 
                         <select name="region" class="form-control" onchange="this.form.submit()">
-                            <option value="">{% trans "전체 지역" %}</option>
+                            <option value="">전체 지역</option>
                             {% for value, label in regions %}
                             <option value="{{ value }}" {% if region_filter == value %}selected{% endif %}>{{ label }}
                             </option>
@@ -97,10 +95,10 @@
                         </select>
 
                         <select name="sort" class="form-control" onchange="this.form.submit()">
-                            <option value="latest" {% if sort == "latest" %}selected{% endif %}>{% trans "최신순" %}</option>
-                            <option value="copies" {% if sort == "copies" %}selected{% endif %}>{% trans "복사순" %}</option>
-                            <option value="likes" {% if sort == "likes" %}selected{% endif %}>{% trans "좋아요순" %}</option>
-                            <option value="bookmarks" {% if sort == "bookmarks" %}selected{% endif %}>{% trans "북마크순" %}</option>
+                            <option value="latest" {% if sort == "latest" %}selected{% endif %}>최신순</option>
+                            <option value="copies" {% if sort == "copies" %}selected{% endif %}>복사순</option>
+                            <option value="likes" {% if sort == "likes" %}selected{% endif %}>좋아요순</option>
+                            <option value="bookmarks" {% if sort == "bookmarks" %}selected{% endif %}>북마크순</option>
                         </select>
                     </div>
                 </form>
@@ -109,53 +107,7 @@
             <!-- 좌표 목록 -->
             {% if coords %}
             <div class="coord-grid grid grid-3">
-                {% for coord in coords %}
-                <article class="card coord-card">
-                    <a href="{% url 'coordinates:detail' pk=coord.pk %}">
-                        <div class="coord-card-image">
-                            {% if coord.images.first %}
-                            <img src="{{ coord.images.first.image.url }}" alt="{{ coord|translate_field:"title" }}">
-                            {% else %}
-                            <div class="coord-card-placeholder">🗺️</div>
-                            {% endif %}
-                            <span class="badge badge-primary coord-card-category">
-                                {{ coord.get_category_display }}
-                            </span>
-                        </div>
-
-                        <div class="coord-card-content">
-                            <h3 class="coord-card-title">{{ coord|translate_field:"title" }}</h3>
-                            {% if coord.postcard_name %}
-                            <div class="coord-card-postcard">🏷️ {{ coord|translate_field:"postcard_name" }}</div>
-                            {% endif %}
-                            <div class="coord-card-meta">
-                                <span>📍 {{ coord.latitude }}, {{ coord.longitude }}</span>
-                                <span class="coord-region">{{ coord.get_region_display }}</span>
-                            </div>
-                            <div class="coord-card-meta">
-                                <span class="author-badge {{ coord.author.get_badge_class }}">
-                                    {% if coord.author.profile_emoji %}
-                                        <span class="profile-emoji">{{ coord.author.profile_emoji }}</span>
-                                    {% endif %}
-                                    <span class="author-name">{{ coord.author.nickname|default:_("익명") }}</span>
-                                    {% if coord.author.special_title %}
-                                    <span class="special-title-tag">{{ coord.author.get_special_title_display }}</span>
-                                    {% endif %}
-                                </span>
-                            </div>
-                        </div>
-                    </a>
-
-                    <!-- Stats section - template variables must be on ONE line -->
-                    <div class="coord-card-stats">
-                        <button type="button" class="copy-btn" data-coords="{{ coord.latitude }}, {{ coord.longitude }}" data-pk="{{ coord.pk }}" title="{% trans "좌표 복사" %}">📋 <span class="copy-count">{{ coord.copy_count }}</span></button>
-                        <span class="coord-stat">👁️ {{ coord.view_count }}</span>
-                        <span class="coord-stat">❤️ {{ coord.like_count }}</span>
-                        <span class="coord-stat">⭐ {{ coord.bookmark_count }}</span>
-                        <span class="coord-stat">💬 {{ coord.comment_count }}</span>
-                    </div>
-                </article>
-                {% endfor %}
+                {% include 'coordinates/_card_list.html' %}
             </div>
 
 
@@ -163,22 +115,22 @@
             {% if has_next %}
             <div id="scroll-sentinel" class="scroll-loading">
                 <div class="loading-spinner"></div>
-                <span>{% trans "로딩 중..." %}</span>
+                <span>로딩 중...</span>
             </div>
             {% endif %}
 
             {% else %}
             <div class="empty-state">
                 <div class="empty-state-icon">🗺️</div>
-                <h2 class="empty-state-title">{% trans "좌표가 없습니다" %}</h2>
+                <h2 class="empty-state-title">좌표가 없습니다</h2>
                 <p class="empty-state-desc">
                     {% if query or category %}
-                    {% trans "검색 조건에 맞는 좌표가 없습니다." %}
+                    검색 조건에 맞는 좌표가 없습니다.
                     {% else %}
-                    {% trans "첫 번째 좌표를 제보해주세요!" %}
+                    첫 번째 좌표를 제보해주세요!
                     {% endif %}
                 </p>
-                <a href="{% url 'coordinates:create' %}" class="btn btn-primary">{% trans "새 좌표 제보" %}</a>
+                <a href="{% url 'coordinates:create' %}" class="btn btn-primary">새 좌표 제보</a>
             </div>
             {% endif %}
         </main>
@@ -579,6 +531,36 @@
         color: #4CAF50;
     }
 
+    .like-btn-sm,
+    .bookmark-btn-sm {
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 4px 8px;
+        font-size: 1rem;
+        color: var(--text-secondary);
+        opacity: 0.5;
+        transition: all 0.2s;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .like-btn-sm.active,
+    .bookmark-btn-sm.active {
+        opacity: 1;
+    }
+
+    .like-btn-sm:hover,
+    .bookmark-btn-sm:hover {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+
+    .like-btn-sm:active,
+    .bookmark-btn-sm:active {
+        transform: scale(0.95);
+    }
+
     .copy-toast {
         position: fixed;
         bottom: 20px;
@@ -641,7 +623,7 @@
 <div id="notice-modal" class="modal-overlay" onclick="closeModalOnOverlay(event)">
     <div class="modal-content">
         <div class="modal-header">
-            <h3>📢 {% trans "사이트 공지" %}</h3>
+            <h3>📢 사이트 공지</h3>
             <button class="modal-close" onclick="closeModal('notice-modal')">&times;</button>
         </div>
         <div class="modal-body">
@@ -654,7 +636,7 @@
 <div id="update-modal" class="modal-overlay" onclick="closeModalOnOverlay(event)">
     <div class="modal-content">
         <div class="modal-header">
-            <h3>🔄 {% trans "업데이트 내역" %}</h3>
+            <h3>🔄 업데이트 내역</h3>
             <button class="modal-close" onclick="closeModal('update-modal')">&times;</button>
         </div>
         <div class="modal-body">
@@ -665,32 +647,30 @@
 {% endif %}
 {% endif %}
 
-<div id="copy-toast" class="copy-toast">✅ {% trans "복사되었습니다" %}<br><small>{% trans "좋아요와 댓글은 업로더분에게 큰 힘이 됩니다!" %}</small></div>
+<div id="copy-toast" class="copy-toast">✅ 복사되었습니다<br><small>좋아요와 댓글은 업로더분에게 큰 힘이 됩니다!</small></div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        // Attach event listeners to all copy buttons
-        var copyButtons = document.querySelectorAll('.copy-btn');
-        copyButtons.forEach(function (btn) {
+    // 복사 버튼 이벤트 리스너 부착 (초기 + 동적 카드 공용)
+    function attachCopyListeners(card) {
+        var btn = card.querySelector('.copy-btn');
+        if (btn) {
             btn.addEventListener('click', function (e) {
                 e.preventDefault();
                 e.stopPropagation();
                 var coords = this.getAttribute('data-coords');
-                if (coords) {
-                    handleCopy(coords, this);
-                }
+                if (coords) handleCopy(coords, this);
             });
-
-            // Also handle touch for iOS
             btn.addEventListener('touchend', function (e) {
                 e.preventDefault();
                 e.stopPropagation();
                 var coords = this.getAttribute('data-coords');
-                if (coords) {
-                    handleCopy(coords, this);
-                }
+                if (coords) handleCopy(coords, this);
             });
-        });
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.coord-card').forEach(attachCopyListeners);
     });
 
     function handleCopy(coords, btn) {
@@ -717,7 +697,6 @@
         }
 
         function afterCopy() {
-            // Call API to increment copy count
             if (pk) {
                 fetch('/coordinates/' + pk + '/copy-coords/', { method: 'GET' })
                     .then(function (response) { return response.json(); })
@@ -732,7 +711,6 @@
             }
         }
 
-        // iOS Safari detection
         var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
             (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
         var isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
@@ -799,84 +777,166 @@
         document.body.removeChild(textarea);
     }
 
-    // 무한 스크롤
+    // 목록 전용 좋아요 토글 (아이콘 항상 ❤️ 유지, opacity로 상태 표시)
+    async function toggleLikeCard(coordinateId, button) {
+        try {
+            var res = await fetchWithCSRF('/interactions/like/' + coordinateId + '/', { method: 'POST' });
+            var data = await res.json();
+            var count = button.querySelector('.like-count');
+            if (data.liked) {
+                button.classList.add('active');
+            } else {
+                button.classList.remove('active');
+            }
+            count.textContent = data.like_count;
+        } catch (error) {
+            console.error('Like toggle failed:', error);
+        }
+    }
+
+    // 목록 전용 북마크 토글 (아이콘 항상 ⭐ 유지, opacity로 상태 표시)
+    async function toggleBookmarkCard(coordinateId, button) {
+        try {
+            var res = await fetchWithCSRF('/interactions/bookmark/' + coordinateId + '/', { method: 'POST' });
+            var data = await res.json();
+            if (data.bookmarked) {
+                button.classList.add('active');
+            } else {
+                button.classList.remove('active');
+            }
+        } catch (error) {
+            console.error('Bookmark toggle failed:', error);
+        }
+    }
+
+    // 무한 스크롤 + 스크롤 복원
     (function () {
+        var STORAGE_KEY = 'coordListScroll';
         var currentPage = 1;
         var isLoading = false;
-        var hasNext = {% if has_next %}true{% else %} false{% endif %};
-    var coordGrid = document.querySelector('.coord-grid');
-    var sentinel = document.getElementById('scroll-sentinel');
+        var hasNext = {% if has_next %}true{% else %}false{% endif %};
+        var coordGrid = document.querySelector('.coord-grid');
+        var sentinel = document.getElementById('scroll-sentinel');
 
-    if (!sentinel || !coordGrid) return;
+        if (!coordGrid) return;
 
-    var query = '{{ query|escapejs }}';
-    var category = '{{ category|escapejs }}';
-    var sort = '{{ sort|escapejs }}';
-    var region = '{{ region_filter|escapejs }}';
+        var query = '{{ query|escapejs }}';
+        var category = '{{ category|escapejs }}';
+        var sort = '{{ sort|escapejs }}';
+        var region = '{{ region_filter|escapejs }}';
+        var currentFilters = JSON.stringify({q: query, c: category, s: sort, r: region});
 
-    var observer = new IntersectionObserver(function (entries) {
-        entries.forEach(function (entry) {
-            if (entry.isIntersecting && hasNext && !isLoading) {
-                loadMore();
+        function buildPageUrl(page) {
+            var url = '/coordinates/?page=' + page;
+            if (query) url += '&q=' + encodeURIComponent(query);
+            if (category) url += '&category=' + encodeURIComponent(category);
+            if (sort) url += '&sort=' + encodeURIComponent(sort);
+            if (region) url += '&region=' + encodeURIComponent(region);
+            return url;
+        }
+
+        function appendCards(html) {
+            var temp = document.createElement('div');
+            temp.innerHTML = html;
+            var newCards = temp.querySelectorAll('.coord-card');
+            newCards.forEach(function (card) {
+                coordGrid.appendChild(card);
+                attachCopyListeners(card);
+            });
+        }
+
+        // --- 스크롤 상태 저장 (카드 링크 클릭 시) ---
+        coordGrid.addEventListener('click', function (e) {
+            var link = e.target.closest('a[href*="/coordinates/"]');
+            if (link && !e.target.closest('button')) {
+                sessionStorage.setItem(STORAGE_KEY, JSON.stringify({
+                    page: currentPage,
+                    scrollY: window.scrollY,
+                    filters: currentFilters
+                }));
             }
         });
-    }, { rootMargin: '100px' });
 
-    observer.observe(sentinel);
+        // --- 스크롤 복원 시도 ---
+        var saved = sessionStorage.getItem(STORAGE_KEY);
+        if (saved) {
+            sessionStorage.removeItem(STORAGE_KEY);
+            try {
+                var state = JSON.parse(saved);
+                if (state.filters === currentFilters && state.page > 1) {
+                    isLoading = true;
+                    // 복원 중 로딩 표시
+                    if (sentinel) sentinel.classList.remove('hidden');
 
-    function loadMore() {
-        isLoading = true;
-        currentPage++;
-
-        var url = '/coordinates/?page=' + currentPage;
-        if (query) url += '&q=' + encodeURIComponent(query);
-        if (category) url += '&category=' + encodeURIComponent(category);
-        if (sort) url += '&sort=' + encodeURIComponent(sort);
-        if (region) url += '&region=' + encodeURIComponent(region);
-
-        fetch(url, {
-            headers: { 'X-Requested-With': 'XMLHttpRequest' }
-        })
-            .then(function (response) { return response.json(); })
-            .then(function (data) {
-                // 새 카드 추가
-                var temp = document.createElement('div');
-                temp.innerHTML = data.html;
-                var newCards = temp.querySelectorAll('.coord-card');
-                newCards.forEach(function (card) {
-                    coordGrid.appendChild(card);
-                    // 새 카드의 복사 버튼에 이벤트 리스너 추가
-                    var btn = card.querySelector('.copy-btn');
-                    if (btn) {
-                        btn.addEventListener('click', function (e) {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            var coords = this.getAttribute('data-coords');
-                            if (coords) handleCopy(coords, this);
-                        });
-                        btn.addEventListener('touchend', function (e) {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            var coords = this.getAttribute('data-coords');
-                            if (coords) handleCopy(coords, this);
-                        });
+                    var fetches = [];
+                    for (var p = 2; p <= state.page; p++) {
+                        fetches.push(
+                            fetch(buildPageUrl(p), { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                                .then(function (r) { return r.json(); })
+                        );
                     }
-                });
 
-                hasNext = data.has_next;
-                isLoading = false;
+                    Promise.all(fetches).then(function (results) {
+                        results.forEach(function (data) {
+                            appendCards(data.html);
+                        });
 
-                if (!hasNext) {
-                    sentinel.classList.add('hidden');
-                    observer.disconnect();
+                        var lastResult = results[results.length - 1];
+                        hasNext = lastResult.has_next;
+                        currentPage = state.page;
+                        isLoading = false;
+
+                        if (!hasNext && sentinel) {
+                            sentinel.classList.add('hidden');
+                        }
+
+                        requestAnimationFrame(function () {
+                            window.scrollTo(0, state.scrollY);
+                        });
+                    }).catch(function () {
+                        isLoading = false;
+                    });
                 }
-            })
-            .catch(function (err) {
-                console.error('Failed to load more:', err);
-                isLoading = false;
+            } catch (e) { /* ignore */ }
+        }
+
+        // --- 무한 스크롤 ---
+        if (!sentinel) return;
+
+        var observer = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (entry.isIntersecting && hasNext && !isLoading) {
+                    loadMore();
+                }
             });
-    }
-    }) ();
+        }, { rootMargin: '100px' });
+
+        observer.observe(sentinel);
+
+        function loadMore() {
+            isLoading = true;
+            currentPage++;
+
+            fetch(buildPageUrl(currentPage), {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+                .then(function (response) { return response.json(); })
+                .then(function (data) {
+                    appendCards(data.html);
+                    hasNext = data.has_next;
+                    isLoading = false;
+
+                    if (!hasNext) {
+                        sentinel.classList.add('hidden');
+                        observer.disconnect();
+                    }
+                })
+                .catch(function (err) {
+                    console.error('Failed to load more:', err);
+                    isLoading = false;
+                });
+        }
+    })();
 
     // 모달 열기
     function openModal(modalId) {

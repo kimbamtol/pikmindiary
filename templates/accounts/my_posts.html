@@ -1,26 +1,24 @@
 {% extends 'base.html' %}
-{% load i18n %}
-{% load translate_content %}
 
-{% block title %}{% trans "내가 쓴 글" %} - {% trans "피크민 다이어리" %}{% endblock %}
+{% block title %}내가 쓴 글 - 피크민 다이어리{% endblock %}
 
 {% block content %}
 <div class="container">
     <div class="posts-page">
         <div class="page-header">
-            <a href="{% url 'accounts:my_page' %}" class="back-link">← {% trans "마이페이지" %}</a>
-            <h1 class="page-title">📋 {% trans "내가 쓴 글" %}</h1>
+            <a href="{% url 'accounts:my_page' %}" class="back-link">← 마이페이지</a>
+            <h1 class="page-title">📋 내가 쓴 글</h1>
         </div>
 
         <!-- 필터 -->
         <div class="filter-tabs">
-            <a href="{% url 'accounts:my_posts' %}" class="tab {% if not status_filter %}active{% endif %}">{% trans "전체" %}</a>
+            <a href="{% url 'accounts:my_posts' %}" class="tab {% if not status_filter %}active{% endif %}">전체</a>
             <a href="{% url 'accounts:my_posts' %}?status=APPROVED"
-                class="tab {% if status_filter == 'APPROVED' %}active{% endif %}">{% trans "승인됨" %}</a>
+                class="tab {% if status_filter == 'APPROVED' %}active{% endif %}">승인됨</a>
             <a href="{% url 'accounts:my_posts' %}?status=PENDING"
-                class="tab {% if status_filter == 'PENDING' %}active{% endif %}">{% trans "대기중" %}</a>
+                class="tab {% if status_filter == 'PENDING' %}active{% endif %}">대기중</a>
             <a href="{% url 'accounts:my_posts' %}?status=REJECTED"
-                class="tab {% if status_filter == 'REJECTED' %}active{% endif %}">{% trans "거절됨" %}</a>
+                class="tab {% if status_filter == 'REJECTED' %}active{% endif %}">거절됨</a>
         </div>
 
         <!-- 글 목록 -->
@@ -35,7 +33,7 @@
                     </span>
                 </div>
                 <div class="post-content">
-                    <h3 class="post-title">{{ post|translate_field:"title" }}</h3>
+                    <h3 class="post-title">{{ post.title }}</h3>
                     <div class="post-meta">
                         <span>{{ post.get_category_display }}</span>
                         <span>{{ post.created_at|date:"Y.m.d" }}</span>
@@ -54,11 +52,11 @@
         {% if page_obj.has_other_pages %}
         <nav class="pagination">
             {% if page_obj.has_previous %}
-            <a href="?page={{ page_obj.previous_page_number }}&status={{ status_filter }}">← {% trans "이전" %}</a>
+            <a href="?page={{ page_obj.previous_page_number }}&status={{ status_filter }}">← 이전</a>
             {% endif %}
             <span>{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
             {% if page_obj.has_next %}
-            <a href="?page={{ page_obj.next_page_number }}&status={{ status_filter }}">{% trans "다음" %} →</a>
+            <a href="?page={{ page_obj.next_page_number }}&status={{ status_filter }}">다음 →</a>
             {% endif %}
         </nav>
         {% endif %}
@@ -66,9 +64,9 @@
         {% else %}
         <div class="empty-state">
             <div class="empty-state-icon">📝</div>
-            <h2 class="empty-state-title">{% trans "작성한 글이 없습니다" %}</h2>
-            <p class="empty-state-desc">{% trans "첫 번째 좌표를 제보해보세요!" %}</p>
-            <a href="{% url 'coordinates:create' %}" class="btn btn-primary">{% trans "새 좌표 제보" %}</a>
+            <h2 class="empty-state-title">작성한 글이 없습니다</h2>
+            <p class="empty-state-desc">첫 번째 좌표를 제보해보세요!</p>
+            <a href="{% url 'coordinates:create' %}" class="btn btn-primary">새 좌표 제보</a>
         </div>
         {% endif %}
     </div>

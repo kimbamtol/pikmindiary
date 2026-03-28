@@ -1,20 +1,18 @@
 {% extends 'base.html' %}
-{% load i18n %}
-{% load translate_content %}
 
-{% block title %}{% trans "댓글 신고" %} - {% trans "피크민 다이어리" %}{% endblock %}
+{% block title %}댓글 신고 - 피크민 다이어리{% endblock %}
 
 {% block content %}
 <div class="container">
     <div class="report-page">
-        <a href="{% url 'coordinates:detail' pk=comment.coordinate.pk %}" class="back-link">← {% trans "돌아가기" %}</a>
+        <a href="{% url 'coordinates:detail' pk=comment.coordinate.pk %}" class="back-link">← 돌아가기</a>
 
         <div class="report-form card">
-            <h1 class="form-title">🚨 {% trans "댓글 신고" %}</h1>
+            <h1 class="form-title">🚨 댓글 신고</h1>
 
             <div class="target-info">
-                <strong>{% trans "신고 대상 댓글" %}:</strong>
-                <p class="target-content">"{{ comment|translate_field:"content"|truncatewords:20 }}"</p>
+                <strong>신고 대상 댓글:</strong>
+                <p class="target-content">"{{ comment.content|truncatewords:20 }}"</p>
                 <span class="target-author">- {{ comment.display_name }}</span>
             </div>
 
@@ -22,7 +20,7 @@
                 {% csrf_token %}
 
                 <div class="form-group">
-                    <label class="form-label">{% trans "신고 사유" %} *</label>
+                    <label class="form-label">신고 사유 *</label>
                     {% for value, label in reasons %}
                     <label class="radio-option">
                         <input type="radio" name="reason" value="{{ value }}" required>
@@ -32,14 +30,14 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">{% trans "상세 내용" %}</label>
+                    <label class="form-label">상세 내용</label>
                     <textarea name="detail" class="form-control" rows="4"
-                        placeholder="{% trans "신고 사유를 자세히 적어주세요 (선택)" %}"></textarea>
+                        placeholder="신고 사유를 자세히 적어주세요 (선택)"></textarea>
                 </div>
 
                 <div class="form-actions">
-                    <a href="{% url 'coordinates:detail' pk=comment.coordinate.pk %}" class="btn btn-outline">{% trans "취소" %}</a>
-                    <button type="submit" class="btn btn-primary">{% trans "신고하기" %}</button>
+                    <a href="{% url 'coordinates:detail' pk=comment.coordinate.pk %}" class="btn btn-outline">취소</a>
+                    <button type="submit" class="btn btn-primary">신고하기</button>
                 </div>
             </form>
         </div>

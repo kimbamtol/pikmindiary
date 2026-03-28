@@ -1,11 +1,9 @@
-{% load i18n %}
-{% load translate_content %}
 {% for coord in coords %}
 <article class="card coord-card">
     <a href="{% url 'coordinates:detail' pk=coord.pk %}">
         <div class="coord-card-image">
             {% if coord.images.first %}
-            <img src="{{ coord.images.first.image.url }}" alt="{{ coord|translate_field:"title" }}">
+            <img src="{{ coord.images.first.image.url }}" alt="{{ coord.title }}">
             {% else %}
             <div class="coord-card-placeholder">🗺️</div>
             {% endif %}
@@ -15,9 +13,9 @@
         </div>
 
         <div class="coord-card-content">
-            <h3 class="coord-card-title">{{ coord|translate_field:"title" }}</h3>
+            <h3 class="coord-card-title">{{ coord.title }}</h3>
             {% if coord.postcard_name %}
-            <div class="coord-card-postcard">🏷️ {{ coord|translate_field:"postcard_name" }}</div>
+            <div class="coord-card-postcard">🏷️ {{ coord.postcard_name }}</div>
             {% endif %}
             <div class="coord-card-meta">
                 <span>📍 {{ coord.latitude }}, {{ coord.longitude }}</span>
@@ -38,11 +36,14 @@
     </a>
 
     <div class="coord-card-stats">
-        <button type="button" class="copy-btn" data-coords="{{ coord.latitude }}, {{ coord.longitude }}"
-            data-pk="{{ coord.pk }}" title="좌표 복사">📋 <span class="copy-count">{{ coord.copy_count }}</span></button>
+        <button type="button" class="copy-btn" data-coords="{{ coord.latitude }}, {{ coord.longitude }}" data-pk="{{ coord.pk }}" title="좌표 복사">📋 <span class="copy-count">{{ coord.copy_count }}</span></button>
         <span class="coord-stat">👁️ {{ coord.view_count }}</span>
-        <span class="coord-stat">❤️ {{ coord.like_count }}</span>
+        <button type="button" class="like-btn-sm {% if coord.pk in user_liked_coords %}active{% endif %}" onclick="toggleLikeCard({{ coord.pk }}, this)"><span class="like-icon">❤️</span> <span class="like-count">{{ coord.like_count }}</span></button>
+        {% if user.is_authenticated %}
+        <button type="button" class="bookmark-btn-sm {% if coord.pk in user_bookmarked_coords %}active{% endif %}" onclick="toggleBookmarkCard({{ coord.pk }}, this)"><span class="bookmark-icon">⭐</span> <span class="bookmark-count">{{ coord.bookmark_count }}</span></button>
+        {% else %}
         <span class="coord-stat">⭐ {{ coord.bookmark_count }}</span>
+        {% endif %}
         <span class="coord-stat">💬 {{ coord.comment_count }}</span>
     </div>
 </article>

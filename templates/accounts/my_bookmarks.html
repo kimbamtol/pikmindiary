@@ -1,15 +1,13 @@
 {% extends 'base.html' %}
-{% load i18n %}
-{% load translate_content %}
 
-{% block title %}{% trans "북마크" %} - {% trans "피크민 다이어리" %}{% endblock %}
+{% block title %}북마크 - 피크민 다이어리{% endblock %}
 
 {% block content %}
 <div class="container">
     <div class="bookmarks-page">
         <div class="page-header">
-            <a href="{% url 'accounts:my_page' %}" class="back-link">← {% trans "마이페이지" %}</a>
-            <h1 class="page-title">🔖 {% trans "북마크한 글" %}</h1>
+            <a href="{% url 'accounts:my_page' %}" class="back-link">← 마이페이지</a>
+            <h1 class="page-title">🔖 북마크한 글</h1>
         </div>
 
         {% if page_obj %}
@@ -19,7 +17,7 @@
                 <a href="{% url 'coordinates:detail' pk=coord.pk %}">
                     <div class="coord-card-image">
                         {% if coord.images.first %}
-                        <img src="{{ coord.images.first.image.url }}" alt="{{ coord|translate_field:"title" }}">
+                        <img src="{{ coord.images.first.image.url }}" alt="{{ coord.title }}">
                         {% else %}
                         <div class="coord-card-placeholder">🗺️</div>
                         {% endif %}
@@ -29,9 +27,9 @@
                     </div>
 
                     <div class="coord-card-content">
-                        <h3 class="coord-card-title">{{ coord|translate_field:"title" }}</h3>
+                        <h3 class="coord-card-title">{{ coord.title }}</h3>
                         <div class="coord-card-meta">
-                            <span>{{ coord.author.nickname|default:_("익명") }}</span>
+                            <span>{{ coord.author.nickname|default:"익명" }}</span>
                             <span>{{ coord.created_at|date:"m/d" }}</span>
                         </div>
                     </div>
@@ -48,11 +46,11 @@
         {% if page_obj.has_other_pages %}
         <nav class="pagination">
             {% if page_obj.has_previous %}
-            <a href="?page={{ page_obj.previous_page_number }}">← {% trans "이전" %}</a>
+            <a href="?page={{ page_obj.previous_page_number }}">← 이전</a>
             {% endif %}
             <span>{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
             {% if page_obj.has_next %}
-            <a href="?page={{ page_obj.next_page_number }}">{% trans "다음" %} →</a>
+            <a href="?page={{ page_obj.next_page_number }}">다음 →</a>
             {% endif %}
         </nav>
         {% endif %}
@@ -60,9 +58,9 @@
         {% else %}
         <div class="empty-state">
             <div class="empty-state-icon">🔖</div>
-            <h2 class="empty-state-title">{% trans "북마크한 글이 없습니다" %}</h2>
-            <p class="empty-state-desc">{% trans "마음에 드는 좌표를 북마크해보세요!" %}</p>
-            <a href="{% url 'coordinates:list' %}" class="btn btn-primary">{% trans "좌표 둘러보기" %}</a>
+            <h2 class="empty-state-title">북마크한 글이 없습니다</h2>
+            <p class="empty-state-desc">마음에 드는 좌표를 북마크해보세요!</p>
+            <a href="{% url 'coordinates:list' %}" class="btn btn-primary">좌표 둘러보기</a>
         </div>
         {% endif %}
     </div>

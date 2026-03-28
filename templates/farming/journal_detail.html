@@ -1,8 +1,6 @@
 {% extends 'base.html' %}
-{% load i18n %}
-{% load translate_content %}
 
-{% block title %}{{ journal|translate_field:"title" }} - {% trans "피크민 다이어리" %}{% endblock %}
+{% block title %}{{ journal.title }} - 피크민 다이어리{% endblock %}
 
 {% block content %}
 <div class="container">
@@ -11,7 +9,7 @@
             {% if journal.flower_type %}
             <span class="badge badge-{{ journal.flower_type }}">{{ journal.get_flower_type_display }}</span>
             {% endif %}
-            <h1>{{ journal|translate_field:"title" }}</h1>
+            <h1>{{ journal.title }}</h1>
             <div class="journal-meta">
                 <span><a href="{% url 'accounts:user_profile' user_id=journal.author.pk %}" class="author-link">{{ journal.author.nickname }}</a></span>
                 <span>{{ journal.created_at|date:"Y.n.j H:i" }}</span>
@@ -20,30 +18,30 @@
 
         {% if journal.image %}
         <div class="journal-image">
-            <img src="{{ journal.image.url }}" alt="{{ journal|translate_field:"title" }}">
+            <img src="{{ journal.image.url }}" alt="{{ journal.title }}">
         </div>
         {% endif %}
 
         <div class="journal-content">
-            {{ journal|translate_field:"content"|linebreaks }}
+            {{ journal.content|linebreaks }}
         </div>
 
         <div class="journal-info">
             {% if journal.location_name %}
             <div class="info-item">
-                <span class="info-label">📍 {% trans "장소" %}</span>
+                <span class="info-label">📍 장소</span>
                 <span class="info-value">{{ journal.location_name }}</span>
             </div>
             {% endif %}
             {% if journal.flower_count > 0 %}
             <div class="info-item">
-                <span class="info-label">🌸 {% trans "심은 꽃" %}</span>
+                <span class="info-label">🌸 심은 꽃</span>
                 <span class="info-value">{{ journal.flower_count }}개</span>
             </div>
             {% endif %}
             {% if journal.latitude and journal.longitude %}
             <div class="info-item">
-                <span class="info-label">🗺️ {% trans "좌표" %}</span>
+                <span class="info-label">🗺️ 좌표</span>
                 <span class="info-value">{{ journal.latitude }}, {{ journal.longitude }}</span>
             </div>
             {% endif %}
@@ -52,7 +50,7 @@
         <!-- 좋아요 버튼 -->
         <div class="journal-interactions">
             <button type="button" id="like-btn" class="btn-interaction {% if user_liked %}active{% endif %}"
-                data-journal-id="{{ journal.pk }}" {% if user == journal.author %}disabled title="{% trans "본인 글에는 좋아요를 누를 수 없습니다" %}"
+                data-journal-id="{{ journal.pk }}" {% if user == journal.author %}disabled title="본인 글에는 좋아요를 누를 수 없습니다"
                 {% endif %}>
                 <span class="icon">{% if user_liked %}❤️{% else %}🤍{% endif %}</span>
                 <span class="count" id="like-count">{{ journal.like_count }}</span>
@@ -60,11 +58,11 @@
         </div>
 
         <div class="journal-actions">
-            <a href="{% url 'farming:journal_list' %}" class="btn btn-outline">{% trans "목록으로" %}</a>
+            <a href="{% url 'farming:journal_list' %}" class="btn btn-outline">목록으로</a>
             {% if user == journal.author or user.is_staff %}
             <div class="owner-actions">
-                <a href="{% url 'farming:journal_edit' pk=journal.pk %}" class="btn btn-outline">{% trans "수정" %}</a>
-                <a href="{% url 'farming:journal_delete' pk=journal.pk %}" class="btn btn-danger-text">{% trans "삭제" %}</a>
+                <a href="{% url 'farming:journal_edit' pk=journal.pk %}" class="btn btn-outline">수정</a>
+                <a href="{% url 'farming:journal_delete' pk=journal.pk %}" class="btn btn-danger-text">삭제</a>
             </div>
             {% endif %}
         </div>
@@ -72,7 +70,7 @@
 
     <!-- 댓글 섹션 -->
     <div class="comments-section">
-        <h2>💬 {% trans "댓글" %} ({{ journal.comment_count }})</h2>
+        <h2>💬 댓글 ({{ journal.comment_count }})</h2>
 
         <!-- 댓글 작성 -->
         <form action="{% url 'comments:journal_create' journal_id=journal.pk %}" method="post" class="comment-form">
@@ -80,14 +78,14 @@
 
             {% if not user.is_authenticated %}
             <div class="guest-fields">
-                <input type="text" name="guest_nickname" placeholder="{% trans "닉네임" %}" class="form-control" required>
-                <input type="password" name="guest_password" placeholder="{% trans "비밀번호 (수정/삭제용)" %}" class="form-control" required>
+                <input type="text" name="guest_nickname" placeholder="닉네임" class="form-control" required>
+                <input type="password" name="guest_password" placeholder="비밀번호 (수정/삭제용)" class="form-control" required>
             </div>
             {% endif %}
 
             <div class="comment-input">
-                <textarea name="content" placeholder="{% trans "댓글을 입력하세요..." %}" class="form-control" required></textarea>
-                <button type="submit" class="btn btn-primary">{% trans "등록" %}</button>
+                <textarea name="content" placeholder="댓글을 입력하세요..." class="form-control" required></textarea>
+                <button type="submit" class="btn btn-primary">등록</button>
             </div>
         </form>
 
@@ -104,27 +102,27 @@
                     <span class="comment-date">{{ comment.created_at|date:"m/d H:i" }}</span>
                 </div>
                 <div class="comment-content">
-                    {{ comment|translate_field:"content"|linebreaks }}
+                    {{ comment.content|linebreaks }}
                 </div>
 
                 {% if not comment.is_deleted %}
                 <div class="comment-actions">
                     <!-- 답글 버튼 -->
-                    <button class="btn-text reply-btn" onclick="toggleReplyForm({{ comment.pk }})">{% trans "답글" %}</button>
+                    <button class="btn-text reply-btn" onclick="toggleReplyForm({{ comment.pk }})">답글</button>
 
                     {% if user == comment.author or user.is_staff %}
                     <form action="{% url 'comments:delete' pk=comment.pk %}" method="post" style="display:inline;">
                         {% csrf_token %}
-                        <button type="submit" class="btn-text" onclick="return confirm('{% trans "삭제하시겠습니까?" %}')">{% trans "삭제" %}</button>
+                        <button type="submit" class="btn-text" onclick="return confirm('삭제하시겠습니까?')">삭제</button>
                     </form>
                     {% elif comment.guest_password %}
-                    <button class="btn-text" onclick="toggleDeleteForm({{ comment.pk }})">{% trans "삭제" %}</button>
+                    <button class="btn-text" onclick="toggleDeleteForm({{ comment.pk }})">삭제</button>
                     <form action="{% url 'comments:delete' pk=comment.pk %}" method="post" class="delete-form hidden"
                         id="deleteForm{{ comment.pk }}">
                         {% csrf_token %}
                         <div class="delete-password-input">
-                            <input type="password" name="password" placeholder="{% trans "비밀번호" %}" class="form-control" required>
-                            <button type="submit" class="btn btn-sm">{% trans "확인" %}</button>
+                            <input type="password" name="password" placeholder="비밀번호" class="form-control" required>
+                            <button type="submit" class="btn btn-sm">확인</button>
                         </div>
                     </form>
                     {% endif %}
@@ -136,13 +134,13 @@
                     {% csrf_token %}
                     {% if not user.is_authenticated %}
                     <div class="guest-fields">
-                        <input type="text" name="guest_nickname" placeholder="{% trans "닉네임" %}" class="form-control" required>
-                        <input type="password" name="guest_password" placeholder="{% trans "비밀번호" %}" class="form-control" required>
+                        <input type="text" name="guest_nickname" placeholder="닉네임" class="form-control" required>
+                        <input type="password" name="guest_password" placeholder="비밀번호" class="form-control" required>
                     </div>
                     {% endif %}
                     <div class="comment-input">
-                        <textarea name="content" placeholder="{% trans "답글을 입력하세요..." %}" class="form-control" required></textarea>
-                        <button type="submit" class="btn btn-primary btn-sm">{% trans "등록" %}</button>
+                        <textarea name="content" placeholder="답글을 입력하세요..." class="form-control" required></textarea>
+                        <button type="submit" class="btn btn-primary btn-sm">등록</button>
                     </div>
                 </form>
                 {% endif %}
@@ -167,7 +165,7 @@
                 {% endfor %}
             </div>
             {% empty %}
-            <p class="no-comments">{% trans "아직 댓글이 없습니다. 첫 댓글을 남겨보세요!" %}</p>
+            <p class="no-comments">아직 댓글이 없습니다. 첫 댓글을 남겨보세요!</p>
             {% endfor %}
         </div>
     </div>
