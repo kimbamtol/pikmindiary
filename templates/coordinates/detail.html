@@ -7,7 +7,7 @@
 <div class="container">
     <div class="detail-page">
         <!-- 뒤로가기 -->
-        <a href="{% url 'coordinates:list' %}" class="back-link" onclick="if(history.length>1){history.back();return false;}">← 목록으로</a>
+        <a href="{% url 'coordinates:list' %}" class="back-link" onclick="if(/\/coordinates\/(\?|$)/.test(document.referrer)){history.back();return false;}">← 목록으로</a>
 
         <!-- 메인 카드 -->
         <div class="detail-card">
