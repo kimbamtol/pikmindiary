@@ -561,6 +561,22 @@
         transform: scale(0.95);
     }
 
+    /* 소멸 좌표 카드 */
+    .coord-card-inactive .coord-card-image img {
+        filter: grayscale(80%);
+        opacity: 0.6;
+    }
+    .coord-card-inactive-badge {
+        position: absolute;
+        top: var(--spacing-sm);
+        right: var(--spacing-sm);
+        background: var(--text-secondary) !important;
+        color: white !important;
+        font-size: 0.7rem;
+        padding: 2px 6px;
+        border-radius: 4px;
+    }
+
     .copy-toast {
         position: fixed;
         bottom: 20px;

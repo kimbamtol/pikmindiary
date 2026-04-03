@@ -12,7 +12,7 @@
         <!-- 메인 카드 -->
         <div class="detail-card">
             <!-- 이미지 갤러리 -->
-            <div class="detail-images">
+            <div class="detail-images {% if coordinate.is_inactive %}detail-inactive{% endif %}"
                 {% if images %}
                 <div class="image-main">
                     <img src="{{ images.0.image.url }}" alt="{{ coordinate.title }}" id="mainImage">
@@ -38,9 +38,18 @@
                     {% if coordinate.status == 'PENDING' %}
                     <span class="badge badge-pending">승인 대기</span>
                     {% endif %}
+                    {% if coordinate.is_inactive %}
+                    <span class="badge badge-inactive">소멸</span>
+                    {% endif %}
                 </div>
 
                 <h1 class="detail-title">{{ coordinate.title }}</h1>
+
+                {% if coordinate.is_inactive %}
+                <div class="inactive-banner">
+                    🔴 이 좌표의 버섯/빅플라워가 현재 소멸된 상태입니다. 다시 살아날 수 있습니다.
+                </div>
+                {% endif %}
 
                 <div class="detail-meta">
                     <span>작성자: {% if coordinate.author %}<a href="{% url 'accounts:user_profile' user_id=coordinate.author.pk %}" class="author-link"><strong>{{ coordinate.author.nickname }}</strong></a>{% else %}<strong>익명</strong>{% endif %}</span>
@@ -98,13 +107,24 @@
                     </a>
                 </div>
 
-                <!-- 수정/삭제 버튼 (작성자, 관리자, 또는 비회원 글) -->
-                {% if user.is_authenticated and user == coordinate.author or user.is_staff or coordinate.guest_password %}
+                <!-- 수정/삭제/정정 버튼 -->
                 <div class="owner-actions">
+                    <button type="button" class="btn btn-outline" onclick="document.getElementById('correction-modal').classList.add('show');document.body.style.overflow='hidden'">✏️ 정정 요청</button>
+                    {% if user.is_authenticated and user == coordinate.author or user.is_staff or coordinate.guest_password %}
                     <a href="{% url 'coordinates:edit' pk=coordinate.pk %}" class="btn btn-outline">수정</a>
                     <a href="{% url 'coordinates:delete' pk=coordinate.pk %}" class="btn btn-danger-text">삭제</a>
+                    {% endif %}
+                    {% if user.is_staff %}
+                    <form method="post" action="{% url 'admin_panel:toggle_inactive' pk=coordinate.pk %}" style="display:inline;">
+                        {% csrf_token %}
+                        {% if coordinate.is_inactive %}
+                        <button type="submit" class="btn btn-primary" title="관리자 전용">🟢 복구 처리</button>
+                        {% else %}
+                        <button type="submit" class="btn btn-outline" title="관리자 전용" style="color:var(--text-secondary);">🔴 소멸 처리</button>
+                        {% endif %}
+                    </form>
+                    {% endif %}
                 </div>
-                {% endif %}
             </div>
         </div>
 
@@ -1143,5 +1163,152 @@
         padding: var(--spacing-xs) var(--spacing-sm);
         font-size: 0.85rem;
     }
+
+    /* 소멸 뱃지 */
+    .badge-inactive {
+        background: var(--text-secondary);
+        color: white;
+        font-size: 0.75rem;
+        padding: 2px 8px;
+        border-radius: 4px;
+    }
+
+    /* 소멸 좌표 이미지 */
+    .detail-inactive .image-main img,
+    .detail-inactive .image-thumbs img {
+        filter: grayscale(80%);
+        opacity: 0.6;
+    }
+
+    .inactive-banner {
+        background: var(--bg-secondary);
+        border: 1px solid var(--bg-tertiary);
+        border-radius: var(--radius-md);
+        padding: var(--spacing-sm) var(--spacing-md);
+        margin-bottom: var(--spacing-md);
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        text-align: center;
+    }
+
+    /* 정정 요청 모달 */
+    .correction-modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: rgba(0,0,0,0.5);
+        z-index: 9999;
+        justify-content: center;
+        align-items: center;
+        padding: var(--spacing-md);
+    }
+    .correction-modal-overlay.show { display: flex; }
+
+    .correction-modal {
+        background: var(--bg-primary);
+        border-radius: var(--radius-xl);
+        max-width: 480px;
+        width: 100%;
+        max-height: 80vh;
+        overflow-y: auto;
+        box-shadow: var(--shadow-xl);
+        animation: correctionSlideIn 0.3s ease;
+    }
+    @keyframes correctionSlideIn {
+        from { opacity: 0; transform: translateY(-20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .correction-modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: var(--spacing-md) var(--spacing-lg);
+        border-bottom: 1px solid var(--bg-tertiary);
+    }
+    .correction-modal-header h3 { margin: 0; font-size: 1.1rem; }
+
+    .correction-modal-body {
+        padding: var(--spacing-lg);
+    }
+    .correction-modal-body .form-group {
+        margin-bottom: var(--spacing-md);
+    }
+    .correction-modal-body label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: var(--spacing-xs);
+        font-size: 0.9rem;
+    }
+    .correction-type-options {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-xs);
+    }
+    .correction-type-options label {
+        font-weight: 400;
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-xs);
+        cursor: pointer;
+    }
+    .correction-modal-body textarea {
+        width: 100%;
+        min-height: 80px;
+        padding: var(--spacing-sm);
+        border: 1px solid var(--bg-tertiary);
+        border-radius: var(--radius-md);
+        font-size: 0.9rem;
+        resize: vertical;
+        background: var(--bg-primary);
+        color: var(--text-primary);
+    }
+    .correction-modal-body .form-control {
+        width: 100%;
+    }
+    .correction-modal-actions {
+        display: flex;
+        gap: var(--spacing-sm);
+        justify-content: flex-end;
+        margin-top: var(--spacing-md);
+    }
 </style>
+
+<!-- 정정 요청 모달 -->
+<div id="correction-modal" class="correction-modal-overlay" onclick="if(event.target===this){this.classList.remove('show');document.body.style.overflow='';}">
+    <div class="correction-modal">
+        <div class="correction-modal-header">
+            <h3>✏️ 정정 요청</h3>
+            <button style="background:none;border:none;font-size:1.5rem;cursor:pointer;color:var(--text-secondary);" onclick="document.getElementById('correction-modal').classList.remove('show');document.body.style.overflow='';">&times;</button>
+        </div>
+        <div class="correction-modal-body">
+            <form method="post" action="{% url 'coordinates:correction' pk=coordinate.pk %}">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label>정정 유형</label>
+                    <div class="correction-type-options">
+                        <label><input type="radio" name="correction_type" value="GONE" required> 🔴 소멸됨 (사라짐)</label>
+                        <label><input type="radio" name="correction_type" value="CHANGED"> 🔄 내용 변경 (교체됨)</label>
+                        <label><input type="radio" name="correction_type" value="RESTORED"> 🟢 복구됨 (다시 생김)</label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="correction-desc">설명</label>
+                    <textarea name="description" id="correction-desc" placeholder="어떻게 변경되었는지 알려주세요..." required></textarea>
+                </div>
+                {% if not user.is_authenticated %}
+                <div class="form-group">
+                    <label for="correction-nickname">닉네임</label>
+                    <input type="text" name="guest_nickname" id="correction-nickname" class="form-control" placeholder="닉네임" required>
+                </div>
+                {% endif %}
+                <div class="correction-modal-actions">
+                    <button type="button" class="btn btn-outline" onclick="document.getElementById('correction-modal').classList.remove('show');document.body.style.overflow='';">취소</button>
+                    <button type="submit" class="btn btn-primary">요청 보내기</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 {% endblock %}

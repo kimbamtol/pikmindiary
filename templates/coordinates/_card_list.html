@@ -1,5 +1,5 @@
 {% for coord in coords %}
-<article class="card coord-card">
+<article class="card coord-card {% if coord.is_inactive %}coord-card-inactive{% endif %}">
     <a href="{% url 'coordinates:detail' pk=coord.pk %}">
         <div class="coord-card-image">
             {% if coord.images.first %}
@@ -10,6 +10,9 @@
             <span class="badge badge-primary coord-card-category">
                 {{ coord.get_category_display }}
             </span>
+            {% if coord.is_inactive %}
+            <span class="badge badge-inactive coord-card-inactive-badge">소멸</span>
+            {% endif %}
         </div>
 
         <div class="coord-card-content">

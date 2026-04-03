@@ -19,6 +19,11 @@
                 <span class="summary-value">{{ report_count }}</span>
                 <span class="summary-label">미처리 신고</span>
             </a>
+            <a href="#corrections-section" class="summary-card card">
+                <span class="summary-icon">✏️</span>
+                <span class="summary-value">{{ correction_count }}</span>
+                <span class="summary-label">정정 요청</span>
+            </a>
             {% if request.user.is_superuser %}
             <a href="{% url 'admin_panel:user_list' %}" class="summary-card card superuser-only">
                 <span class="summary-icon">👥</span>
@@ -105,6 +110,52 @@
             </div>
             {% else %}
             <p class="no-items">미처리 신고가 없습니다.</p>
+            {% endif %}
+        </div>
+
+        <!-- 정정 요청 -->
+        <div class="section" id="corrections-section">
+            <div class="section-header">
+                <h2>✏️ 정정 요청</h2>
+            </div>
+
+            {% if recent_corrections %}
+            <div class="item-list">
+                {% for notif in recent_corrections %}
+                <div class="list-item card">
+                    <div class="item-info">
+                        <strong>{% if notif.coordinate %}{{ notif.coordinate.title }}{% else %}(삭제된 좌표){% endif %}</strong>
+                        <span class="item-meta" style="white-space:pre-line;">{{ notif.message }}</span>
+                        <span class="item-meta">{{ notif.created_at|date:"m/d H:i" }}</span>
+                    </div>
+                    <div class="item-actions" style="flex-wrap:wrap;">
+                        {% if notif.coordinate %}
+                        <a href="{% url 'coordinates:detail' pk=notif.coordinate.pk %}" class="btn btn-sm btn-outline">보기</a>
+                        {% if notif.coordinate.is_inactive %}
+                        <form action="{% url 'admin_panel:resolve_correction' pk=notif.pk %}" method="post" style="display:inline;">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="restore">
+                            <button type="submit" class="btn btn-sm btn-success">🟢 복구</button>
+                        </form>
+                        {% else %}
+                        <form action="{% url 'admin_panel:resolve_correction' pk=notif.pk %}" method="post" style="display:inline;">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="inactive">
+                            <button type="submit" class="btn btn-sm btn-danger">🔴 소멸</button>
+                        </form>
+                        {% endif %}
+                        {% endif %}
+                        <form action="{% url 'admin_panel:resolve_correction' pk=notif.pk %}" method="post" style="display:inline;">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="dismiss">
+                            <button type="submit" class="btn btn-sm btn-outline">무시</button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="no-items">정정 요청이 없습니다.</p>
             {% endif %}
         </div>
     </div>

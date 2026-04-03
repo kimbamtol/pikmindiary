@@ -92,6 +92,14 @@ class Coordinate(models.Model):
         help_text=_('비회원이 글 수정/삭제 시 사용')
     )
 
+    # 소멸 상태 (버섯/빅플 등이 사라진 경우)
+    is_inactive = models.BooleanField(
+        _('일시적 소멸'),
+        default=False,
+        help_text=_('버섯/빅플 등이 사라진 경우 (다시 살아날 수 있음)')
+    )
+    inactive_at = models.DateTimeField(_('소멸 시점'), null=True, blank=True)
+
     # 워터마크 옵션
     watermark_enabled = models.BooleanField(
         _('워터마크 표시'),

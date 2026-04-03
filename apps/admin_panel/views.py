@@ -15,24 +15,36 @@ from apps.rankings.utils import update_user_ranking
 @staff_member_required
 def dashboard(request):
     """관리자 대시보드"""
+    from apps.interactions.models import Notification
+
     pending_count = Coordinate.objects.filter(status=Coordinate.Status.PENDING).count()
     report_count = Report.objects.filter(status=Report.Status.PENDING).count()
-    
+
     # 최근 대기 글
     recent_pending = Coordinate.objects.filter(
         status=Coordinate.Status.PENDING
     ).order_by('-created_at')[:5]
-    
+
     # 최근 신고
     recent_reports = Report.objects.filter(
         status=Report.Status.PENDING
     ).order_by('-created_at')[:5]
-    
+
+    # 정정 요청 (읽지 않은 CORRECTION 알림)
+    correction_notifications = Notification.objects.filter(
+        notification_type=Notification.NotificationType.CORRECTION,
+        is_read=False,
+    ).select_related('coordinate', 'actor').order_by('-created_at')
+    correction_count = correction_notifications.count()
+    recent_corrections = correction_notifications[:10]
+
     context = {
         'pending_count': pending_count,
         'report_count': report_count,
         'recent_pending': recent_pending,
         'recent_reports': recent_reports,
+        'correction_count': correction_count,
+        'recent_corrections': recent_corrections,
     }
     return render(request, 'admin_panel/dashboard.html', context)
 
@@ -350,3 +362,62 @@ def unban_user(request, pk):
         messages.success(request, f'{target}의 정지가 해제되었습니다.')
     
     return redirect('admin_panel:ban_list')
+
+
+@staff_member_required
+def toggle_inactive(request, pk):
+    """좌표 소멸/복구 토글"""
+    coordinate = get_object_or_404(Coordinate, pk=pk)
+
+    if request.method == 'POST':
+        if coordinate.is_inactive:
+            coordinate.is_inactive = False
+            coordinate.inactive_at = None
+            coordinate.save(update_fields=['is_inactive', 'inactive_at'])
+            messages.success(request, f'"{coordinate.title}" 복구 처리되었습니다.')
+        else:
+            coordinate.is_inactive = True
+            coordinate.inactive_at = timezone.now()
+            coordinate.save(update_fields=['is_inactive', 'inactive_at'])
+            messages.success(request, f'"{coordinate.title}" 소멸 처리되었습니다.')
+
+    # 상세 페이지로 돌아가기
+    return redirect('coordinates:detail', pk=pk)
+
+
+@staff_member_required
+def resolve_correction(request, pk):
+    """정정 요청 처리 (소멸/복구/무시) - 대시보드에서 사용"""
+    from apps.interactions.models import Notification
+
+    notification = get_object_or_404(Notification, pk=pk, notification_type=Notification.NotificationType.CORRECTION)
+
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        coordinate = notification.coordinate
+
+        if action == 'inactive' and coordinate:
+            coordinate.is_inactive = True
+            coordinate.inactive_at = timezone.now()
+            coordinate.save(update_fields=['is_inactive', 'inactive_at'])
+            messages.success(request, f'"{coordinate.title}" 소멸 처리되었습니다.')
+        elif action == 'restore' and coordinate:
+            coordinate.is_inactive = False
+            coordinate.inactive_at = None
+            coordinate.save(update_fields=['is_inactive', 'inactive_at'])
+            messages.success(request, f'"{coordinate.title}" 복구 처리되었습니다.')
+        elif action == 'dismiss':
+            messages.success(request, '정정 요청을 무시했습니다.')
+
+        # 같은 좌표에 대한 동일 타입 정정 알림 모두 읽음 처리
+        if coordinate:
+            Notification.objects.filter(
+                notification_type=Notification.NotificationType.CORRECTION,
+                coordinate=coordinate,
+                is_read=False,
+            ).update(is_read=True)
+        else:
+            notification.is_read = True
+            notification.save(update_fields=['is_read'])
+
+    return redirect('admin_panel:dashboard')

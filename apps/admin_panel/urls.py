@@ -22,4 +22,8 @@ urlpatterns = [
     path('batch/ban/', views.ban_user, name='ban_user'),
     path('bans/', views.ban_list, name='ban_list'),
     path('bans/<int:pk>/unban/', views.unban_user, name='unban_user'),
+
+    # 좌표 소멸/복구
+    path('coordinate/<int:pk>/toggle-inactive/', views.toggle_inactive, name='toggle_inactive'),
+    path('correction/<int:pk>/resolve/', views.resolve_correction, name='resolve_correction'),
 ]
