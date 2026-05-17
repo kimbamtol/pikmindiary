@@ -59,6 +59,25 @@
                 </div>
             </div>
 
+            <div class="location-btn-row">
+                <button type="button" class="btn btn-location" id="useMyLocationBtn">
+                    📍 {% trans "내 위치 입력하기" %}
+                </button>
+                <button type="button" class="btn btn-map-picker" id="openMapPickerBtn">
+                    🗺️ {% trans "지도에서 선택" %}
+                </button>
+                <span id="locationStatus"></span>
+            </div>
+
+            <div class="coords-help">
+                <p>💡 {% trans "좌표 입력 방법:" %}</p>
+                <ol>
+                    <li><strong>📍 {% trans "내 위치 입력하기" %}</strong> {% trans "버튼으로 현재 위치 자동 입력" %}</li>
+                    <li><strong>🗺️ {% trans "지도에서 선택" %}</strong> {% trans "버튼으로 지도에서 직접 위치 선택" %}</li>
+                    <li>{% trans "또는 게임 내에서 공유하기 → 좌표 확인" %}</li>
+                </ol>
+            </div>
+
             <!-- 설명 -->
             <div class="form-group">
                 <label class="form-label">{% trans "설명" %}</label>
@@ -120,6 +139,33 @@
     </div>
 </div>
 
+<!-- 지도 선택 모달 -->
+<div id="mapPickerModal" class="map-picker-modal">
+    <div class="map-picker-header">
+        <h2>📍 {% trans "지도에서 위치 선택" %}</h2>
+        <button type="button" class="map-picker-close" id="closeMapPickerBtn">&times;</button>
+    </div>
+    <div class="map-search-bar">
+        <input type="text" id="mapSearchInput" class="map-search-input" placeholder="🔍 {% trans "장소, 주소, 건물명 검색..." %}">
+        <button type="button" class="btn btn-search" id="mapSearchBtn">{% trans "검색" %}</button>
+    </div>
+    <div id="mapSearchResults" class="map-search-results"></div>
+    <div id="mapPickerContainer" class="map-picker-container"></div>
+    <div class="map-picker-footer">
+        <div class="map-picker-coords">
+            <span id="selectedCoordsDisplay">{% trans "지도를 터치하여 위치를 선택하세요" %}</span>
+        </div>
+        <div class="map-picker-actions">
+            <button type="button" class="btn btn-outline" id="cancelMapPickerBtn">{% trans "취소" %}</button>
+            <button type="button" class="btn btn-primary" id="confirmMapPickerBtn" disabled>{% trans "선택 완료" %}</button>
+        </div>
+    </div>
+</div>
+
+<!-- Leaflet CSS/JS for map picker -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 <script>
     function toggleWatermarkName() {
         const checkbox = document.getElementById('watermark_enabled');
@@ -152,6 +198,285 @@
                 }
             });
         }
+
+        // 내 위치 입력하기 버튼
+        const locationBtn = document.getElementById('useMyLocationBtn');
+        const locationStatus = document.getElementById('locationStatus');
+
+        if (locationBtn) {
+            locationBtn.addEventListener('click', function () {
+                if (!navigator.geolocation) {
+                    locationStatus.textContent = '이 브라우저에서는 위치 정보를 지원하지 않습니다.';
+                    locationStatus.style.color = 'red';
+                    return;
+                }
+
+                locationBtn.disabled = true;
+                locationBtn.textContent = '📍 위치 찾는 중...';
+                locationStatus.textContent = '';
+
+                navigator.geolocation.getCurrentPosition(
+                    function (position) {
+                        const lat = position.coords.latitude.toFixed(6);
+                        const lng = position.coords.longitude.toFixed(6);
+
+                        if (latInput) latInput.value = lat;
+                        if (lngInput) lngInput.value = lng;
+
+                        locationBtn.disabled = false;
+                        locationBtn.textContent = '📍 내 위치 입력하기';
+                        locationStatus.textContent = '✅ 위치가 입력되었습니다!';
+                        locationStatus.style.color = 'green';
+                    },
+                    function (error) {
+                        locationBtn.disabled = false;
+                        locationBtn.textContent = '📍 내 위치 입력하기';
+
+                        switch (error.code) {
+                            case error.PERMISSION_DENIED:
+                                locationStatus.textContent = '❌ 위치 권한이 거부되었습니다.';
+                                break;
+                            case error.POSITION_UNAVAILABLE:
+                                locationStatus.textContent = '❌ 위치 정보를 가져올 수 없습니다.';
+                                break;
+                            case error.TIMEOUT:
+                                locationStatus.textContent = '❌ 위치 요청 시간 초과';
+                                break;
+                            default:
+                                locationStatus.textContent = '❌ 알 수 없는 오류';
+                        }
+                        locationStatus.style.color = 'red';
+                    },
+                    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+                );
+            });
+        }
+
+        // ========================================
+        // 지도에서 선택 기능
+        // ========================================
+        const mapPickerBtn = document.getElementById('openMapPickerBtn');
+        const mapPickerModal = document.getElementById('mapPickerModal');
+        const closeMapPickerBtn = document.getElementById('closeMapPickerBtn');
+        const cancelMapPickerBtn = document.getElementById('cancelMapPickerBtn');
+        const confirmMapPickerBtn = document.getElementById('confirmMapPickerBtn');
+        const selectedCoordsDisplay = document.getElementById('selectedCoordsDisplay');
+        const mapContainer = document.getElementById('mapPickerContainer');
+        const mapSearchInput = document.getElementById('mapSearchInput');
+        const mapSearchBtn = document.getElementById('mapSearchBtn');
+        const mapSearchResults = document.getElementById('mapSearchResults');
+
+        let pickerMap = null;
+        let pickerMarker = null;
+        let selectedLat = null;
+        let selectedLng = null;
+
+        // 기본 위치 (현재 좌표 → 서울 fallback)
+        const currentLat = parseFloat(latInput?.value) || 37.5665;
+        const currentLng = parseFloat(lngInput?.value) || 126.9780;
+
+        if (mapPickerBtn) {
+            mapPickerBtn.addEventListener('click', openMapPicker);
+        }
+        if (closeMapPickerBtn) {
+            closeMapPickerBtn.addEventListener('click', closeMapPicker);
+        }
+        if (cancelMapPickerBtn) {
+            cancelMapPickerBtn.addEventListener('click', closeMapPicker);
+        }
+
+        if (confirmMapPickerBtn) {
+            confirmMapPickerBtn.addEventListener('click', function () {
+                if (selectedLat !== null && selectedLng !== null) {
+                    if (latInput) latInput.value = selectedLat.toFixed(6);
+                    if (lngInput) lngInput.value = selectedLng.toFixed(6);
+                    locationStatus.textContent = '✅ 지도에서 위치가 선택되었습니다!';
+                    locationStatus.style.color = 'green';
+                    closeMapPicker();
+                }
+            });
+        }
+
+        function openMapPicker() {
+            mapPickerModal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+
+            mapContainer.innerHTML = `
+                <div class="map-loading-overlay">
+                    <div class="map-loading-spinner"></div>
+                    <div class="map-loading-text">📍 위치 불러오는 중...</div>
+                </div>
+            `;
+
+            selectedLat = null;
+            selectedLng = null;
+            selectedCoordsDisplay.textContent = '지도를 터치하여 위치를 선택하세요';
+            confirmMapPickerBtn.disabled = true;
+
+            // 수정 모드: 기존 좌표 위치에서 시작 (GPS 호출 안 함)
+            initializePickerMap(currentLat, currentLng);
+        }
+
+        function initializePickerMap(lat, lng) {
+            mapContainer.innerHTML = '';
+            pickerMap = L.map('mapPickerContainer').setView([lat, lng], 16);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(pickerMap);
+
+            // 기존 좌표 위치 표시 (회색 점)
+            L.circleMarker([lat, lng], {
+                radius: 8,
+                color: '#fff',
+                weight: 2,
+                fillColor: '#95a5a6',
+                fillOpacity: 1
+            }).addTo(pickerMap).bindPopup('📍 현재 좌표').openPopup();
+
+            pickerMap.on('click', function (e) {
+                const clickLat = e.latlng.lat;
+                const clickLng = e.latlng.lng;
+
+                if (pickerMarker) {
+                    pickerMap.removeLayer(pickerMarker);
+                }
+
+                pickerMarker = L.marker([clickLat, clickLng], {
+                    icon: L.divIcon({
+                        className: 'selected-location-marker',
+                        html: '<div style="font-size: 32px; text-align: center;">📍</div>',
+                        iconSize: [40, 40],
+                        iconAnchor: [20, 40]
+                    })
+                }).addTo(pickerMap);
+
+                selectedLat = clickLat;
+                selectedLng = clickLng;
+
+                selectedCoordsDisplay.innerHTML = `
+                    <span style="color: #27ae60;">✅ 선택됨:</span>
+                    위도 ${clickLat.toFixed(6)}, 경도 ${clickLng.toFixed(6)}
+                `;
+                confirmMapPickerBtn.disabled = false;
+            });
+
+            setTimeout(() => {
+                pickerMap.invalidateSize();
+            }, 100);
+        }
+
+        function closeMapPicker() {
+            mapPickerModal.classList.remove('active');
+            document.body.style.overflow = '';
+
+            if (pickerMap) {
+                pickerMap.remove();
+                pickerMap = null;
+            }
+            pickerMarker = null;
+
+            if (mapSearchInput) mapSearchInput.value = '';
+            if (mapSearchResults) {
+                mapSearchResults.innerHTML = '';
+                mapSearchResults.classList.remove('active');
+            }
+        }
+
+        // 지도 검색 (Nominatim)
+        if (mapSearchBtn) {
+            mapSearchBtn.addEventListener('click', performMapSearch);
+        }
+        if (mapSearchInput) {
+            mapSearchInput.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    performMapSearch();
+                }
+            });
+        }
+
+        function performMapSearch() {
+            const query = mapSearchInput.value.trim();
+            if (!query) return;
+
+            mapSearchResults.innerHTML = '<div class="search-loading">🔍 검색 중...</div>';
+            mapSearchResults.classList.add('active');
+            mapSearchBtn.disabled = true;
+
+            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&countrycodes=kr&accept-language=ko`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.length === 0) {
+                        return fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&accept-language=ko`)
+                            .then(response => response.json());
+                    }
+                    return data;
+                })
+                .then(data => {
+                    mapSearchBtn.disabled = false;
+
+                    if (data.length === 0) {
+                        mapSearchResults.innerHTML = '<div class="search-no-results">😢 검색 결과가 없습니다</div>';
+                        return;
+                    }
+
+                    mapSearchResults.innerHTML = data.map(item => `
+                        <div class="search-result-item" data-lat="${item.lat}" data-lon="${item.lon}">
+                            <div class="search-result-name">${item.display_name.split(',')[0]}</div>
+                            <div class="search-result-address">${item.display_name}</div>
+                        </div>
+                    `).join('');
+
+                    mapSearchResults.querySelectorAll('.search-result-item').forEach(item => {
+                        item.addEventListener('click', function () {
+                            const lat = parseFloat(this.dataset.lat);
+                            const lon = parseFloat(this.dataset.lon);
+
+                            if (pickerMap) {
+                                pickerMap.setView([lat, lon], 17);
+
+                                if (pickerMarker) {
+                                    pickerMap.removeLayer(pickerMarker);
+                                }
+
+                                pickerMarker = L.marker([lat, lon], {
+                                    icon: L.divIcon({
+                                        className: 'selected-location-marker',
+                                        html: '<div style="font-size: 32px; text-align: center;">📍</div>',
+                                        iconSize: [40, 40],
+                                        iconAnchor: [20, 40]
+                                    })
+                                }).addTo(pickerMap);
+
+                                selectedLat = lat;
+                                selectedLng = lon;
+
+                                selectedCoordsDisplay.innerHTML = `
+                                    <span style="color: #27ae60;">✅ 선택됨:</span>
+                                    위도 ${lat.toFixed(6)}, 경도 ${lon.toFixed(6)}
+                                `;
+                                confirmMapPickerBtn.disabled = false;
+                            }
+
+                            mapSearchResults.classList.remove('active');
+                            mapSearchInput.value = '';
+                        });
+                    });
+                })
+                .catch(error => {
+                    console.error('검색 오류:', error);
+                    mapSearchBtn.disabled = false;
+                    mapSearchResults.innerHTML = '<div class="search-no-results">❌ 검색 중 오류가 발생했습니다</div>';
+                });
+        }
+
+        // ESC 키로 모달 닫기
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && mapPickerModal && mapPickerModal.classList.contains('active')) {
+                closeMapPicker();
+            }
+        });
     });
 </script>
 
@@ -272,6 +597,264 @@
         gap: var(--spacing-md);
     }
 
+    /* 위치 버튼 행 */
+    .location-btn-row {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-md);
+        margin-bottom: var(--spacing-lg);
+        flex-wrap: wrap;
+    }
+
+    .btn-location {
+        background: #3498db;
+        color: white;
+        border: none;
+        padding: var(--spacing-sm) var(--spacing-lg);
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        font-weight: 600;
+    }
+
+    .btn-location:hover {
+        background: #2980b9;
+    }
+
+    .btn-location:disabled {
+        background: #95a5a6;
+        cursor: not-allowed;
+    }
+
+    .btn-map-picker {
+        background: #27ae60;
+        color: white;
+        border: none;
+        padding: var(--spacing-sm) var(--spacing-lg);
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        font-weight: 600;
+    }
+
+    .btn-map-picker:hover {
+        background: #219a52;
+    }
+
+    .coords-help {
+        padding: var(--spacing-md);
+        background: var(--bg-secondary);
+        border-radius: var(--radius-md);
+        margin-bottom: var(--spacing-lg);
+        font-size: 0.9rem;
+    }
+
+    .coords-help p {
+        font-weight: 600;
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .coords-help ol {
+        padding-left: var(--spacing-lg);
+        color: var(--text-secondary);
+        list-style: decimal;
+    }
+
+    .coords-help li {
+        margin-bottom: var(--spacing-xs);
+    }
+
+    /* 지도 선택 모달 */
+    .map-picker-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: var(--bg-primary);
+        z-index: 10000;
+        flex-direction: column;
+    }
+
+    .map-picker-modal.active {
+        display: flex;
+    }
+
+    .map-picker-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: var(--spacing-md) var(--spacing-lg);
+        background: var(--bg-secondary);
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .map-picker-header h2 {
+        margin: 0;
+        font-size: 1.2rem;
+    }
+
+    .map-picker-close {
+        background: none;
+        border: none;
+        font-size: 2rem;
+        cursor: pointer;
+        color: var(--text-secondary);
+        line-height: 1;
+        padding: 0;
+    }
+
+    .map-picker-close:hover {
+        color: var(--text-primary);
+    }
+
+    .map-search-bar {
+        display: flex;
+        padding: var(--spacing-sm) var(--spacing-lg);
+        gap: var(--spacing-sm);
+        background: var(--bg-primary);
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .map-search-input {
+        flex: 1;
+        padding: var(--spacing-sm) var(--spacing-md);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        font-size: 1rem;
+    }
+
+    .map-search-input:focus {
+        outline: none;
+        border-color: #27ae60;
+        box-shadow: 0 0 0 2px rgba(39, 174, 96, 0.2);
+    }
+
+    .btn-search {
+        background: #27ae60;
+        color: white;
+        border: none;
+        padding: var(--spacing-sm) var(--spacing-md);
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .btn-search:hover {
+        background: #219a52;
+    }
+
+    .btn-search:disabled {
+        background: #95a5a6;
+        cursor: not-allowed;
+    }
+
+    .map-search-results {
+        max-height: 200px;
+        overflow-y: auto;
+        background: var(--bg-primary);
+        border-bottom: 1px solid var(--border-color);
+        display: none;
+    }
+
+    .map-search-results.active {
+        display: block;
+    }
+
+    .search-result-item {
+        padding: var(--spacing-sm) var(--spacing-lg);
+        cursor: pointer;
+        border-bottom: 1px solid var(--border-color);
+        transition: background 0.2s;
+    }
+
+    .search-result-item:hover {
+        background: var(--bg-secondary);
+    }
+
+    .search-result-item:last-child {
+        border-bottom: none;
+    }
+
+    .search-result-name {
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .search-result-address {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin-top: 2px;
+    }
+
+    .search-no-results,
+    .search-loading {
+        padding: var(--spacing-md) var(--spacing-lg);
+        text-align: center;
+        color: var(--text-secondary);
+    }
+
+    .map-picker-container {
+        flex: 1;
+        min-height: 0;
+    }
+
+    .map-picker-footer {
+        padding: var(--spacing-md) var(--spacing-lg);
+        background: var(--bg-secondary);
+        border-top: 1px solid var(--border-color);
+    }
+
+    .map-picker-coords {
+        text-align: center;
+        margin-bottom: var(--spacing-md);
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .map-picker-actions {
+        display: flex;
+        justify-content: center;
+        gap: var(--spacing-md);
+    }
+
+    .map-picker-actions .btn {
+        min-width: 120px;
+    }
+
+    .map-loading-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255, 255, 255, 0.9);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+    }
+
+    .map-loading-spinner {
+        width: 50px;
+        height: 50px;
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #27ae60;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .map-loading-text {
+        margin-top: var(--spacing-md);
+        color: var(--text-secondary);
+    }
+
     @media (max-width: 480px) {
         .form-page {
             padding: var(--spacing-md);
@@ -283,6 +866,11 @@
 
         .form-actions {
             flex-direction: column-reverse;
+        }
+
+        .location-btn-row {
+            flex-direction: column;
+            align-items: stretch;
         }
     }
 </style>
