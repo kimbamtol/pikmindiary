@@ -648,7 +648,8 @@
     // OpenStreetMap 타일 추가
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap contributors',
-        maxZoom: 19
+        maxZoom: 19,
+        referrerPolicy: 'strict-origin-when-cross-origin'
     }).addTo(map);
 
     // 마커 클러스터 그룹

@@ -322,7 +322,8 @@
             pickerMap = L.map('mapPickerContainer').setView([lat, lng], 16);
 
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; OpenStreetMap contributors'
+                attribution: '&copy; OpenStreetMap contributors',
+                referrerPolicy: 'strict-origin-when-cross-origin'
             }).addTo(pickerMap);
 
             // 기존 좌표 위치 표시 (회색 점)
