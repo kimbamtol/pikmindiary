@@ -1,0 +1,1052 @@
+/* ==============================================
+   수첩(노트) 디자인 - 체험판 스킨
+   main.css / seasons.css 위에 덧씌운다. 기능·마크업은 그대로.
+   적용 조건: <body data-ui="notebook">
+
+   가독성 원칙
+   - 본문과 UI 글씨는 기존 본문체(Noto Sans KR)를 그대로 쓴다.
+   - 명조체는 제목처럼 큰 글씨에만 쓴다.
+   - 기울인 요소는 사진 카드에만, 그것도 아주 조금만 둔다.
+   ============================================== */
+
+body[data-ui="notebook"] {
+    /* 색: 크래프트지와 잎사귀 */
+    --primary: #4F7A3F;
+    --primary-dark: #3B5F2F;
+    --primary-light: #D7E6CE;
+    --secondary: #B8901F;
+    --accent: #B84A3E;
+
+    --text-primary: #2F2B23;
+    --text-secondary: #5E5749;
+    --text-light: #938A78;
+
+    --bg-primary: #FDFBF4;
+    --bg-secondary: #EFE6D4;
+    --bg-tertiary: #E2D5BC;
+    --bg-glass: rgba(253, 251, 244, 0.94);
+
+    /* 그림자는 종이가 겹친 느낌으로 */
+    --shadow-sm: 1px 2px 0 #E2D5BC;
+    --shadow-md: 2px 3px 0 #E2D5BC;
+    --shadow-lg: 3px 5px 14px rgba(47, 43, 35, 0.14);
+    --shadow-xl: 4px 8px 22px rgba(47, 43, 35, 0.18);
+
+    --radius-sm: 3px;
+    --radius-md: 5px;
+    --radius-lg: 8px;
+    --radius-xl: 10px;
+
+    --nb-rule: #D9CFB8;
+    --nb-tape-1: #F3DFA5;
+    --nb-tape-2: #BFDCC4;
+    --nb-tape-3: #F2C4C0;
+    /* 제목 전용 서체. 본문에는 쓰지 않는다 */
+    --nb-title: 'Nanum Myeongjo', 'Noto Sans KR', serif;
+}
+
+/* 모눈 속지 바탕 */
+body[data-ui="notebook"] {
+    background-color: var(--bg-secondary);
+    background-image:
+        linear-gradient(rgba(217, 207, 184, 0.45) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(217, 207, 184, 0.28) 1px, transparent 1px);
+    background-size: 26px 26px, 26px 26px;
+    background-attachment: fixed;
+}
+
+/* 계절 연출은 은은하게 */
+body[data-ui="notebook"] .weather-effects { opacity: 0.45; }
+body[data-ui="notebook"] .sky-object { opacity: 0.5; }
+
+/* ---------- 헤더 ---------- */
+body[data-ui="notebook"] .main-header {
+    background: var(--bg-primary);
+    border-bottom: 2px dashed var(--nb-rule);
+    box-shadow: 0 2px 10px rgba(47, 43, 35, 0.06);
+    backdrop-filter: none;
+}
+body[data-ui="notebook"] .logo-text {
+    font-family: var(--nb-title);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+}
+body[data-ui="notebook"] .logo-icon {
+    background: var(--primary);
+    color: #fff;
+    border-radius: 9px;
+    width: 34px;
+    height: 34px;
+    display: inline-grid;
+    place-items: center;
+    box-shadow: 2px 2px 0 var(--primary-dark);
+}
+body[data-ui="notebook"] .nav-link {
+    border-bottom: 2px solid transparent;
+    border-radius: 0;
+}
+body[data-ui="notebook"] .nav-link::after { display: none; }
+body[data-ui="notebook"] .nav-link:hover,
+body[data-ui="notebook"] .nav-link.active {
+    border-bottom-color: var(--primary);
+    color: var(--primary-dark);
+}
+
+/* ---------- 버튼: 종이 위 도장 ---------- */
+body[data-ui="notebook"] .btn {
+    border-radius: 8px;
+    border: 1.5px solid var(--text-primary);
+    box-shadow: 2px 2px 0 var(--text-primary);
+    transition: transform .12s ease, box-shadow .12s ease;
+}
+body[data-ui="notebook"] .btn:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 3px 3px 0 var(--text-primary);
+}
+body[data-ui="notebook"] .btn:active {
+    transform: translate(2px, 2px);
+    box-shadow: 0 0 0 var(--text-primary);
+}
+body[data-ui="notebook"] .btn-primary {
+    background: var(--primary);
+    border-color: var(--primary-dark);
+    box-shadow: 2px 2px 0 var(--primary-dark);
+    color: #fff;
+}
+body[data-ui="notebook"] .btn-primary:hover { box-shadow: 3px 3px 0 var(--primary-dark); }
+body[data-ui="notebook"] .btn-outline,
+body[data-ui="notebook"] .btn-text {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+}
+body[data-ui="notebook"] .btn-text { box-shadow: none; border-color: transparent; }
+body[data-ui="notebook"] .btn-text:hover { box-shadow: none; border-color: var(--nb-rule); }
+
+/* 아이콘 버튼 (팔레트·알림) */
+body[data-ui="notebook"] .theme-btn,
+body[data-ui="notebook"] .notification-btn {
+    background: var(--bg-primary);
+    border: 1.5px solid var(--nb-rule);
+    border-radius: 9px;
+    box-shadow: none;
+}
+body[data-ui="notebook"] .theme-btn:hover,
+body[data-ui="notebook"] .notification-btn:hover {
+    border-color: var(--primary);
+}
+
+/* ---------- 입력 ---------- */
+body[data-ui="notebook"] .form-control,
+body[data-ui="notebook"] input[type="text"],
+body[data-ui="notebook"] input[type="search"],
+body[data-ui="notebook"] input[type="password"],
+body[data-ui="notebook"] textarea,
+body[data-ui="notebook"] select {
+    background: var(--bg-primary);
+    border: 1.5px solid var(--nb-rule);
+    border-radius: 7px;
+    color: var(--text-primary);
+}
+body[data-ui="notebook"] .form-control:focus,
+body[data-ui="notebook"] textarea:focus,
+body[data-ui="notebook"] select:focus {
+    border-color: var(--primary);
+    outline: 2px solid var(--primary-light);
+    outline-offset: 1px;
+}
+
+/* ---------- 제목 ---------- */
+body[data-ui="notebook"] .page-title,
+body[data-ui="notebook"] h1,
+body[data-ui="notebook"] h2 {
+    font-family: var(--nb-title);
+    font-weight: 800;
+    letter-spacing: -0.025em;
+}
+body[data-ui="notebook"] .page-title::after {
+    content: "";
+    display: block;
+    width: 100%;
+    max-width: 230px;
+    height: 9px;
+    margin-top: -4px;
+    background: var(--nb-tape-1);
+    opacity: .7;
+}
+
+/* ---------- 카드: 테이프로 붙인 사진 ---------- */
+body[data-ui="notebook"] .card,
+body[data-ui="notebook"] .coord-card {
+    background: var(--bg-primary);
+    border: 1px solid var(--nb-rule);
+    border-radius: 3px;
+    box-shadow: 1px 2px 0 var(--bg-tertiary), 0 6px 16px rgba(47, 43, 35, 0.07);
+    padding-top: 8px;
+    position: relative;
+    overflow: visible;
+    transition: transform .18s ease, box-shadow .18s ease;
+}
+body[data-ui="notebook"] .coord-card::before {
+    content: "";
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    width: 78px;
+    height: 20px;
+    transform: translateX(-50%) rotate(-2deg);
+    background: var(--nb-tape-1);
+    opacity: .85;
+    z-index: 2;
+}
+body[data-ui="notebook"] .coord-card:nth-child(3n+2)::before {
+    background: var(--nb-tape-2);
+    transform: translateX(-50%) rotate(2deg);
+}
+body[data-ui="notebook"] .coord-card:nth-child(3n+3)::before {
+    background: var(--nb-tape-3);
+    transform: translateX(-60%) rotate(-3deg);
+}
+body[data-ui="notebook"] .coord-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 1px 2px 0 var(--bg-tertiary), 0 14px 26px rgba(47, 43, 35, 0.14);
+    z-index: 3;
+}
+body[data-ui="notebook"] .coord-card-image {
+    margin: 0 8px;
+    border-radius: 2px;
+}
+body[data-ui="notebook"] .coord-card-title {
+    font-family: var(--nb-title);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+body[data-ui="notebook"] .coord-card-postcard { color: var(--accent); }
+body[data-ui="notebook"] .coord-card-stats {
+    border-top: 1.5px dashed var(--nb-rule);
+    background: transparent;
+}
+body[data-ui="notebook"] .coord-card-stats button,
+body[data-ui="notebook"] .coord-card-stats .coord-stat {
+    border-radius: 6px;
+}
+body[data-ui="notebook"] .badge {
+    border-radius: 999px;
+    border: 1.5px solid var(--text-primary);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+}
+body[data-ui="notebook"] .badge-primary {
+    background: var(--primary);
+    border-color: var(--primary-dark);
+    color: #fff;
+}
+
+/* ---------- 사이드 위젯: 메모지(기울이지 않음) ---------- */
+body[data-ui="notebook"] .ranking-widget {
+    background: var(--bg-primary);
+    border: 1px solid var(--nb-rule);
+    border-radius: 3px;
+    box-shadow: 1px 2px 0 var(--bg-tertiary), 0 6px 16px rgba(47, 43, 35, 0.07);
+    position: relative;
+    padding-top: 6px;
+}
+/* 위쪽에 테이프 한 조각만 붙여 수첩 느낌을 낸다 */
+body[data-ui="notebook"] .ranking-widget::before {
+    content: "";
+    position: absolute;
+    top: -9px;
+    left: 50%;
+    width: 86px;
+    height: 18px;
+    transform: translateX(-50%);
+    background: var(--nb-tape-1);
+    opacity: .9;
+}
+body[data-ui="notebook"] .ranking-widget-title {
+    font-family: var(--nb-title);
+    font-weight: 800;
+    color: var(--text-primary);
+    border-bottom: 1.5px dashed var(--nb-rule);
+    padding-bottom: 8px;
+}
+body[data-ui="notebook"] .ranking-widget-item {
+    border-radius: 6px;
+}
+body[data-ui="notebook"] .ranking-widget-item:hover { background: var(--primary-light); }
+body[data-ui="notebook"] .ranker-name { color: var(--text-primary); }
+body[data-ui="notebook"] .ranker-stats { color: var(--text-secondary); }
+body[data-ui="notebook"] .ranker-score { color: var(--primary-dark); font-weight: 700; }
+body[data-ui="notebook"] .ranking-widget-more {
+    color: var(--primary-dark);
+    border-top: 1.5px dashed var(--nb-rule);
+}
+body[data-ui="notebook"] .notice-btn {
+    background: var(--bg-primary);
+    border: 1.5px solid var(--nb-rule);
+    border-radius: 8px;
+    text-align: left;
+    color: var(--text-secondary);
+}
+body[data-ui="notebook"] .notice-btn:hover {
+    border-color: var(--primary);
+    color: var(--primary-dark);
+}
+
+/* ---------- 모달: 속지 한 장 ---------- */
+body[data-ui="notebook"] .modal-content {
+    background: var(--bg-primary);
+    border: 1px solid var(--nb-rule);
+    border-radius: 4px;
+    box-shadow: 0 2px 0 var(--bg-tertiary), 0 14px 34px rgba(47, 43, 35, 0.22);
+}
+body[data-ui="notebook"] .modal-header {
+    border-bottom: 2px dashed var(--nb-rule);
+}
+body[data-ui="notebook"] .modal-header h2,
+body[data-ui="notebook"] .modal-header h3 { font-family: var(--nb-title); font-weight: 800; }
+
+/* ---------- 드롭다운 ---------- */
+body[data-ui="notebook"] .notification-dropdown-inner,
+body[data-ui="notebook"] .theme-dropdown {
+    background: var(--bg-primary);
+    border: 1.5px solid var(--nb-rule);
+    border-radius: 8px;
+    box-shadow: 3px 4px 0 var(--bg-tertiary);
+}
+
+/* ---------- 빈 상태 / 푸터 / 로딩 ---------- */
+body[data-ui="notebook"] .empty-state-title { font-family: var(--nb-title); font-weight: 800; }
+body[data-ui="notebook"] .main-footer {
+    background: var(--bg-primary);
+    border-top: 2px dashed var(--nb-rule);
+    color: var(--text-secondary);
+}
+body[data-ui="notebook"] .main-footer p,
+body[data-ui="notebook"] .main-footer a,
+body[data-ui="notebook"] .footer-note {
+    color: var(--text-secondary);
+}
+body[data-ui="notebook"] .loading-spinner { border-top-color: var(--primary); }
+
+/* ---------- 카드 댓글 모달 ---------- */
+body[data-ui="notebook"] .cm-comment-list { background: transparent; }
+body[data-ui="notebook"] .cm-comment {
+    background: var(--bg-primary);
+    border: 1px solid var(--nb-rule);
+    border-radius: 3px;
+    box-shadow: 1px 2px 0 var(--bg-tertiary);
+}
+body[data-ui="notebook"] .cm-comment-date { color: var(--text-light); }
+body[data-ui="notebook"] .cm-comment-photo { border-radius: 2px; }
+body[data-ui="notebook"] .cm-reply { border-left: 2px dashed var(--nb-rule); }
+body[data-ui="notebook"] .cm-empty,
+body[data-ui="notebook"] .cm-loading { color: var(--text-secondary); }
+body[data-ui="notebook"] .cm-form {
+    background: var(--bg-primary);
+    border-top: 2px dashed var(--nb-rule);
+}
+body[data-ui="notebook"] .modal-overlay { background: rgba(47, 43, 35, 0.55); }
+
+/* 투표 띠에 가리지 않도록 아래 여백 */
+body[data-ui="notebook"] { padding-bottom: 104px; }
+@media (max-width: 700px) {
+    body[data-ui="notebook"] { padding-bottom: 150px; }
+}
+
+/* ==============================================
+   랭킹 페이지
+   - 작은 글씨(0.7~0.9rem)와 회색 글자를 키우고 진하게
+   - 그라데이션 단상을 평평한 색으로
+   ============================================== */
+body[data-ui="notebook"] .ranking-page {
+    background: var(--bg-primary);
+    border: 1px solid var(--nb-rule);
+    border-radius: 3px;
+    box-shadow: 1px 2px 0 var(--bg-tertiary), 0 6px 18px rgba(47, 43, 35, 0.08);
+}
+body[data-ui="notebook"] .ranking-page .page-title {
+    text-align: left;
+    color: var(--text-primary);
+}
+body[data-ui="notebook"] .ranking-page .page-title::after { margin-left: 0; }
+
+/* 기간 탭 */
+body[data-ui="notebook"] .period-tabs {
+    background: var(--bg-secondary);
+    border-radius: 999px;
+    gap: 4px;
+}
+body[data-ui="notebook"] .period-tabs .tab {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    border-radius: 999px;
+}
+body[data-ui="notebook"] .period-tabs .tab.active {
+    background: var(--primary);
+    color: #fff;
+    font-weight: 700;
+}
+body[data-ui="notebook"] .period-label {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+}
+
+/* 4위 이하 목록 */
+body[data-ui="notebook"] .ranking-divider {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+}
+body[data-ui="notebook"] .ranking-divider::before,
+body[data-ui="notebook"] .ranking-divider::after {
+    background: var(--nb-rule);
+}
+body[data-ui="notebook"] .ranking-item {
+    background: var(--bg-primary);
+    border: 1px solid var(--nb-rule);
+    border-radius: 4px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+}
+body[data-ui="notebook"] .ranking-item:hover { background: var(--primary-light); }
+body[data-ui="notebook"] .ranking-item .rank {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+}
+body[data-ui="notebook"] .ranking-item .nickname {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+body[data-ui="notebook"] .ranking-item .score-detail {
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
+}
+body[data-ui="notebook"] .ranking-item .score-value {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--primary-dark);
+    font-variant-numeric: tabular-nums;
+}
+body[data-ui="notebook"] .ranking-item .score-label { font-size: 0.85rem; color: var(--text-secondary); }
+body[data-ui="notebook"] .ranking-item .avatar-placeholder { background: var(--primary); font-size: 1rem; }
+
+/* ==============================================
+   안내 페이지
+   - 본문 글자 키우고 진하게, 섹션 구분을 점선으로
+   ============================================== */
+body[data-ui="notebook"] .guide-page {
+    background: var(--bg-primary);
+    border: 1px solid var(--nb-rule);
+    border-radius: 3px;
+    box-shadow: 1px 2px 0 var(--bg-tertiary), 0 6px 18px rgba(47, 43, 35, 0.08);
+}
+body[data-ui="notebook"] .guide-page .page-title {
+    text-align: left;
+    font-size: 2.1rem;
+}
+body[data-ui="notebook"] .guide-page .page-title::after { margin-left: 0; }
+body[data-ui="notebook"] .guide-section {
+    border-bottom: 2px dashed var(--nb-rule);
+}
+body[data-ui="notebook"] .guide-section h2 {
+    font-family: var(--nb-title);
+    font-weight: 800;
+    font-size: 1.45rem;
+    color: var(--primary-dark);
+    letter-spacing: -0.02em;
+}
+body[data-ui="notebook"] .guide-section p,
+body[data-ui="notebook"] .guide-section li {
+    font-size: 1.02rem;
+    color: var(--text-primary);
+    line-height: 1.85;
+}
+body[data-ui="notebook"] .guide-section ol,
+body[data-ui="notebook"] .guide-section ul {
+    color: var(--text-primary);
+    padding-left: 1.4rem;
+}
+body[data-ui="notebook"] .guide-section li { margin-bottom: 0.6rem; }
+body[data-ui="notebook"] .guide-section li::marker { color: var(--primary); font-weight: 700; }
+body[data-ui="notebook"] .tip {
+    font-size: 0.98rem;
+    color: var(--primary-dark);
+    background: var(--primary-light);
+    border-radius: 6px;
+    line-height: 1.7;
+}
+body[data-ui="notebook"] .validity-example { flex-wrap: wrap; }
+
+/* ==============================================
+   명예의 전당: 단상을 없애고 '상장 스티커' 형태로
+   1~3위를 같은 높이의 종이 카드로 두고,
+   순위는 크기와 작은 효과로만 구분한다.
+   ============================================== */
+body[data-ui="notebook"] .hall-of-fame {
+    align-items: stretch;          /* 계단식 단상 제거 */
+    gap: 16px;
+    padding: 26px 0 18px;
+    position: relative;
+}
+
+/* 뒤에 깔리는 색종이 조각 (아주 연하게) */
+body[data-ui="notebook"] .hall-of-fame::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 72px;
+    background-image:
+        radial-gradient(circle at 12% 30%, var(--nb-tape-3) 0 4px, transparent 5px),
+        radial-gradient(circle at 28% 62%, var(--nb-tape-2) 0 3px, transparent 4px),
+        radial-gradient(circle at 46% 22%, var(--nb-tape-1) 0 4px, transparent 5px),
+        radial-gradient(circle at 68% 58%, var(--nb-tape-3) 0 3px, transparent 4px),
+        radial-gradient(circle at 86% 28%, var(--nb-tape-2) 0 4px, transparent 5px);
+    opacity: .55;
+    pointer-events: none;
+}
+
+body[data-ui="notebook"] .hof-card {
+    background: var(--bg-primary);
+    border: 1px solid var(--nb-rule);
+    border-radius: 4px;
+    padding: 16px 14px 14px;
+    box-shadow: 1px 2px 0 var(--bg-tertiary), 0 6px 16px rgba(47, 43, 35, 0.07);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 150px;
+    transition: transform .2s ease, box-shadow .2s ease;
+}
+/* 카드 위 테이프 */
+body[data-ui="notebook"] .hof-card::before {
+    content: "";
+    position: absolute;
+    top: -9px;
+    left: 50%;
+    width: 64px;
+    height: 17px;
+    transform: translateX(-50%);
+    opacity: .9;
+}
+body[data-ui="notebook"] .hof-card.first::before  { background: var(--nb-tape-1); }
+body[data-ui="notebook"] .hof-card.second::before { background: var(--nb-tape-2); }
+body[data-ui="notebook"] .hof-card.third::before  { background: var(--nb-tape-3); }
+
+body[data-ui="notebook"] .hof-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 1px 2px 0 var(--bg-tertiary), 0 14px 26px rgba(47, 43, 35, 0.16);
+}
+
+/* 1위만 조금 더 크고, 아주 천천히 흔들린다 */
+body[data-ui="notebook"] .hof-card.first {
+    min-width: 176px;
+    padding: 20px 16px 16px;
+    background: #FFFDF2;
+    border-color: #E8D58F;
+    animation: nbSway 5s ease-in-out infinite;
+}
+@keyframes nbSway {
+    0%, 100% { transform: rotate(-0.7deg) translateY(0); }
+    50%      { transform: rotate(0.7deg) translateY(-3px); }
+}
+body[data-ui="notebook"] .hof-card.first:hover { animation-play-state: paused; }
+
+/* 메달: 처음에 톡 튀어나오고, 1위는 계속 떠 있다 */
+body[data-ui="notebook"] .hof-medal {
+    font-size: 2.1rem;
+    line-height: 1;
+    animation: nbPop .55s cubic-bezier(.2, 1.5, .4, 1) both;
+}
+body[data-ui="notebook"] .hof-card.first .hof-medal {
+    font-size: 2.7rem;
+    animation: nbPop .55s cubic-bezier(.2, 1.5, .4, 1) both, nbFloat 2.6s ease-in-out .6s infinite;
+}
+body[data-ui="notebook"] .hof-card.second .hof-medal { animation-delay: .1s; }
+body[data-ui="notebook"] .hof-card.third .hof-medal { animation-delay: .2s; }
+@keyframes nbPop {
+    0%   { transform: scale(.4) rotate(-18deg); opacity: 0; }
+    100% { transform: scale(1) rotate(0); opacity: 1; }
+}
+@keyframes nbFloat {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-5px); }
+}
+
+/* 1위 아바타 둘레에 반짝임 */
+body[data-ui="notebook"] .hof-avatar {
+    border: 3px solid var(--bg-primary);
+    box-shadow: 0 2px 0 var(--bg-tertiary);
+    position: relative;
+}
+body[data-ui="notebook"] .hof-card.first .hof-avatar::before,
+body[data-ui="notebook"] .hof-card.first .hof-avatar::after {
+    content: "✦";
+    position: absolute;
+    color: #D9A520;
+    pointer-events: none;
+    animation: nbTwinkle 2.2s ease-in-out infinite;
+}
+body[data-ui="notebook"] .hof-card.first .hof-avatar::before {
+    font-size: 1rem;
+    top: -6px;
+    right: -10px;
+}
+body[data-ui="notebook"] .hof-card.first .hof-avatar::after {
+    font-size: .75rem;
+    bottom: -2px;
+    left: -10px;
+    animation-delay: 1.1s;
+}
+@keyframes nbTwinkle {
+    0%, 100% { opacity: .25; transform: scale(.7) rotate(0); }
+    50%      { opacity: 1;   transform: scale(1.15) rotate(20deg); }
+}
+body[data-ui="notebook"] .hof-avatar .avatar-placeholder { background: var(--primary); }
+
+/* 이름 아래 작은 리본 띠 */
+body[data-ui="notebook"] .hof-name {
+    font-size: 1.08rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    position: relative;
+    padding-bottom: 4px;
+}
+body[data-ui="notebook"] .hof-card.first .hof-name { font-size: 1.22rem; }
+body[data-ui="notebook"] .hof-name::after {
+    content: "";
+    display: block;
+    width: 34px;
+    height: 6px;
+    margin: 4px auto 0;
+    border-radius: 999px;
+    background: var(--nb-tape-1);
+}
+body[data-ui="notebook"] .hof-card.second .hof-name::after { background: var(--nb-tape-2); }
+body[data-ui="notebook"] .hof-card.third .hof-name::after { background: var(--nb-tape-3); }
+
+body[data-ui="notebook"] .hof-bio {
+    font-size: .86rem;
+    color: var(--text-secondary);
+    max-width: 150px;
+    margin-bottom: 10px;
+}
+
+/* 점수: 단상 대신 종이 태그 */
+body[data-ui="notebook"] .hof-pedestal {
+    margin-top: auto;              /* 카드마다 점수 태그를 바닥에 맞춘다 */
+    background: var(--bg-secondary) !important;
+    border: 1px dashed var(--nb-rule);
+    border-radius: 8px;
+    min-width: 0;
+    min-height: 0 !important;
+    width: 100%;
+    margin-top: 10px;
+    padding: 10px 12px 9px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+body[data-ui="notebook"] .hof-card.first .hof-pedestal {
+    background: #FBF0CE !important;
+    border-color: #E0CB84;
+}
+body[data-ui="notebook"] .hof-score {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--primary-dark);
+    font-variant-numeric: tabular-nums;
+    line-height: 1.1;
+}
+body[data-ui="notebook"] .hof-card.first .hof-score { font-size: 1.8rem; color: #8A6512; }
+body[data-ui="notebook"] .hof-score-label { font-size: .85rem; color: var(--text-secondary); }
+body[data-ui="notebook"] .hof-detail {
+    font-size: .85rem;
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
+    justify-content: center;
+}
+
+/* 움직임을 줄이도록 설정한 사용자에게는 정지 상태로 */
+@media (prefers-reduced-motion: reduce) {
+    body[data-ui="notebook"] .hof-card.first,
+    body[data-ui="notebook"] .hof-medal,
+    body[data-ui="notebook"] .hof-card.first .hof-medal,
+    body[data-ui="notebook"] .hof-card.first .hof-avatar::before,
+    body[data-ui="notebook"] .hof-card.first .hof-avatar::after {
+        animation: none;
+    }
+}
+
+/* 좁은 화면에서는 세로로 쌓고 1위가 맨 위 */
+@media (max-width: 560px) {
+    body[data-ui="notebook"] .hall-of-fame { flex-direction: column; align-items: center; }
+    body[data-ui="notebook"] .hof-card { width: 100%; max-width: 320px; }
+    body[data-ui="notebook"] .hof-card.first { order: 1; }
+    body[data-ui="notebook"] .hof-card.second { order: 2; }
+    body[data-ui="notebook"] .hof-card.third { order: 3; }
+}
+
+/* ---------- 1~3위 자기소개: 마우스를 올리면 메모로 펼침 ---------- */
+body[data-ui="notebook"] .hof-bio {
+    cursor: help;
+    position: relative;
+}
+/* 펼쳐지는 메모 (카드 위쪽에 뜬다. 자리 밀림 없음) */
+body[data-ui="notebook"] .hof-bio[data-bio]::after {
+    content: attr(data-bio);
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + 10px);
+    transform: translateX(-50%) translateY(4px);
+    width: max-content;
+    max-width: 230px;
+    white-space: normal;
+    text-align: left;
+    line-height: 1.55;
+    font-size: .88rem;
+    color: var(--text-primary);
+    background: #FFFDF2;
+    border: 1px solid var(--nb-rule);
+    border-radius: 4px;
+    padding: 9px 11px;
+    box-shadow: 1px 2px 0 var(--bg-tertiary), 0 8px 18px rgba(47, 43, 35, 0.16);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .16s ease, transform .16s ease;
+    pointer-events: none;
+    z-index: 20;
+}
+body[data-ui="notebook"] .hof-card:hover .hof-bio[data-bio]::after,
+body[data-ui="notebook"] .hof-card:focus-within .hof-bio[data-bio]::after,
+body[data-ui="notebook"] .hof-bio[data-bio]:hover::after {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+}
+/* 내용이 빈 사람은 메모를 띄우지 않는다 */
+body[data-ui="notebook"] .hof-bio[data-bio=""]::after { display: none; }
+
+/* 좁은 화면에서는 가릴 이유가 없으니 전부 펼쳐 보여준다 */
+@media (max-width: 560px) {
+    body[data-ui="notebook"] .hof-bio {
+        white-space: normal;
+        overflow: visible;
+        text-overflow: clip;
+        max-width: 100%;
+    }
+    body[data-ui="notebook"] .hof-bio[data-bio]::after { display: none; }
+}
+
+/* ---------- 랭킹 페이지 입장 색종이 ---------- */
+.nb-confetti {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 1800;
+}
+.nb-confetti i {
+    position: absolute;
+    top: -24px;
+    width: 9px;
+    height: 13px;
+    opacity: 0;
+    animation-name: nbConfettiFall;
+    animation-timing-function: cubic-bezier(.25, .6, .5, 1);
+    animation-fill-mode: forwards;
+}
+.nb-confetti i.c1 { background: #F3DFA5; }
+.nb-confetti i.c2 { background: #BFDCC4; }
+.nb-confetti i.c3 { background: #F2C4C0; }
+.nb-confetti i.c4 { background: #A8CBE8; }
+.nb-confetti i.c5 { background: #D9C3E8; }
+.nb-confetti i.round { border-radius: 50%; width: 10px; height: 10px; }
+.nb-confetti i.slim { width: 5px; height: 16px; }
+@keyframes nbConfettiFall {
+    0%   { opacity: 0; transform: translate3d(0, -10px, 0) rotate(0deg); }
+    8%   { opacity: 1; }
+    100% { opacity: 0; transform: translate3d(var(--nb-drift, 30px), 105vh, 0) rotate(var(--nb-spin, 540deg)); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .nb-confetti { display: none; }
+}
+
+/* ==============================================
+   피크민 자랑 게시판
+   ============================================== */
+body[data-ui="notebook"] .brag-intro { color: var(--text-secondary); }
+
+/* 이번 주 1위 (목록 상단) */
+body[data-ui="notebook"] .brag-top-label {
+    background: var(--secondary);
+    color: #241B02;
+    border-radius: 3px;
+    font-weight: 700;
+}
+body[data-ui="notebook"] .brag-top-card {
+    background: var(--bg-primary);
+    border: 1px solid var(--nb-rule);
+    border-radius: 3px;
+    box-shadow: 1px 2px 0 var(--bg-tertiary), 0 6px 16px rgba(47, 43, 35, 0.07);
+    position: relative;
+}
+body[data-ui="notebook"] .brag-top-card::before {
+    content: "";
+    position: absolute;
+    top: -9px; left: 42px;
+    width: 76px; height: 18px;
+    background: var(--nb-tape-1);
+    opacity: .9;
+}
+body[data-ui="notebook"] .brag-top-photo { border-radius: 2px; }
+body[data-ui="notebook"] .brag-top-caption { font-family: var(--nb-title); font-weight: 800; font-size: 1.25rem; }
+
+/* 정렬 버튼 */
+body[data-ui="notebook"] .brag-sort {
+    background: var(--bg-primary);
+    border: 1.5px solid var(--nb-rule);
+    border-radius: 999px;
+    color: var(--text-secondary);
+}
+body[data-ui="notebook"] .brag-sort.on {
+    background: var(--primary);
+    border-color: var(--primary-dark);
+    color: #fff;
+}
+
+/* 사진 카드: 테이프로 붙인 인화지 */
+body[data-ui="notebook"] .brag-card {
+    background: var(--bg-primary);
+    border: 1px solid var(--nb-rule);
+    border-radius: 3px;
+    padding: 8px 8px 0;
+    box-shadow: 1px 2px 0 var(--bg-tertiary), 0 6px 16px rgba(47, 43, 35, 0.07);
+    position: relative;
+    overflow: visible;
+}
+body[data-ui="notebook"] .brag-card::before {
+    content: "";
+    position: absolute;
+    top: -9px; left: 50%;
+    width: 64px; height: 17px;
+    transform: translateX(-50%) rotate(-2deg);
+    background: var(--nb-tape-1);
+    opacity: .85;
+    z-index: 2;
+}
+body[data-ui="notebook"] .brag-card:nth-child(4n+2)::before { background: var(--nb-tape-2); transform: translateX(-50%) rotate(2deg); }
+body[data-ui="notebook"] .brag-card:nth-child(4n+3)::before { background: var(--nb-tape-3); transform: translateX(-58%) rotate(-3deg); }
+body[data-ui="notebook"] .brag-card:nth-child(4n+4)::before { background: #CBDCEA; transform: translateX(-44%) rotate(2.5deg); }
+body[data-ui="notebook"] .brag-card:hover { transform: translateY(-4px); }
+body[data-ui="notebook"] .brag-photo { border-radius: 2px; }
+body[data-ui="notebook"] .brag-caption { color: var(--text-primary); }
+body[data-ui="notebook"] .brag-actions { border-top: 1.5px dashed var(--nb-rule); margin: 6px 0 0; padding-top: 8px; }
+body[data-ui="notebook"] .brag-like,
+body[data-ui="notebook"] .brag-comment-link {
+    background: transparent;
+    border-radius: 6px;
+    color: var(--text-secondary);
+}
+body[data-ui="notebook"] .brag-like:hover,
+body[data-ui="notebook"] .brag-comment-link:hover { background: var(--bg-secondary); }
+body[data-ui="notebook"] .brag-like.on { background: #F7DFDC; color: #A2453B; }
+
+/* 상세 */
+body[data-ui="notebook"] .brag-detail-photo {
+    background: var(--bg-primary);
+    border: 1px solid var(--nb-rule);
+    border-radius: 3px;
+    padding: 9px;
+    box-shadow: 1px 2px 0 var(--bg-tertiary), 0 8px 20px rgba(47, 43, 35, 0.10);
+}
+body[data-ui="notebook"] .brag-detail-caption { font-family: var(--nb-title); font-weight: 700; font-size: 1.3rem; }
+body[data-ui="notebook"] .brag-like-big {
+    background: var(--bg-primary);
+    border: 1.5px solid var(--text-primary);
+    border-radius: 999px;
+    box-shadow: 2px 2px 0 var(--text-primary);
+}
+body[data-ui="notebook"] .brag-like-big.on {
+    background: #F7DFDC;
+    border-color: #A2453B;
+    color: #A2453B;
+    box-shadow: 2px 2px 0 #A2453B;
+}
+body[data-ui="notebook"] .brag-comments-title { font-family: var(--nb-title); font-weight: 800; }
+body[data-ui="notebook"] .brag-comment,
+body[data-ui="notebook"] .brag-comment-form {
+    background: var(--bg-primary);
+    border: 1px solid var(--nb-rule);
+    border-radius: 3px;
+    box-shadow: 1px 2px 0 var(--bg-tertiary);
+}
+body[data-ui="notebook"] .brag-comment-reply { border-left: 2px dashed var(--nb-rule); }
+body[data-ui="notebook"] .brag-comment-photo { border-radius: 2px; }
+
+/* 작성·삭제 폼 */
+body[data-ui="notebook"] .brag-form-page {
+    background: var(--bg-primary);
+    border: 1px solid var(--nb-rule);
+    border-radius: 3px;
+    box-shadow: 1px 2px 0 var(--bg-tertiary), 0 6px 18px rgba(47, 43, 35, 0.08);
+}
+body[data-ui="notebook"] .brag-form-page .page-title { text-align: left; }
+body[data-ui="notebook"] .brag-form-page .page-title::after { margin-left: 0; }
+
+/* 좌표 목록 우측 위젯 */
+body[data-ui="notebook"] .brag-widget {
+    background: var(--bg-primary);
+    border: 1px solid var(--nb-rule);
+    border-radius: 3px;
+    box-shadow: 1px 2px 0 var(--bg-tertiary), 0 6px 16px rgba(47, 43, 35, 0.07);
+    position: relative;
+    padding-top: 14px;
+}
+body[data-ui="notebook"] .brag-widget::before {
+    content: "";
+    position: absolute;
+    top: -9px; left: 50%;
+    width: 80px; height: 18px;
+    transform: translateX(-50%);
+    background: var(--nb-tape-3);
+    opacity: .9;
+}
+body[data-ui="notebook"] .brag-widget-title {
+    font-family: var(--nb-title);
+    font-weight: 800;
+    font-size: 1.02rem;
+    border-bottom: 1.5px dashed var(--nb-rule);
+    padding-bottom: 8px;
+}
+body[data-ui="notebook"] .brag-widget-photo { border-radius: 2px; }
+body[data-ui="notebook"] .brag-widget-more {
+    border-top: 1.5px dashed var(--nb-rule);
+    color: var(--primary-dark);
+}
+
+/* ==============================================
+   어두운 바탕(밤 / 비 / 폭풍)에서의 가독성
+   - 바탕 위에 바로 놓이는 글씨는 밝게
+   - 밝은 종이 패널 안의 글씨는 어두운 잉크 그대로
+   ============================================== */
+body[data-ui="notebook"][data-time="night"],
+body[data-ui="notebook"][data-weather="rain"],
+body[data-ui="notebook"][data-weather="storm"] {
+    --nb-on-dark: #F0EDE2;
+    --nb-on-dark-soft: #C9C4B4;
+}
+
+/* (1) 바탕 위 글씨 */
+body[data-ui="notebook"][data-time="night"] .page-title,
+body[data-ui="notebook"][data-weather="rain"] .page-title,
+body[data-ui="notebook"][data-weather="storm"] .page-title {
+    color: var(--nb-on-dark) !important;
+}
+body[data-ui="notebook"][data-time="night"] .brag-intro,
+body[data-ui="notebook"][data-time="night"] .brag-count,
+body[data-ui="notebook"][data-time="night"] .result-line,
+body[data-ui="notebook"][data-time="night"] .scroll-loading,
+body[data-ui="notebook"][data-time="night"] .brag-pager-now,
+body[data-ui="notebook"][data-weather="rain"] .brag-intro,
+body[data-ui="notebook"][data-weather="rain"] .brag-count,
+body[data-ui="notebook"][data-weather="rain"] .result-line,
+body[data-ui="notebook"][data-weather="rain"] .scroll-loading,
+body[data-ui="notebook"][data-weather="rain"] .brag-pager-now,
+body[data-ui="notebook"][data-weather="storm"] .brag-intro,
+body[data-ui="notebook"][data-weather="storm"] .brag-count,
+body[data-ui="notebook"][data-weather="storm"] .result-line,
+body[data-ui="notebook"][data-weather="storm"] .scroll-loading,
+body[data-ui="notebook"][data-weather="storm"] .brag-pager-now {
+    color: var(--nb-on-dark-soft) !important;
+}
+body[data-ui="notebook"][data-time="night"] .result-line b,
+body[data-ui="notebook"][data-weather="rain"] .result-line b,
+body[data-ui="notebook"][data-weather="storm"] .result-line b {
+    color: var(--nb-on-dark) !important;
+}
+
+/* (2) 밝은 종이 패널 '안'의 제목은 어두운 잉크를 되찾는다 */
+body[data-ui="notebook"][data-time="night"] .ranking-page .page-title,
+body[data-ui="notebook"][data-time="night"] .guide-page .page-title,
+body[data-ui="notebook"][data-time="night"] .brag-form-page .page-title,
+body[data-ui="notebook"][data-weather="rain"] .ranking-page .page-title,
+body[data-ui="notebook"][data-weather="rain"] .guide-page .page-title,
+body[data-ui="notebook"][data-weather="rain"] .brag-form-page .page-title,
+body[data-ui="notebook"][data-weather="storm"] .ranking-page .page-title,
+body[data-ui="notebook"][data-weather="storm"] .guide-page .page-title,
+body[data-ui="notebook"][data-weather="storm"] .brag-form-page .page-title {
+    color: var(--text-primary) !important;
+    text-shadow: none !important;
+}
+/* 패널 안 본문·소제목도 잉크 유지 */
+body[data-ui="notebook"][data-time="night"] .guide-section h2,
+body[data-ui="notebook"][data-weather="rain"] .guide-section h2,
+body[data-ui="notebook"][data-weather="storm"] .guide-section h2 {
+    color: var(--primary-dark) !important;
+}
+body[data-ui="notebook"][data-time="night"] .guide-section p,
+body[data-ui="notebook"][data-time="night"] .guide-section li,
+body[data-ui="notebook"][data-time="night"] .ranking-page .period-label,
+body[data-ui="notebook"][data-weather="rain"] .guide-section p,
+body[data-ui="notebook"][data-weather="rain"] .guide-section li,
+body[data-ui="notebook"][data-weather="rain"] .ranking-page .period-label,
+body[data-ui="notebook"][data-weather="storm"] .guide-section p,
+body[data-ui="notebook"][data-weather="storm"] .guide-section li,
+body[data-ui="notebook"][data-weather="storm"] .ranking-page .period-label {
+    color: var(--text-primary) !important;
+    text-shadow: none !important;
+}
+
+/* (3) 종이 질감이 사라지지 않도록 바탕에 은은한 모눈을 유지 */
+body[data-ui="notebook"][data-time="night"] {
+    background-image:
+        linear-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px) !important;
+    background-size: 26px 26px, 26px 26px !important;
+    background-color: #1F2733 !important;
+    background-attachment: fixed !important;
+}
+
+/* 자랑 게시판 주차 구분 / 전당 */
+body[data-ui="notebook"] .brag-week-title {
+    font-family: var(--nb-title);
+    font-weight: 800;
+    border-bottom: 2px dashed var(--nb-rule);
+}
+body[data-ui="notebook"] .brag-week-now {
+    background: var(--primary);
+    color: #fff;
+    border-radius: 3px;
+}
+body[data-ui="notebook"] .brag-hall {
+    border-top: 2px dashed var(--nb-rule);
+}
+body[data-ui="notebook"] .brag-hall-title { font-family: var(--nb-title); font-weight: 800; }
+body[data-ui="notebook"] .brag-hall-photo {
+    border-radius: 2px;
+    border: 1px solid var(--nb-rule);
+    padding: 4px;
+    background: var(--bg-primary);
+}
+body[data-ui="notebook"][data-time="night"] .brag-week-range,
+body[data-ui="notebook"][data-time="night"] .brag-week-count,
+body[data-ui="notebook"][data-time="night"] .brag-week-title,
+body[data-ui="notebook"][data-time="night"] .brag-hall-title,
+body[data-ui="notebook"][data-time="night"] .brag-hall-week,
+body[data-ui="notebook"][data-time="night"] .brag-hall-name,
+body[data-ui="notebook"][data-time="night"] .brag-hall-likes,
+body[data-ui="notebook"][data-weather="rain"] .brag-week-title,
+body[data-ui="notebook"][data-weather="storm"] .brag-week-title {
+    color: var(--nb-on-dark) !important;
+}
+body[data-ui="notebook"][data-time="night"] .brag-week-range,
+body[data-ui="notebook"][data-time="night"] .brag-week-count,
+body[data-ui="notebook"][data-time="night"] .brag-hall-week,
+body[data-ui="notebook"][data-time="night"] .brag-hall-likes {
+    color: var(--nb-on-dark-soft) !important;
+}

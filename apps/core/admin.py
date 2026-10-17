@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils.translation import gettext as _
-from .models import SiteNotice, Suggestion, SiteSettings
+from .models import SiteNotice, Suggestion, SiteSettings, DesignVote
 
 
 @admin.register(SiteNotice)
@@ -97,6 +97,10 @@ class SiteSettingsAdmin(admin.ModelAdmin):
             'fields': ('daily_upload_limit', 'ranker_limit_exempt_rank'),
             'description': '랭커 제한 해제 순위를 0으로 설정하면 비활성화됩니다.'
         }),
+        ('새 디자인(수첩) 체험', {
+            'fields': ('design_beta_enabled', 'design_beta_popup_enabled'),
+            'description': '체험 공개를 끄면 팝업·전환 버튼이 모두 사라지고 모든 유저가 기존 디자인을 봅니다.'
+        }),
     )
     
     def has_add_permission(self, request):
@@ -104,4 +108,31 @@ class SiteSettingsAdmin(admin.ModelAdmin):
         return not SiteSettings.objects.exists()
     
     def has_delete_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(DesignVote)
+class DesignVoteAdmin(admin.ModelAdmin):
+    list_display = ['voter', 'choice', 'comment', 'updated_at']
+    list_filter = ['choice', 'updated_at']
+    search_fields = ['user__nickname', 'comment', 'session_key']
+    readonly_fields = ['user', 'session_key', 'ip_address', 'choice', 'comment', 'created_at', 'updated_at']
+    ordering = ['-updated_at']
+
+    def voter(self, obj):
+        if obj.user:
+            return obj.user.nickname
+        return f'비회원 ({obj.session_key[:8]})'
+    voter.short_description = '투표자'
+
+    def changelist_view(self, request, extra_context=None):
+        tally = DesignVote.tally()
+        self.message_user(
+            request,
+            f"집계 - 새 디자인 {tally['new']}표({tally['new_pct']}%) · "
+            f"예전 {tally['old']}표({tally['old_pct']}%) · 전체 {tally['total']}표"
+        )
+        return super().changelist_view(request, extra_context)
+
+    def has_add_permission(self, request):
         return False

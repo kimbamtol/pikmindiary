@@ -1,0 +1,324 @@
+/* ==============================================
+   새 디자인 체험 - 안내 팝업 / 전환 토글 / 투표 띠
+   기존 디자인과 수첩 디자인 양쪽에서 함께 쓰인다.
+   ============================================== */
+
+/* ---------- 헤더 전환 토글 (팔레트 아이콘 왼쪽) ---------- */
+.beta-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 13px;
+    border-radius: 999px;
+    border: 1.5px solid #5E8B4C;
+    background: #fff;
+    color: #3F6633;
+    font-size: 0.84rem;
+    font-weight: 700;
+    line-height: 1;
+    white-space: nowrap;
+    text-decoration: none;
+    transition: background .15s ease, transform .15s ease, color .15s ease;
+}
+.beta-toggle:hover {
+    background: #EDF5E8;
+    transform: translateY(-1px);
+}
+.beta-toggle.on {
+    background: #44702F;
+    border-color: #2F5220;
+    color: #fff;
+}
+.beta-toggle.on:hover { background: #375E26; }
+.beta-toggle-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #5E8B4C;
+    flex: none;
+}
+.beta-toggle.on .beta-toggle-dot {
+    background: #fff;
+    animation: betaPulse 2.2s ease-in-out infinite;
+}
+@keyframes betaPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: .35; }
+}
+.beta-toggle.mini {
+    padding: 0;
+    width: 38px;
+    height: 38px;
+    justify-content: center;
+    border-radius: 10px;
+}
+.beta-toggle.mini .beta-toggle-text { display: none; }
+@media (prefers-reduced-motion: reduce) {
+    .beta-toggle.on .beta-toggle-dot { animation: none; }
+}
+
+/* ---------- 안내 팝업 ---------- */
+.beta-popup-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 3000;
+    background: rgba(40, 38, 32, 0.52);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .25s ease, visibility .25s ease;
+}
+.beta-popup-backdrop.show { opacity: 1; visibility: visible; }
+
+.beta-popup {
+    position: relative;
+    width: 100%;
+    max-width: 430px;
+    background: #FDFBF4;
+    border: 1px solid #D9CFB8;
+    border-radius: 4px;
+    padding: 30px 26px 22px;
+    box-shadow: 0 2px 0 #E2D5BC, 0 18px 40px rgba(40, 38, 32, 0.28);
+    transform: translateY(14px);
+    transition: transform .28s cubic-bezier(.2, .8, .3, 1);
+    text-align: center;
+}
+.beta-popup-backdrop.show .beta-popup { transform: translateY(0); }
+
+.beta-popup-tape {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    width: 110px;
+    height: 24px;
+    transform: translateX(-50%) rotate(-2deg);
+    background: #F3DFA5;
+    opacity: .9;
+}
+
+.beta-popup-title {
+    font-family: 'Nanum Myeongjo', 'Noto Sans KR', serif;
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    color: #39342B;
+    margin: 0 0 10px;
+    line-height: 1.25;
+}
+.beta-popup-desc {
+    font-size: 0.94rem;
+    color: #5C5648;
+    line-height: 1.65;
+    margin: 0 0 16px;
+}
+.beta-popup-preview {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+}
+.bp-chip {
+    font-size: 0.85rem;
+    font-weight: 500;
+    padding: 5px 12px;
+    border-radius: 3px;
+    color: #4A4336;
+}
+.bp-chip-1 { background: #F3DFA5; }
+.bp-chip-2 { background: #BFDCC4; }
+.bp-chip-3 { background: #F2C4C0; }
+
+.beta-popup-note {
+    font-size: 0.85rem;
+    color: #6F6758;
+    background: #F4EFE2;
+    border-radius: 6px;
+    padding: 10px 12px;
+    margin: 0 0 20px;
+    line-height: 1.6;
+}
+.beta-popup-note b { color: #446837; }
+
+.beta-popup-actions {
+    display: flex;
+    gap: 9px;
+    margin-bottom: 12px;
+}
+.beta-btn {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 13px 14px;
+    border-radius: 8px;
+    font-size: 0.97rem;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: none;
+    border: 1.5px solid #39342B;
+    transition: transform .12s ease, box-shadow .12s ease;
+    box-shadow: 2px 2px 0 #39342B;
+}
+.beta-btn:active { transform: translate(2px, 2px); box-shadow: none; }
+.beta-btn-go { background: #5E8B4C; border-color: #446837; color: #fff; box-shadow: 2px 2px 0 #446837; }
+.beta-btn-go:hover { background: #4D7840; }
+.beta-btn-later { background: #FDFBF4; color: #5C5648; }
+.beta-btn-later:hover { background: #F0EADC; }
+
+.beta-popup-week {
+    background: none;
+    border: none;
+    color: #8A8170;
+    font-size: 0.86rem;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+    padding: 4px;
+}
+.beta-popup-week:hover { color: #5C5648; }
+.beta-popup-foot {
+    margin: 12px 0 0;
+    font-size: 0.78rem;
+    color: #A49A88;
+    line-height: 1.55;
+}
+.beta-popup-foot b { color: #6F6758; }
+
+/* ---------- 하단 투표 띠 ---------- */
+.beta-votebar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 2500;
+    background: #FDFBF4;
+    border-top: 2px dashed #D9CFB8;
+    box-shadow: 0 -6px 20px rgba(57, 52, 43, 0.12);
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px));
+}
+.beta-votebar-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+.beta-votebar-text {
+    font-size: 0.95rem;
+    color: #4A4336;
+    line-height: 1.5;
+    flex: 1 1 260px;
+    min-width: 0;
+}
+.beta-votebar-text b { color: #39342B; }
+.bv-ask, .bv-thanks { display: block; color: #6F6758; font-size: 0.88rem; }
+/* hidden 속성이 항상 이긴다 */
+.beta-votebar [hidden],
+.beta-votebar-reopen[hidden] { display: none !important; }
+
+.beta-votebar-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+.bv-btn {
+    border: 1.5px solid #39342B;
+    background: #fff;
+    color: #39342B;
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-size: 0.93rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 2px 2px 0 #39342B;
+    transition: transform .12s ease, box-shadow .12s ease, background .12s ease;
+}
+.bv-btn:hover { background: #F4EFE2; }
+.bv-btn:active { transform: translate(2px, 2px); box-shadow: none; }
+.bv-btn:disabled { opacity: .55; cursor: default; }
+.bv-new.chosen { background: #5E8B4C; border-color: #446837; color: #fff; box-shadow: 2px 2px 0 #446837; }
+.bv-old.chosen { background: #C85A4E; border-color: #A2453B; color: #fff; box-shadow: 2px 2px 0 #A2453B; }
+.bv-back {
+    font-size: 0.88rem;
+    color: #5C5648;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    padding: 6px 2px;
+}
+.bv-back:hover { color: #39342B; }
+.bv-close {
+    background: none;
+    border: none;
+    color: #6F6758;
+    font-size: 0.85rem;
+    cursor: pointer;
+    padding: 6px 8px;
+}
+.bv-close:hover { color: #6F6758; }
+
+.beta-votebar-result {
+    flex: 1 1 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.85rem;
+    color: #6F6758;
+    padding-top: 4px;
+}
+.bvr-bar {
+    flex: 1;
+    max-width: 320px;
+    height: 8px;
+    background: #E2D5BC;
+    border-radius: 999px;
+    overflow: hidden;
+}
+.bvr-bar i {
+    display: block;
+    height: 100%;
+    background: #5E8B4C;
+    border-radius: 999px;
+    transition: width .4s ease;
+}
+.bvr-nums b { color: #39342B; font-variant-numeric: tabular-nums; }
+
+.beta-votebar-reopen {
+    position: fixed;
+    right: 16px;
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    z-index: 2500;
+    background: #5E8B4C;
+    color: #fff;
+    border: 1.5px solid #446837;
+    border-radius: 999px;
+    padding: 11px 18px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 2px 2px 0 #446837;
+}
+.beta-votebar-reopen:active { transform: translate(2px, 2px); box-shadow: none; }
+
+@media (max-width: 700px) {
+    .beta-votebar { padding: 10px 12px calc(10px + env(safe-area-inset-bottom, 0px)); }
+    .beta-votebar-inner { gap: 8px; }
+    .beta-votebar-text { flex-basis: 100%; font-size: 0.9rem; }
+    .beta-votebar-actions { width: 100%; flex-wrap: nowrap; }
+    .bv-btn { flex: 1; padding: 10px 6px; font-size: 0.84rem; white-space: nowrap; }
+    .bv-back { font-size: 0.8rem; }
+    .bv-close { padding: 6px 4px; font-size: 0.8rem; }
+    .beta-popup { padding: 26px 18px 18px; }
+    .beta-popup-title { font-size: 1.5rem; }
+    .beta-popup-actions { flex-direction: column; }
+}
+
+@media (max-width: 420px) {
+    .beta-votebar .bv-ask { display: none; }
+    .bv-back { display: none; }
+}

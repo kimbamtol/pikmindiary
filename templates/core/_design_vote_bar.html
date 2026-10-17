@@ -1,0 +1,25 @@
+{# 새 디자인 체험 중 하단 고정 투표 띠 #}
+<div class="beta-votebar" id="betaVoteBar" data-voted="{{ my_design_vote }}">
+    <div class="beta-votebar-inner">
+        <div class="beta-votebar-text">
+            <b>새 디자인을 체험하고 있어요.</b>
+            <span class="bv-ask">어느 쪽이 더 좋으세요?</span>
+            <span class="bv-thanks" hidden>투표해 주셔서 감사합니다. 언제든 다시 고를 수 있어요.</span>
+        </div>
+
+        <div class="beta-votebar-actions">
+            <button type="button" class="bv-btn bv-new" data-choice="NEW">새 디자인이 좋다</button>
+            <button type="button" class="bv-btn bv-old" data-choice="OLD">예전이 낫다</button>
+            <a href="{% url 'core:design_beta_off' %}?next={{ request.get_full_path|urlencode }}" class="bv-back">원래 디자인으로</a>
+            <button type="button" class="bv-close" id="betaVoteClose" aria-label="투표 띠 접기">접기</button>
+        </div>
+
+        <div class="beta-votebar-result" id="betaVoteResult" hidden>
+            <span class="bvr-label">지금까지</span>
+            <span class="bvr-bar" aria-hidden="true"><i id="bvrFill" style="width:0%"></i></span>
+            <span class="bvr-nums"><b id="bvrNew">0</b>명 새 디자인 · <b id="bvrOld">0</b>명 예전</span>
+        </div>
+    </div>
+</div>
+
+<button type="button" class="beta-votebar-reopen" id="betaVoteReopen" hidden>투표하기</button>

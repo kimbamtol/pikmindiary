@@ -1,0 +1,30 @@
+{% load i18n %}
+{# 새 디자인(수첩) 안내 팝업 - 좌표 목록 첫 진입 시 #}
+<div class="beta-popup-backdrop" id="betaPopup" role="dialog" aria-modal="true" aria-labelledby="betaPopupTitle">
+    <div class="beta-popup">
+        <div class="beta-popup-tape" aria-hidden="true"></div>
+
+        <h2 class="beta-popup-title" id="betaPopupTitle">새로운 디자인을 준비하고 있어요</h2>
+        <p class="beta-popup-desc">
+            종이 수첩 느낌의 새 디자인을 적용할지 고민 중입니다.<br>
+            지금 쓰시던 기능 그대로, 겉모습만 바꿔서 직접 써보실 수 있어요.
+        </p>
+
+        <div class="beta-popup-preview" aria-hidden="true">
+            <span class="bp-chip bp-chip-1">수첩 속지</span>
+            <span class="bp-chip bp-chip-2">테이프로 붙인 사진</span>
+            <span class="bp-chip bp-chip-3">손글씨 제목</span>
+        </div>
+
+        <p class="beta-popup-note">써보신 뒤에는 화면 아래에서 <b>어느 쪽이 좋은지 투표</b>할 수 있습니다. 언제든 원래 디자인으로 되돌릴 수 있어요.</p>
+
+        <div class="beta-popup-actions">
+            <a href="{% url 'core:design_beta_on' %}?next={{ request.get_full_path|urlencode }}" class="beta-btn beta-btn-go">새 디자인 보러 가기</a>
+            <button type="button" class="beta-btn beta-btn-later" data-dismiss="session">나중에</button>
+        </div>
+
+        <button type="button" class="beta-popup-week" data-dismiss="7">일주일간 보지 않기</button>
+
+        <p class="beta-popup-foot">이 안내를 닫아도 상단 <b>테스트 버튼</b>으로 언제든 들어올 수 있습니다.</p>
+    </div>
+</div>

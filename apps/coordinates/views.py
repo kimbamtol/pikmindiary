@@ -46,6 +46,8 @@ def coordinate_list(request):
         queryset = queryset.order_by('-copy_count', '-created_at')
     elif sort == 'bookmarks':
         queryset = queryset.order_by('-bookmark_count', '-created_at')
+    elif sort == 'oldest':
+        queryset = queryset.order_by('created_at')
     else:  # latest
         queryset = queryset.order_by('-created_at')
     

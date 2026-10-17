@@ -42,6 +42,7 @@ urlpatterns = [
     
     # 농사 게시판
     path('farming/', include('apps.farming.urls')),
+    path('brag/', include('apps.brag.urls')),
     
     # 관리자 대시보드
     path(f'{ADMIN_URL}/', include('apps.admin_panel.urls')),
@@ -55,6 +56,14 @@ urlpatterns = [
 ]
 
 # 개발 환경에서 미디어 파일 서빙
+# PREVIEW_MEDIA=1 은 로컬 미리보기 서버 전용 (운영에서는 nginx가 /media/를 담당)
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATICFILES_DIRS[0])
+elif os.getenv('PREVIEW_MEDIA') == '1':
+    # 로컬 미리보기 서버 전용 (DEBUG=False라 static() 헬퍼가 동작하지 않음)
+    from django.urls import re_path
+    from django.views.static import serve as _serve
+    urlpatterns += [
+        re_path(r'^media/(?P<path>.*)$', _serve, {'document_root': settings.MEDIA_ROOT}),
+    ]

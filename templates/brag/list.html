@@ -1,0 +1,396 @@
+{% extends 'base.html' %}
+{% load static i18n %}
+
+{% block title %}피크민 자랑 - 엽서·피크민 사진 자랑 | 피크민 다이어리{% endblock %}
+{% block description %}유저들이 자랑하는 피크민 블룸 엽서와 피크민 사진을 구경하고 좋아요를 눌러보세요.{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="list-header">
+        <h1 class="page-title">📸 {% trans "피크민 자랑" %}</h1>
+        <a href="{% url 'brag:create' %}" class="btn btn-primary">{% trans "자랑하기" %}</a>
+    </div>
+
+    <p class="brag-intro">
+        {% trans "엽서, 피크민, 꾸민 화면 무엇이든 자랑해보세요. 좌표를 적지 않아도 됩니다." %}
+    </p>
+
+    {% if weekly_top %}
+    <section class="brag-top">
+        <div class="brag-top-label">{{ weekly_top_label|default:"이번 주 1위" }}</div>
+        <a href="{% url 'brag:detail' pk=weekly_top.pk %}" class="brag-top-card">
+            <div class="brag-top-photo">
+                <img src="{{ weekly_top.image.url }}" alt="{{ weekly_top.caption|default:'자랑 사진' }}">
+            </div>
+            <div class="brag-top-info">
+                <div class="brag-top-caption">{{ weekly_top.caption|default:"사진 자랑" }}</div>
+                <div class="brag-top-meta">
+                    <span class="brag-author">{{ weekly_top.display_name }}</span>
+                    <span>❤️ {{ weekly_top.like_count }}</span>
+                    <span>💬 {{ weekly_top.comment_count }}</span>
+                </div>
+                <span class="brag-top-go">{% trans "사진 보러 가기" %} →</span>
+            </div>
+        </a>
+    </section>
+    {% endif %}
+
+    <div class="brag-toolbar">
+        <div class="brag-sorts">
+            <a href="?sort=latest" class="brag-sort {% if sort == 'latest' %}on{% endif %}">{% trans "최신순" %}</a>
+            <a href="?sort=likes" class="brag-sort {% if sort == 'likes' %}on{% endif %}">{% trans "좋아요순" %}</a>
+            <a href="?sort=comments" class="brag-sort {% if sort == 'comments' %}on{% endif %}">{% trans "댓글순" %}</a>
+        </div>
+        <span class="brag-count">{{ total_count }}{% trans "장" %}</span>
+    </div>
+
+    {% if posts %}
+    {% if week_groups %}
+    {% for group in week_groups %}
+    <div class="brag-week">
+        <h2 class="brag-week-title">
+            {% if group.label %}<span class="brag-week-now">{{ group.label }}</span>{% endif %}
+            <span class="brag-week-range">{{ group.start|date:"n월 j일" }} ~ {{ group.end|date:"n월 j일" }}</span>
+            <span class="brag-week-count">{{ group.posts|length }}장</span>
+        </h2>
+    </div>
+    <div class="brag-grid">
+        {% for post in group.posts %}
+        <article class="brag-card">
+            <a href="{% url 'brag:detail' pk=post.pk %}" class="brag-photo">
+                <img src="{{ post.image.url }}" alt="{{ post.caption|default:'자랑 사진' }}" loading="lazy">
+            </a>
+            <div class="brag-body">
+                {% if post.caption %}<p class="brag-caption">{{ post.caption }}</p>{% endif %}
+                <div class="brag-meta">
+                    <span class="brag-author">{{ post.display_name }}</span>
+                    <span class="brag-date">{{ post.created_at|date:"n/j" }}</span>
+                </div>
+            </div>
+            <div class="brag-actions">
+                <button type="button" class="brag-like {% if post.pk in liked_ids %}on{% endif %}"
+                        data-pk="{{ post.pk }}" aria-label="{% trans '좋아요' %}">
+                    <span class="brag-like-icon">❤️</span><span class="brag-like-count">{{ post.like_count }}</span>
+                </button>
+                <a href="{% url 'brag:detail' pk=post.pk %}" class="brag-comment-link">
+                    💬 <span>{{ post.comment_count }}</span>
+                </a>
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="brag-grid">
+        {% for post in posts %}
+        <article class="brag-card">
+            <a href="{% url 'brag:detail' pk=post.pk %}" class="brag-photo">
+                <img src="{{ post.image.url }}" alt="{{ post.caption|default:'자랑 사진' }}" loading="lazy">
+            </a>
+            <div class="brag-body">
+                {% if post.caption %}<p class="brag-caption">{{ post.caption }}</p>{% endif %}
+                <div class="brag-meta">
+                    <span class="brag-author">{{ post.display_name }}</span>
+                    <span class="brag-date">{{ post.created_at|date:"n/j" }}</span>
+                </div>
+            </div>
+            <div class="brag-actions">
+                <button type="button" class="brag-like {% if post.pk in liked_ids %}on{% endif %}"
+                        data-pk="{{ post.pk }}" aria-label="{% trans '좋아요' %}">
+                    <span class="brag-like-icon">❤️</span><span class="brag-like-count">{{ post.like_count }}</span>
+                </button>
+                <a href="{% url 'brag:detail' pk=post.pk %}" class="brag-comment-link">
+                    💬 <span>{{ post.comment_count }}</span>
+                </a>
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if past_winners %}
+    <section class="brag-hall">
+        <h2 class="brag-hall-title">🏅 {% trans "지난 주간 1위" %}</h2>
+        <div class="brag-hall-row">
+            {% for w in past_winners %}
+            <a href="{% url 'brag:detail' pk=w.post.pk %}" class="brag-hall-item">
+                <span class="brag-hall-photo"><img src="{{ w.post.image.url }}" alt="{{ w.post.caption|default:'주간 1위 사진' }}" loading="lazy"></span>
+                <span class="brag-hall-week">{{ w.start|date:"n/j" }}~{{ w.end|date:"n/j" }}</span>
+                <span class="brag-hall-name">{{ w.post.display_name }}</span>
+                <span class="brag-hall-likes">❤️ {{ w.post.like_count }}</span>
+            </a>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    {% if page_obj.has_other_pages %}
+    <div class="brag-pager">
+        {% if page_obj.has_previous %}
+        <a href="?sort={{ sort }}&page={{ page_obj.previous_page_number }}" class="btn btn-outline">← {% trans "이전" %}</a>
+        {% endif %}
+        <span class="brag-pager-now">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+        <a href="?sort={{ sort }}&page={{ page_obj.next_page_number }}" class="btn btn-outline">{% trans "다음" %} →</a>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-state-icon">📸</div>
+        <h2 class="empty-state-title">{% trans "아직 자랑이 없어요" %}</h2>
+        <p class="empty-state-desc">{% trans "첫 번째로 자랑해보세요!" %}</p>
+        <a href="{% url 'brag:create' %}" class="btn btn-primary">{% trans "자랑하기" %}</a>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    .list-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--spacing-md);
+        flex-wrap: wrap;
+        margin: var(--spacing-lg) 0 var(--spacing-xs);
+    }
+
+    .brag-intro {
+        color: var(--text-secondary);
+        margin-bottom: var(--spacing-lg);
+    }
+
+    /* 이번 주 1위 */
+    .brag-top {
+        margin-bottom: var(--spacing-xl);
+    }
+    .brag-top-label {
+        display: inline-block;
+        background: var(--secondary);
+        color: #fff;
+        font-weight: 700;
+        font-size: 0.85rem;
+        padding: 5px 14px;
+        border-radius: var(--radius-full);
+        margin-bottom: var(--spacing-sm);
+    }
+    .brag-top-card {
+        display: grid;
+        max-width: 820px;
+        grid-template-columns: 300px 1fr;
+        gap: var(--spacing-lg);
+        align-items: center;
+        background: var(--bg-primary);
+        border-radius: var(--radius-lg);
+        padding: var(--spacing-md);
+        box-shadow: var(--shadow-sm);
+        color: inherit;
+        text-decoration: none;
+    }
+    .brag-top-photo {
+        aspect-ratio: 4 / 3;
+        border-radius: var(--radius-md);
+        overflow: hidden;
+        background: var(--bg-tertiary);
+    }
+    .brag-top-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .brag-top-caption { font-size: 1.4rem; font-weight: 700; margin-bottom: 10px; line-height: 1.35; }
+    .brag-top-meta { display: flex; gap: var(--spacing-md); color: var(--text-secondary); font-size: 1rem; align-items: center; }
+    .brag-top-meta .brag-author { color: var(--text-primary); }
+    .brag-top-info { padding-right: var(--spacing-md); }
+    .brag-top-go { display: inline-block; margin-top: var(--spacing-md); color: var(--primary); font-weight: 700; }
+
+    /* 정렬 */
+    .brag-toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--spacing-md);
+        margin-bottom: var(--spacing-md);
+        flex-wrap: wrap;
+    }
+    .brag-sorts { display: flex; gap: 6px; }
+    .brag-sort {
+        padding: 8px 16px;
+        border-radius: var(--radius-full);
+        background: var(--bg-primary);
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+        text-decoration: none;
+    }
+    .brag-sort.on { background: var(--primary); color: #fff; font-weight: 700; }
+    .brag-count { color: var(--text-secondary); font-size: 0.95rem; }
+
+    /* 그리드 */
+    .brag-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: var(--spacing-md);
+    }
+    .brag-card {
+        background: var(--bg-primary);
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        box-shadow: var(--shadow-sm);
+        display: flex;
+        flex-direction: column;
+        transition: transform 0.18s ease, box-shadow 0.18s ease;
+    }
+    .brag-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+    .brag-photo { display: block; aspect-ratio: 1 / 1; background: var(--bg-tertiary); }
+    .brag-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .brag-body { padding: 10px 12px 6px; flex: 1; }
+    .brag-caption {
+        font-size: 0.95rem;
+        line-height: 1.45;
+        margin: 0 0 6px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    .brag-meta {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+    }
+    .brag-author { font-weight: 500; }
+    .brag-actions {
+        display: flex;
+        gap: 4px;
+        padding: 6px 8px 10px;
+    }
+    .brag-like, .brag-comment-link {
+        flex: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        border: none;
+        background: var(--bg-secondary);
+        color: var(--text-secondary);
+        border-radius: var(--radius-md);
+        padding: 7px 4px;
+        font-size: 0.9rem;
+        cursor: pointer;
+        text-decoration: none;
+        transition: background 0.15s ease;
+    }
+    .brag-like:hover, .brag-comment-link:hover { background: var(--bg-tertiary); }
+    .brag-like.on { background: #FDE4E4; color: #C0392B; font-weight: 700; }
+    .brag-like-icon { filter: grayscale(1); opacity: .55; }
+    .brag-like.on .brag-like-icon { filter: none; opacity: 1; }
+
+    /* 주차 구분선 */
+    .brag-week {
+        margin: var(--spacing-xl) 0 var(--spacing-sm);
+    }
+    .brag-week:first-of-type { margin-top: var(--spacing-md); }
+    .brag-week-title {
+        display: flex;
+        align-items: baseline;
+        gap: var(--spacing-sm);
+        font-size: 1rem;
+        margin: 0;
+        padding-bottom: 8px;
+        border-bottom: 2px dashed var(--bg-tertiary);
+        flex-wrap: wrap;
+    }
+    .brag-week-now {
+        background: var(--primary);
+        color: #fff;
+        border-radius: var(--radius-full);
+        padding: 4px 12px;
+        font-size: 0.88rem;
+    }
+    .brag-week-range { color: var(--text-secondary); font-weight: 500; }
+    .brag-week-count { margin-left: auto; color: var(--text-secondary); font-size: 0.88rem; }
+
+    /* 지난 주간 1위 전당 */
+    .brag-hall {
+        margin: var(--spacing-2xl) 0 var(--spacing-lg);
+        padding-top: var(--spacing-lg);
+        border-top: 2px dashed var(--bg-tertiary);
+    }
+    .brag-hall-title { font-size: 1.05rem; margin-bottom: var(--spacing-md); }
+    .brag-hall-row {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: var(--spacing-md);
+    }
+    .brag-hall-item {
+        display: block;
+        color: inherit;
+        text-decoration: none;
+        font-size: 0.82rem;
+    }
+    .brag-hall-photo {
+        display: block;
+        aspect-ratio: 1 / 1;
+        border-radius: var(--radius-md);
+        overflow: hidden;
+        background: var(--bg-tertiary);
+        margin-bottom: 6px;
+    }
+    .brag-hall-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .brag-hall-item:hover .brag-hall-photo img { transform: scale(1.04); transition: transform .2s ease; }
+    .brag-hall-week { display: block; color: var(--text-secondary); }
+    .brag-hall-name { display: block; font-weight: 500; }
+    .brag-hall-likes { display: block; color: var(--text-secondary); }
+
+    @media (max-width: 1024px) {
+        .brag-hall-row { grid-template-columns: repeat(3, 1fr); }
+    }
+    @media (max-width: 560px) {
+        .brag-hall-row { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    .brag-pager {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--spacing-md);
+        margin: var(--spacing-xl) 0;
+    }
+    .brag-pager-now { color: var(--text-secondary); }
+
+    @media (max-width: 1024px) {
+        .brag-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+    @media (max-width: 768px) {
+        .brag-grid { grid-template-columns: repeat(2, 1fr); }
+        .brag-top-card { grid-template-columns: 1fr; }
+    }
+</style>
+
+<script>
+(function () {
+    function getCookie(name) {
+        var m = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+        return m ? decodeURIComponent(m.pop()) : '';
+    }
+    document.querySelectorAll('.brag-like').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var pk = btn.getAttribute('data-pk');
+            btn.disabled = true;
+            fetch('/brag/' + pk + '/like/', {
+                method: 'POST',
+                headers: { 'X-CSRFToken': getCookie('csrftoken'), 'X-Requested-With': 'XMLHttpRequest' },
+                credentials: 'same-origin'
+            })
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                btn.disabled = false;
+                if (data.error) { alert(data.error); return; }
+                btn.classList.toggle('on', data.liked);
+                btn.querySelector('.brag-like-count').textContent = data.like_count;
+            })
+            .catch(function () { btn.disabled = false; });
+        });
+    });
+})();
+</script>
+{% endblock %}

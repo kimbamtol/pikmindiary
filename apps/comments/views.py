@@ -1,14 +1,14 @@
 """Comments views - 댓글"""
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib import messages
 from django.http import JsonResponse
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_GET
 from django.utils.translation import gettext as _
 from django.contrib.auth.hashers import make_password, check_password
 
 from .models import Comment
 from apps.coordinates.models import Coordinate
-from apps.interactions.models import Notification
+from apps.interactions.models import Notification, CommentLike
 
 
 # ===== 헬퍼 함수 =====
@@ -25,7 +25,7 @@ def _validate_photo(photo):
     return None
 
 
-def _create_comment(request, content, photo=None, parent=None, coordinate=None, farming_journal=None):
+def _create_comment(request, content, photo=None, parent=None, coordinate=None, farming_journal=None, brag_post=None):
     """회원/비회원 댓글 생성 공통 로직. (comment, actor_name, actor) 튜플 반환. 실패 시 (None, error_msg, None)"""
     kwargs = {
         'content': content,
@@ -33,6 +33,7 @@ def _create_comment(request, content, photo=None, parent=None, coordinate=None, 
         'parent': parent,
         'coordinate': coordinate,
         'farming_journal': farming_journal,
+        'brag_post': brag_post,
     }
 
     if request.user.is_authenticated:
@@ -102,16 +103,10 @@ def comment_create(request, coordinate_id):
 
     _update_comment_count(coordinate=coordinate)
 
-    if request.headers.get('HX-Request'):
-        from django.template.loader import render_to_string
-        comments = Comment.objects.filter(
-            coordinate=coordinate, is_deleted=False, parent__isnull=True
-        ).select_related('author').prefetch_related('replies')
-        html = render_to_string('comments/_comment_list.html', {
-            'comments': comments,
-            'coordinate': coordinate,
-        }, request=request)
-        return JsonResponse({'html': html})
+    is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+
+    if request.headers.get('HX-Request') or is_ajax:
+        return JsonResponse({'success': True, 'comment_count': coordinate.comment_count})
 
     messages.success(request, _('댓글이 등록되었습니다.'))
     return redirect('coordinates:detail', pk=coordinate_id)
@@ -227,6 +222,35 @@ def comment_reply(request, pk):
 
     messages.success(request, _('답글이 등록되었습니다.'))
     return redirect('coordinates:detail', pk=coordinate.pk)
+
+
+@require_GET
+def comment_list(request, coordinate_id):
+    """카드 댓글 모달용 댓글 목록"""
+    coordinate = get_object_or_404(Coordinate, pk=coordinate_id)
+    comments = Comment.objects.filter(
+        coordinate=coordinate, is_deleted=False, parent__isnull=True
+    ).select_related('author').prefetch_related(
+        'replies', 'replies__author'
+    ).order_by('-created_at')
+
+    # 좋아요 상태
+    user_liked_comments = set()
+    if request.user.is_authenticated:
+        user_liked_comments = set(
+            CommentLike.objects.filter(
+                user=request.user,
+                comment__coordinate=coordinate
+            ).values_list('comment_id', flat=True)
+        )
+    else:
+        user_liked_comments = set(request.session.get('liked_comments', []))
+
+    return render(request, 'comments/_comment_modal_content.html', {
+        'comments': comments,
+        'coordinate': coordinate,
+        'user_liked_comments': user_liked_comments,
+    })
 
 
 # ===== 농사 일지 댓글 =====

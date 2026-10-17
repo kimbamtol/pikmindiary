@@ -1,0 +1,23 @@
+{% load i18n %}
+{% if post %}
+<div class="brag-widget">
+    <h3 class="brag-widget-title">📸 {{ label|default:"이번 주 1위" }}</h3>
+    <a href="{% url 'brag:detail' pk=post.pk %}" class="brag-widget-card">
+        <span class="brag-widget-photo">
+            <img src="{{ post.image.url }}" alt="{{ post.caption|default:'자랑 사진' }}" loading="lazy">
+        </span>
+        {% if post.caption %}<span class="brag-widget-caption">{{ post.caption }}</span>{% endif %}
+        <span class="brag-widget-meta">
+            <span class="brag-widget-author">{{ post.display_name }}</span>
+            <span>❤️ {{ post.like_count }}</span>
+        </span>
+    </a>
+    <a href="{% url 'brag:list' %}" class="brag-widget-more">{% trans "자랑 더 보기" %} →</a>
+</div>
+{% else %}
+<div class="brag-widget brag-widget-empty">
+    <h3 class="brag-widget-title">📸 {% trans "피크민 자랑" %}</h3>
+    <p class="brag-widget-invite">{% trans "엽서나 피크민 사진을 자랑해보세요. 좌표를 적지 않아도 됩니다." %}</p>
+    <a href="{% url 'brag:create' %}" class="brag-widget-more">{% trans "첫 자랑 올리기" %} →</a>
+</div>
+{% endif %}

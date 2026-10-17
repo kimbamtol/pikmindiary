@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}자랑하기 - 피크민 자랑 | 피크민 다이어리{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="brag-form-page">
+        <h1 class="page-title">📸 {% trans "자랑하기" %}</h1>
+        <p class="brag-form-desc">{% trans "엽서, 피크민, 꾸민 화면 무엇이든 좋아요. 사진 한 장과 한마디면 됩니다." %}</p>
+
+        <form method="post" enctype="multipart/form-data" class="brag-form">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label class="form-label" for="brag-image">{% trans "사진" %} <span class="req">*</span></label>
+                <input type="file" id="brag-image" name="image" accept="image/*" class="form-control" required>
+                <p class="form-hint">{% trans "JPG, PNG, WEBP, GIF / 최대 8MB" %}</p>
+                <div class="brag-preview" id="bragPreview" hidden><img alt="{% trans '미리보기' %}"></div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="brag-caption">{% trans "한마디" %}</label>
+                <input type="text" id="brag-caption" name="caption" maxlength="200" class="form-control"
+                       value="{{ caption|default:'' }}" placeholder="{% trans '예: 드디어 모은 제주 엽서!' %}">
+            </div>
+
+            {% if not user.is_authenticated %}
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label" for="brag-nick">{% trans "닉네임" %} <span class="req">*</span></label>
+                    <input type="text" id="brag-nick" name="guest_nickname" maxlength="30" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="brag-pw">{% trans "비밀번호" %} <span class="req">*</span></label>
+                    <input type="password" id="brag-pw" name="guest_password" class="form-control" required>
+                    <p class="form-hint">{% trans "삭제할 때 필요합니다." %}</p>
+                </div>
+            </div>
+            {% endif %}
+
+            <label class="brag-check">
+                <input type="checkbox" name="watermark" checked>
+                <span>{% trans "사진에 내 닉네임 워터마크 넣기" %}</span>
+            </label>
+
+            <div class="brag-form-actions">
+                <a href="{% url 'brag:list' %}" class="btn btn-outline">{% trans "취소" %}</a>
+                <button type="submit" class="btn btn-primary">{% trans "올리기" %}</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .brag-form-page {
+        max-width: 620px;
+        margin: var(--spacing-xl) auto;
+        background: var(--bg-primary);
+        padding: var(--spacing-xl);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-sm);
+    }
+    .brag-form-desc { color: var(--text-secondary); margin-bottom: var(--spacing-lg); }
+    .brag-form .form-group { margin-bottom: var(--spacing-lg); }
+    .brag-form .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-md); }
+    .brag-form .req { color: var(--accent); }
+    .form-hint { font-size: 0.85rem; color: var(--text-secondary); margin-top: 5px; }
+    .brag-preview { margin-top: var(--spacing-md); }
+    .brag-preview img { max-width: 100%; border-radius: var(--radius-md); display: block; }
+    .brag-check { display: flex; align-items: center; gap: 8px; margin-bottom: var(--spacing-lg); cursor: pointer; }
+    .brag-form-actions { display: flex; gap: var(--spacing-md); justify-content: flex-end; }
+    @media (max-width: 560px) {
+        .brag-form .form-row { grid-template-columns: 1fr; }
+    }
+</style>
+
+<script>
+document.getElementById('brag-image').addEventListener('change', function (e) {
+    var file = e.target.files && e.target.files[0];
+    var box = document.getElementById('bragPreview');
+    if (!file) { box.hidden = true; return; }
+    box.querySelector('img').src = URL.createObjectURL(file);
+    box.hidden = false;
+});
+</script>
+{% endblock %}

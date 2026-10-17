@@ -113,6 +113,18 @@ class SiteSettings(models.Model):
         default=3,
         help_text='카테고리별 하루 업로드 제한 (0 = 무제한)'
     )
+
+    # 새 디자인 체험 (수첩)
+    design_beta_enabled = models.BooleanField(
+        '새 디자인 체험 공개',
+        default=False,
+        help_text='켜면 유저에게 새 디자인 안내 팝업과 전환 버튼이 보입니다.'
+    )
+    design_beta_popup_enabled = models.BooleanField(
+        '새 디자인 안내 팝업',
+        default=True,
+        help_text='좌표 목록 첫 진입 시 안내 팝업을 띄웁니다. (체험 공개가 켜져 있을 때만 동작)'
+    )
     
     updated_at = models.DateTimeField('수정일', auto_now=True)
     
@@ -133,3 +145,62 @@ class SiteSettings(models.Model):
         """설정 가져오기 (없으면 생성)"""
         obj, _ = cls.objects.get_or_create(pk=1)
         return obj
+
+
+class DesignVote(models.Model):
+    """새 디자인(수첩) 체험 투표 - 비회원 포함 1인 1표"""
+
+    class Choice(models.TextChoices):
+        NEW = 'NEW', '새 디자인이 좋다'
+        OLD = 'OLD', '예전이 낫다'
+
+    user = models.ForeignKey(
+        'accounts.CustomUser',
+        on_delete=models.CASCADE,
+        null=True, blank=True,
+        related_name='design_votes',
+        verbose_name='회원'
+    )
+    session_key = models.CharField('세션 키', max_length=40, blank=True, db_index=True)
+    ip_address = models.GenericIPAddressField('IP', null=True, blank=True)
+
+    choice = models.CharField('선택', max_length=3, choices=Choice.choices)
+    comment = models.CharField('한마디', max_length=200, blank=True)
+
+    created_at = models.DateTimeField('첫 투표일', auto_now_add=True)
+    updated_at = models.DateTimeField('수정일', auto_now=True)
+
+    class Meta:
+        verbose_name = '디자인 투표'
+        verbose_name_plural = '디자인 투표'
+        ordering = ['-updated_at']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user'],
+                condition=models.Q(user__isnull=False),
+                name='unique_design_vote_per_user'
+            ),
+            models.UniqueConstraint(
+                fields=['session_key'],
+                condition=models.Q(user__isnull=True),
+                name='unique_design_vote_per_session'
+            ),
+        ]
+
+    def __str__(self):
+        who = self.user.nickname if self.user else f'비회원({self.session_key[:6]})'
+        return f'{who} - {self.get_choice_display()}'
+
+    @classmethod
+    def tally(cls):
+        """집계 결과"""
+        new = cls.objects.filter(choice=cls.Choice.NEW).count()
+        old = cls.objects.filter(choice=cls.Choice.OLD).count()
+        total = new + old
+        return {
+            'new': new,
+            'old': old,
+            'total': total,
+            'new_pct': round(new / total * 100) if total else 0,
+            'old_pct': round(old / total * 100) if total else 0,
+        }

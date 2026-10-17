@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}자랑 글 삭제 | 피크민 다이어리{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="brag-form-page">
+        <h1 class="page-title">{% trans "자랑 글 삭제" %}</h1>
+        <p class="brag-form-desc">{% trans "삭제하면 되돌릴 수 없습니다." %}</p>
+
+        <div class="brag-delete-preview">
+            <img src="{{ post.image.url }}" alt="{{ post.caption|default:'자랑 사진' }}">
+            {% if post.caption %}<p>{{ post.caption }}</p>{% endif %}
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+            {% if not post.author %}
+            <div class="form-group">
+                <label class="form-label" for="del-pw">{% trans "비밀번호" %}</label>
+                <input type="password" id="del-pw" name="password" class="form-control" required>
+            </div>
+            {% endif %}
+            <div class="brag-form-actions">
+                <a href="{% url 'brag:detail' pk=post.pk %}" class="btn btn-outline">{% trans "취소" %}</a>
+                <button type="submit" class="btn btn-danger">{% trans "삭제" %}</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .brag-form-page { max-width: 560px; margin: var(--spacing-xl) auto; background: var(--bg-primary);
+        padding: var(--spacing-xl); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); }
+    .brag-form-desc { color: var(--text-secondary); margin-bottom: var(--spacing-lg); }
+    .brag-delete-preview img { max-width: 100%; border-radius: var(--radius-md); display: block; }
+    .brag-delete-preview p { color: var(--text-secondary); margin-top: var(--spacing-sm); }
+    .brag-form-actions { display: flex; gap: var(--spacing-md); justify-content: flex-end; margin-top: var(--spacing-lg); }
+</style>
+{% endblock %}

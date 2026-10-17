@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load brag_tags %}
 {% load static %}
 
 {% block title %}피크민 좌표 목록 - 버섯, 모종, 빅플라워 좌표 모음 | 피크민 다이어리{% endblock %}
@@ -6,7 +7,7 @@
 {% block og_title %}피크민 좌표 목록 - 피크민 블룸 좌표 모음{% endblock %}
 
 {% block content %}
-<div class="container">
+<div class="container coord-list-container">
     <div class="list-header">
         <h1 class="page-title">📍 좌표 목록</h1>
         <a href="{% url 'coordinates:create' %}" class="btn btn-primary">
@@ -63,6 +64,9 @@
                     🔄 업데이트 내역
                 </button>
                 {% endif %}
+                <button class="notice-btn suggestion-btn" onclick="openModal('suggestion-modal')">
+                    💬 운영자에게 건의하기
+                </button>
             </div>
             {% endif %}
         </aside>
@@ -96,6 +100,7 @@
 
                         <select name="sort" class="form-control" onchange="this.form.submit()">
                             <option value="latest" {% if sort == "latest" %}selected{% endif %}>최신순</option>
+                            <option value="oldest" {% if sort == "oldest" %}selected{% endif %}>오래된순</option>
                             <option value="copies" {% if sort == "copies" %}selected{% endif %}>복사순</option>
                             <option value="likes" {% if sort == "likes" %}selected{% endif %}>좋아요순</option>
                             <option value="bookmarks" {% if sort == "bookmarks" %}selected{% endif %}>북마크순</option>
@@ -106,7 +111,7 @@
 
             <!-- 좌표 목록 -->
             {% if coords %}
-            <div class="coord-grid grid grid-3">
+            <div class="coord-grid grid">
                 {% include 'coordinates/_card_list.html' %}
             </div>
 
@@ -134,6 +139,11 @@
             </div>
             {% endif %}
         </main>
+
+        <!-- 우측: 이번 주 자랑 1위 (PC 전용) -->
+        <aside class="brag-sidebar">
+            {% weekly_top_brag %}
+        </aside>
     </div>
 </div>
 
@@ -153,9 +163,136 @@
     /* 2열 레이아웃 */
     .coord-page-layout {
         display: grid;
-        grid-template-columns: 220px 1fr;
+        grid-template-columns: 220px minmax(0, 1fr) 240px;
         gap: var(--spacing-xl);
         align-items: start;
+    }
+
+    /* 그리드 아이템이 내용 최소폭 때문에 넘치지 않도록 */
+    .coord-main-content,
+    .ranking-sidebar,
+    .brag-sidebar {
+        min-width: 0;
+    }
+
+    /* 우측 칸을 쓰는 넓은 화면에서는 본문 폭을 넓혀 카드 크기를 지킨다 */
+    @media (min-width: 1400px) {
+        /* 본문과 헤더·푸터의 좌우 선을 맞춘다 */
+        .coord-list-container,
+        .main-header .container,
+        .main-footer .container {
+            max-width: 1460px;
+        }
+    }
+
+    .coord-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    @media (max-width: 1100px) {
+        .coord-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    @media (max-width: 620px) {
+        .coord-grid {
+            grid-template-columns: minmax(0, 1fr);
+        }
+    }
+
+    /* 우측 자랑 위젯 (PC 전용) */
+    .brag-sidebar {
+        position: sticky;
+        top: 80px;
+    }
+
+    .brag-widget {
+        background: var(--bg-primary);
+        border-radius: var(--radius-lg);
+        padding: var(--spacing-md);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .brag-widget-title {
+        font-size: 0.95rem;
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .brag-widget-card {
+        display: block;
+        color: inherit;
+        text-decoration: none;
+    }
+
+    .brag-widget-photo {
+        display: block;
+        aspect-ratio: 1 / 1;
+        border-radius: var(--radius-md);
+        overflow: hidden;
+        background: var(--bg-tertiary);
+    }
+
+    .brag-widget-photo img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        transition: transform 0.25s ease;
+    }
+
+    .brag-widget-card:hover .brag-widget-photo img {
+        transform: scale(1.04);
+    }
+
+    .brag-widget-caption {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        font-size: 0.92rem;
+        line-height: 1.45;
+        margin-top: var(--spacing-sm);
+    }
+
+    .brag-widget-meta {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin-top: 4px;
+    }
+
+    .brag-widget-author { font-weight: 500; }
+
+    .brag-widget-invite {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        line-height: 1.55;
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .brag-widget-more {
+        display: block;
+        text-align: center;
+        margin-top: var(--spacing-sm);
+        padding-top: var(--spacing-sm);
+        border-top: 1px solid var(--bg-tertiary);
+        font-size: 0.88rem;
+        color: var(--primary);
+        text-decoration: none;
+    }
+
+    /* 자리가 넉넉한 화면에서만 우측 칸을 보여준다 */
+    @media (max-width: 1399px) {
+        .coord-page-layout {
+            grid-template-columns: 220px minmax(0, 1fr);
+        }
+
+        .brag-sidebar {
+            display: none;
+        }
     }
 
     /* 랭킹 사이드바 */
@@ -289,6 +426,156 @@
         background: var(--bg-secondary);
         transform: translateY(-1px);
         box-shadow: var(--shadow-md);
+    }
+
+    .suggestion-btn {
+        font-size: 0.8rem;
+        border-style: dashed;
+    }
+
+    .suggestion-message {
+        font-size: 0.92rem;
+        line-height: 1.8;
+        color: var(--text-secondary);
+        word-break: keep-all;
+    }
+
+    .suggestion-actions {
+        margin-top: var(--spacing-lg);
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-sm);
+        align-items: center;
+    }
+
+    .suggestion-actions .btn-primary {
+        width: 100%;
+        padding: var(--spacing-sm) var(--spacing-md);
+        border-radius: var(--radius-lg);
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+
+    .suggestion-email {
+        font-size: 0.78rem;
+        color: var(--text-tertiary);
+    }
+
+    .suggestion-email a {
+        color: var(--text-secondary);
+    }
+
+    /* 댓글 모달 */
+    .cm-comment-list {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-sm);
+    }
+
+    .cm-comment {
+        padding: var(--spacing-sm) 0;
+        border-bottom: 1px solid var(--bg-tertiary);
+    }
+
+    .cm-comment:last-child {
+        border-bottom: none;
+    }
+
+    .cm-reply {
+        margin-left: var(--spacing-lg);
+        padding-left: var(--spacing-sm);
+        border-left: 2px solid var(--bg-tertiary);
+        border-bottom: none;
+    }
+
+    .cm-comment-header {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-xs);
+        margin-bottom: 4px;
+    }
+
+    .cm-comment-date {
+        font-size: 0.75rem;
+        color: var(--text-tertiary);
+        margin-left: auto;
+    }
+
+    .cm-comment-body {
+        font-size: 0.88rem;
+        line-height: 1.6;
+        color: var(--text-primary);
+    }
+
+    .cm-comment-body p {
+        margin: 0;
+    }
+
+    .cm-comment-photo {
+        max-width: 200px;
+        max-height: 150px;
+        border-radius: var(--radius-md);
+        margin-top: 4px;
+        cursor: pointer;
+    }
+
+    .cm-comment-actions {
+        margin-top: 2px;
+    }
+
+    .cm-comment-actions .btn-text {
+        font-size: 0.8rem;
+        padding: 2px 4px;
+    }
+
+    .cm-empty {
+        text-align: center;
+        color: var(--text-tertiary);
+        padding: var(--spacing-lg) 0;
+        font-size: 0.9rem;
+    }
+
+    .cm-form {
+        border-top: 1px solid var(--bg-tertiary);
+        padding: var(--spacing-md) var(--spacing-lg);
+    }
+
+    .cm-form .guest-fields {
+        display: flex;
+        gap: var(--spacing-xs);
+        margin-bottom: var(--spacing-xs);
+    }
+
+    .cm-form .guest-fields .form-control {
+        flex: 1;
+        font-size: 0.85rem;
+        padding: 6px 10px;
+    }
+
+    .cm-form .comment-input {
+        display: flex;
+        gap: var(--spacing-xs);
+    }
+
+    .cm-form textarea {
+        flex: 1;
+        min-height: 40px;
+        max-height: 80px;
+        font-size: 0.85rem;
+        padding: 6px 10px;
+        resize: none;
+    }
+
+    .cm-form .btn {
+        font-size: 0.85rem;
+        padding: 6px 14px;
+        white-space: nowrap;
+    }
+
+    .cm-loading {
+        text-align: center;
+        padding: var(--spacing-lg);
+        color: var(--text-tertiary);
     }
 
     /* 모달 */
@@ -450,16 +737,19 @@
         }
 
         .ranking-widget-list {
-            flex-direction: row;
-            flex-wrap: wrap;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
             gap: var(--spacing-sm);
         }
 
         .ranking-widget-item {
-            flex: 1;
-            min-width: 150px;
             border-bottom: none;
             background: var(--bg-secondary);
+            min-width: 0;
+        }
+
+        .ranking-widget-item:first-child {
+            grid-column: 1 / -1;
         }
     }
 
@@ -483,6 +773,31 @@
             border-radius: 8px;
             color: var(--text-primary);
         }
+
+        .coord-card-stats {
+            gap: 0;
+            padding: 6px 2px;
+            font-size: 0.78rem;
+            justify-content: space-between;
+        }
+
+        .coord-card-stats > * {
+            flex: 1 1 0;
+            min-width: 0;
+            display: inline-flex;
+            flex-direction: column !important;
+            align-items: center;
+            justify-content: center;
+            gap: 1px !important;
+            line-height: 1.1;
+            padding: 4px 0 !important;
+            font-size: 0.78rem !important;
+        }
+
+        .coord-card-stats .stat-icon {
+            font-size: 0.9rem;
+            line-height: 1;
+        }
     }
 
     .coord-copy-row {
@@ -494,29 +809,35 @@
     .coord-card-stats {
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 2px;
         font-size: 1rem;
         color: var(--text-secondary);
-        padding: 8px 12px;
+        padding: 8px 8px;
         border-top: 1px solid var(--bg-tertiary);
+        white-space: nowrap;
     }
 
     .coord-stat {
-        display: flex;
+        display: inline-flex;
         align-items: center;
-        gap: 2px;
+        gap: 4px;
+        padding: 4px 4px;
+        white-space: nowrap;
     }
 
     .copy-btn {
         background: none;
         border: none;
         cursor: pointer;
-        padding: 4px 8px;
+        padding: 4px 4px;
         font-size: 1rem;
         color: var(--text-secondary);
         transition: all 0.2s;
         touch-action: manipulation;
         -webkit-tap-highlight-color: transparent;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
     }
 
     .copy-btn:hover {
@@ -532,33 +853,37 @@
     }
 
     .like-btn-sm,
-    .bookmark-btn-sm {
+    .bookmark-btn-sm,
+    .comment-btn-sm {
         background: none;
         border: none;
         cursor: pointer;
-        padding: 4px 8px;
+        padding: 4px 4px;
         font-size: 1rem;
         color: var(--text-secondary);
-        opacity: 0.5;
         transition: all 0.2s;
         touch-action: manipulation;
         -webkit-tap-highlight-color: transparent;
-    }
-
-    .like-btn-sm.active,
-    .bookmark-btn-sm.active {
-        opacity: 1;
+        white-space: nowrap;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
     }
 
     .like-btn-sm:hover,
-    .bookmark-btn-sm:hover {
-        opacity: 1;
+    .bookmark-btn-sm:hover,
+    .comment-btn-sm:hover {
         transform: scale(1.1);
     }
 
     .like-btn-sm:active,
-    .bookmark-btn-sm:active {
+    .bookmark-btn-sm:active,
+    .comment-btn-sm:active {
         transform: scale(0.95);
+    }
+
+    .copy-btn {
+        white-space: nowrap;
     }
 
     .copy-toast {
@@ -647,7 +972,56 @@
 {% endif %}
 {% endif %}
 
-<div id="copy-toast" class="copy-toast">✅ 복사되었습니다<br><small>좋아요와 댓글은 업로더분에게 큰 힘이 됩니다!</small></div>
+<!-- 건의하기 모달 -->
+<div id="suggestion-modal" class="modal-overlay" onclick="closeModalOnOverlay(event)">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>💬 운영자에게 건의하기</h3>
+            <button class="modal-close" onclick="closeModal('suggestion-modal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="suggestion-message">
+                여러분들 덕분에 어느새 운영한 지 반년이 다 되어가네요 🌱<br><br>
+                혹시 사용하시면서 불편한 점이나, 이런 기능이 있었으면 좋겠다 싶은 것들이 있으시면 아래 버튼을 눌러 자유롭게 남겨주세요.<br><br>
+                뭐든 좋으니, 바라는 점이 있으시면 편하게 말씀해 주시면 감사하겠습니다 😊
+            </div>
+            <div class="suggestion-actions">
+                <a href="{% url 'core:suggestion' %}" class="btn btn-primary">✏️ 건의하기</a>
+                <span class="suggestion-email">개인적인 문의는 <a href="mailto:toritori3434@naver.com">toritori3434@naver.com</a> 으로 연락 부탁드립니다</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 댓글 모달 -->
+<div id="comment-modal" class="modal-overlay" onclick="closeModalOnOverlay(event)">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>💬 댓글</h3>
+            <button class="modal-close" onclick="closeModal('comment-modal')">&times;</button>
+        </div>
+        <div class="modal-body cm-comment-list" id="comment-modal-body">
+            <div class="cm-loading">로딩 중...</div>
+        </div>
+        <div class="cm-form">
+            <form id="comment-modal-form" onsubmit="submitCommentModal(event)">
+                {% csrf_token %}
+                {% if not user.is_authenticated %}
+                <div class="guest-fields">
+                    <input type="text" name="guest_nickname" placeholder="닉네임" class="form-control" required>
+                    <input type="password" name="guest_password" placeholder="비밀번호" class="form-control" required>
+                </div>
+                {% endif %}
+                <div class="comment-input">
+                    <textarea name="content" placeholder="댓글을 입력하세요..." class="form-control" required></textarea>
+                    <button type="submit" class="btn btn-primary">등록</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div id="feedback-toast" class="copy-toast"></div>
 
 <script>
     // 복사 버튼 이벤트 리스너 부착 (초기 + 동적 카드 공용)
@@ -673,26 +1047,33 @@
         document.querySelectorAll('.coord-card').forEach(attachCopyListeners);
     });
 
+    // 공용 피드백 토스트
+    var feedbackToastTimer = null;
+    function showFeedbackToast(html, duration) {
+        var toast = document.getElementById('feedback-toast');
+        if (!toast) return;
+        toast.innerHTML = html;
+        toast.classList.add('show');
+        if (feedbackToastTimer) clearTimeout(feedbackToastTimer);
+        feedbackToastTimer = setTimeout(function () {
+            toast.classList.remove('show');
+        }, duration || 2500);
+    }
+
     function handleCopy(coords, btn) {
         var pk = btn.getAttribute('data-pk');
         var copyCountSpan = btn.querySelector('.copy-count');
-        var originalHTML = btn.innerHTML;
 
         function showSuccess(newCount) {
-            btn.innerHTML = '✅ ' + (newCount !== undefined ? newCount : (copyCountSpan ? copyCountSpan.textContent : ''));
+            var displayCount = newCount !== undefined ? newCount : (copyCountSpan ? copyCountSpan.textContent : '');
+            btn.innerHTML = '<span class="stat-icon">✅</span><span class="copy-count">' + displayCount + '</span>';
             btn.classList.add('copied');
 
-            var toast = document.getElementById('copy-toast');
-            if (toast) {
-                toast.classList.add('show');
-            }
+            showFeedbackToast('✅ 복사되었습니다<br><small>좋아요와 댓글은 업로더분에게 큰 힘이 됩니다!</small>');
 
             setTimeout(function () {
-                btn.innerHTML = '📋 <span class="copy-count">' + (newCount !== undefined ? newCount : (copyCountSpan ? copyCountSpan.textContent : '')) + '</span>';
+                btn.innerHTML = '<span class="stat-icon">📋</span><span class="copy-count">' + displayCount + '</span>';
                 btn.classList.remove('copied');
-                if (toast) {
-                    toast.classList.remove('show');
-                }
             }, 2500);
         }
 
@@ -777,7 +1158,7 @@
         document.body.removeChild(textarea);
     }
 
-    // 목록 전용 좋아요 토글 (아이콘 항상 ❤️ 유지, opacity로 상태 표시)
+    // 목록 전용 좋아요 토글
     async function toggleLikeCard(coordinateId, button) {
         try {
             var res = await fetchWithCSRF('/interactions/like/' + coordinateId + '/', { method: 'POST' });
@@ -785,24 +1166,31 @@
             var count = button.querySelector('.like-count');
             if (data.liked) {
                 button.classList.add('active');
+                showFeedbackToast('❤️ 좋아요!<br><small>업로더님께 큰 힘이 됩니다!</small>');
             } else {
                 button.classList.remove('active');
             }
-            count.textContent = data.like_count;
+            if (count) count.textContent = data.like_count;
         } catch (error) {
             console.error('Like toggle failed:', error);
         }
     }
 
-    // 목록 전용 북마크 토글 (아이콘 항상 ⭐ 유지, opacity로 상태 표시)
+    // 목록 전용 북마크 토글
     async function toggleBookmarkCard(coordinateId, button) {
         try {
             var res = await fetchWithCSRF('/interactions/bookmark/' + coordinateId + '/', { method: 'POST' });
+            if (!res.ok) return;
             var data = await res.json();
+            var count = button.querySelector('.bookmark-count');
             if (data.bookmarked) {
                 button.classList.add('active');
+                showFeedbackToast('⭐ 즐겨찾기에 추가됐어요<br><small>마이페이지에서 모아 볼 수 있어요!</small>');
             } else {
                 button.classList.remove('active');
+            }
+            if (count && typeof data.bookmark_count !== 'undefined') {
+                count.textContent = data.bookmark_count;
             }
         } catch (error) {
             console.error('Bookmark toggle failed:', error);
@@ -956,6 +1344,76 @@
             event.target.classList.remove('show');
             document.body.style.overflow = '';
         }
+    }
+
+    // 댓글 모달
+    var currentCommentCoordId = null;
+
+    function openCommentModal(coordId) {
+        currentCommentCoordId = coordId;
+        var body = document.getElementById('comment-modal-body');
+        body.innerHTML = '<div class="cm-loading">로딩 중...</div>';
+        openModal('comment-modal');
+        fetch('/comments/list/' + coordId + '/')
+            .then(function(r) { return r.text(); })
+            .then(function(html) { body.innerHTML = html; })
+            .catch(function() { body.innerHTML = '<p class="cm-empty">댓글을 불러올 수 없습니다.</p>'; });
+    }
+
+    function submitCommentModal(e) {
+        e.preventDefault();
+        if (!currentCommentCoordId) return;
+        var form = document.getElementById('comment-modal-form');
+        var params = new URLSearchParams(new FormData(form));
+
+        fetch('/comments/create/' + currentCommentCoordId + '/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken,
+                'X-Requested-With': 'XMLHttpRequest',
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: params,
+        }).then(function(res) { return res.json(); })
+        .then(function(data) {
+            if (data.success) {
+                form.querySelector('textarea').value = '';
+                // 댓글 새로고침
+                var body = document.getElementById('comment-modal-body');
+                fetch('/comments/list/' + currentCommentCoordId + '/')
+                    .then(function(r) { return r.text(); })
+                    .then(function(html) { body.innerHTML = html; });
+                // 카드의 댓글 카운트 업데이트
+                var btns = document.querySelectorAll('.comment-btn-sm');
+                btns.forEach(function(btn) {
+                    var card = btn.closest('.coord-card');
+                    if (card) {
+                        var copyBtn = card.querySelector('.copy-btn');
+                        if (copyBtn && copyBtn.getAttribute('data-pk') == currentCommentCoordId) {
+                            var countSpan = btn.querySelector('.comment-count');
+                            if (countSpan) countSpan.textContent = data.comment_count;
+                        }
+                    }
+                });
+            }
+        }).catch(function(err) { console.error('Comment submit failed:', err); });
+    }
+
+    function toggleCommentLikeModal(commentId, button) {
+        fetchWithCSRF('/interactions/comment-like/' + commentId + '/', { method: 'POST' })
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                var icon = button.querySelector('.like-icon');
+                var count = button.querySelector('.like-count');
+                if (data.liked) {
+                    button.classList.add('liked');
+                    icon.textContent = '❤️';
+                } else {
+                    button.classList.remove('liked');
+                    icon.textContent = '🤍';
+                }
+                count.textContent = data.like_count;
+            }).catch(function(err) { console.error('Comment like failed:', err); });
     }
 
     // ESC 키로 닫기

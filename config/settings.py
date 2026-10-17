@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'apps.rankings',
     'apps.admin_panel',
     'apps.farming',
+    'apps.brag',
 ]
 
 MIDDLEWARE = [
@@ -78,6 +79,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'apps.core.context_processors.design_beta',
             ],
         },
     },
@@ -211,4 +213,32 @@ RANKING_SCORE = {
     'valid_feedback': 3,   # 받은 VALID 피드백
     'invalid_feedback': -5, # 받은 INVALID 피드백
     'farming_like': 10,    # 농사 일지 좋아요
+}
+
+# 에러 알림 메일
+ADMINS = [('Tori', os.getenv('ADMIN_EMAIL', ''))]
+SERVER_EMAIL = os.getenv('NAVER_EMAIL', '')
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.naver.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.getenv('NAVER_EMAIL', '')
+EMAIL_HOST_PASSWORD = os.getenv('NAVER_EMAIL_PASSWORD', '')
+
+# IP 직접 접속 등 봇 스캔 에러 메일 차단
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'null': {
+            'class': 'logging.NullHandler',
+        },
+    },
+    'loggers': {
+        'django.security.DisallowedHost': {
+            'handlers': ['null'],
+            'propagate': False,
+        },
+    },
 }

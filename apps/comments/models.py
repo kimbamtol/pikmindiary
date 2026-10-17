@@ -24,6 +24,14 @@ class Comment(models.Model):
         related_name='comments',
         verbose_name=_('농사 일지')
     )
+    brag_post = models.ForeignKey(
+        'brag.BragPost',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='comments',
+        verbose_name=_('자랑 글')
+    )
     author = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,

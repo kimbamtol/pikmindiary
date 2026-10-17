@@ -6,6 +6,7 @@ app_name = 'comments'
 
 urlpatterns = [
     # 좌표 댓글
+    path('list/<int:coordinate_id>/', views.comment_list, name='list'),
     path('create/<int:coordinate_id>/', views.comment_create, name='create'),
     path('<int:pk>/edit/', views.comment_edit, name='edit'),
     path('<int:pk>/delete/', views.comment_delete, name='delete'),

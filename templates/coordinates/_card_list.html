@@ -36,15 +36,15 @@
     </a>
 
     <div class="coord-card-stats">
-        <button type="button" class="copy-btn" data-coords="{{ coord.latitude }}, {{ coord.longitude }}" data-pk="{{ coord.pk }}" title="좌표 복사">📋 <span class="copy-count">{{ coord.copy_count }}</span></button>
-        <span class="coord-stat">👁️ {{ coord.view_count }}</span>
-        <button type="button" class="like-btn-sm {% if coord.pk in user_liked_coords %}active{% endif %}" onclick="toggleLikeCard({{ coord.pk }}, this)"><span class="like-icon">❤️</span> <span class="like-count">{{ coord.like_count }}</span></button>
+        <button type="button" class="copy-btn" data-coords="{{ coord.latitude }}, {{ coord.longitude }}" data-pk="{{ coord.pk }}" title="좌표 복사"><span class="stat-icon">📋</span><span class="copy-count">{{ coord.copy_count }}</span></button>
+        <span class="coord-stat"><span class="stat-icon">👁️</span><span class="stat-num">{{ coord.view_count }}</span></span>
+        <button type="button" class="like-btn-sm {% if coord.pk in user_liked_coords %}active{% endif %}" onclick="toggleLikeCard({{ coord.pk }}, this)"><span class="like-icon stat-icon">❤️</span><span class="like-count">{{ coord.like_count }}</span></button>
         {% if user.is_authenticated %}
-        <button type="button" class="bookmark-btn-sm {% if coord.pk in user_bookmarked_coords %}active{% endif %}" onclick="toggleBookmarkCard({{ coord.pk }}, this)"><span class="bookmark-icon">⭐</span> <span class="bookmark-count">{{ coord.bookmark_count }}</span></button>
+        <button type="button" class="bookmark-btn-sm {% if coord.pk in user_bookmarked_coords %}active{% endif %}" onclick="toggleBookmarkCard({{ coord.pk }}, this)"><span class="bookmark-icon stat-icon">⭐</span><span class="bookmark-count">{{ coord.bookmark_count }}</span></button>
         {% else %}
-        <span class="coord-stat">⭐ {{ coord.bookmark_count }}</span>
+        <span class="coord-stat"><span class="stat-icon">⭐</span><span class="stat-num">{{ coord.bookmark_count }}</span></span>
         {% endif %}
-        <span class="coord-stat">💬 {{ coord.comment_count }}</span>
+        <button type="button" class="comment-btn-sm" onclick="event.preventDefault(); event.stopPropagation(); openCommentModal({{ coord.pk }})"><span class="stat-icon">💬</span><span class="comment-count">{{ coord.comment_count }}</span></button>
     </div>
 </article>
 {% endfor %}

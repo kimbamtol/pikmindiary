@@ -44,13 +44,18 @@
     <!-- CSS -->
     <link rel="stylesheet" href="{% static 'css/main.css' %}?v=20260220a">
     <link rel="stylesheet" href="{% static 'css/seasons.css' %}?v=20260103d">
+    {% if beta_enabled %}<link rel="stylesheet" href="{% static 'css/design-beta.css' %}?v=20261017n">{% endif %}
+    {% if ui_notebook %}
+    <link href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/notebook.css' %}?v=20261017n">
+    {% endif %}
     {% block extra_css %}{% endblock %}
 
     <!-- HTMX -->
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
 </head>
 
-<body data-season="winter" data-weather="clear" data-time="day">
+<body data-season="winter" data-weather="clear" data-time="day"{% if ui_notebook %} data-ui="notebook"{% endif %}>
     <!-- 날씨 효과 컨테이너 -->
     <div class="weather-effects">
         <!-- 태양/달 (CSS로 스타일링) -->
@@ -90,13 +95,28 @@
 
             <nav class="main-nav" aria-label="메인 내비게이션">
                 <a href="{% url 'coordinates:list' %}" class="nav-link">좌표 목록</a>
-                <a href="{% url 'farming:home' %}" class="nav-link">농사</a>
+                <a href="{% url 'brag:list' %}" class="nav-link">피크민 자랑</a>
                 <a href="{% url 'rankings:list' %}" class="nav-link">랭킹</a>
                 <a href="{% url 'core:guide' %}" class="nav-link">안내</a>
                 <a href="{% url 'core:suggestion' %}" class="nav-link">건의하기</a>
             </nav>
 
             <div class="header-actions">
+                {% if beta_enabled %}
+                <!-- 새 디자인 체험 토글 (팔레트 왼쪽) -->
+                {% if ui_notebook %}
+                <a href="{% url 'core:design_beta_off' %}?next={{ request.get_full_path|urlencode }}"
+                   class="beta-toggle on" title="기존 디자인으로 돌아가기">
+                    <span class="beta-toggle-dot" aria-hidden="true"></span><span class="beta-toggle-text">새 디자인 체험 중</span>
+                </a>
+                {% else %}
+                <a href="{% url 'core:design_beta_on' %}?next={{ request.get_full_path|urlencode }}"
+                   class="beta-toggle" title="새 디자인 체험해보기">
+                    <span class="beta-toggle-dot" aria-hidden="true"></span><span class="beta-toggle-text">새 디자인</span>
+                </a>
+                {% endif %}
+                {% endif %}
+
                 <!-- 계절/날씨 선택 -->
                 <div class="theme-selector">
                     <button class="theme-btn" aria-label="테마 선택" aria-expanded="false" aria-haspopup="true">🎨</button>
@@ -195,6 +215,19 @@
 
             <!-- 모바일 아이콘들 (🎨 🔔 옆에 ☰) -->
             <div class="mobile-header-icons">
+                {% if beta_enabled %}
+                {% if ui_notebook %}
+                <a href="{% url 'core:design_beta_off' %}?next={{ request.get_full_path|urlencode }}"
+                   class="beta-toggle mini on" aria-label="기존 디자인으로 돌아가기" title="기존 디자인으로">
+                    <span class="beta-toggle-dot" aria-hidden="true"></span>
+                </a>
+                {% else %}
+                <a href="{% url 'core:design_beta_on' %}?next={{ request.get_full_path|urlencode }}"
+                   class="beta-toggle mini" aria-label="새 디자인 체험해보기" title="새 디자인">
+                    <span class="beta-toggle-dot" aria-hidden="true"></span>
+                </a>
+                {% endif %}
+                {% endif %}
                 <div class="theme-selector">
                     <button class="theme-btn" aria-label="테마 선택">🎨</button>
                     <div class="theme-dropdown">
@@ -297,7 +330,7 @@
                 {% endif %}
                 <div class="mobile-menu-divider"></div>
                 <a href="{% url 'coordinates:list' %}" class="mobile-menu-item">좌표 목록</a>
-                <a href="{% url 'farming:home' %}" class="mobile-menu-item">농사</a>
+                <a href="{% url 'brag:list' %}" class="mobile-menu-item">피크민 자랑</a>
                 <a href="{% url 'rankings:list' %}" class="mobile-menu-item">랭킹</a>
                 <a href="{% url 'core:guide' %}" class="mobile-menu-item">안내</a>
                 <a href="{% url 'core:suggestion' %}" class="mobile-menu-item">💌 건의하기</a>
@@ -358,7 +391,11 @@
     };
     </script>
 
+    {% if beta_popup_show %}{% include 'core/_design_beta_popup.html' %}{% endif %}
+    {% if ui_notebook %}{% include 'core/_design_vote_bar.html' %}{% endif %}
+
     <!-- JavaScript -->
+    {% if beta_enabled %}<script src="{% static 'js/design-beta.js' %}?v=20261017n"></script>{% endif %}
     <script src="{% static 'js/weather-theme.js' %}?v=20260103e"></script>
     <script src="{% static 'js/main.js' %}?v=20260220a"></script>
     {% block extra_js %}{% endblock %}

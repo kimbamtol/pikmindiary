@@ -1,0 +1,63 @@
+{% load i18n %}
+
+{% if comments %}
+{% for comment in comments %}
+<div class="cm-comment">
+    <div class="cm-comment-header">
+        {% if comment.author %}
+        <span class="author-badge {{ comment.author.get_badge_class }}">
+            {% if comment.author.profile_emoji %}
+            <span class="profile-emoji">{{ comment.author.profile_emoji }}</span>
+            {% endif %}
+            <span class="author-name"><strong>{{ comment.author.nickname }}</strong></span>
+        </span>
+        {% else %}
+        <strong>{{ comment.display_name }}</strong>
+        {% endif %}
+        <span class="cm-comment-date">{{ comment.created_at|date:"m/d H:i" }}</span>
+    </div>
+    <div class="cm-comment-body">
+        {% if comment.content %}{{ comment.content|linebreaks }}{% endif %}
+        {% if comment.has_photo %}
+        <img src="{{ comment.photo.url }}" alt="댓글 사진" class="cm-comment-photo" loading="lazy">
+        {% endif %}
+    </div>
+    <div class="cm-comment-actions">
+        <button class="btn-text comment-like-btn {% if comment.pk in user_liked_comments %}liked{% endif %}"
+            onclick="toggleCommentLikeModal({{ comment.pk }}, this)"
+            {% if user == comment.author %}disabled{% endif %}>
+            <span class="like-icon">{% if comment.pk in user_liked_comments %}❤️{% else %}🤍{% endif %}</span>
+            <span class="like-count">{{ comment.like_count }}</span>
+        </button>
+    </div>
+
+    {% for reply in comment.replies.all %}
+    {% if not reply.is_deleted %}
+    <div class="cm-comment cm-reply">
+        <div class="cm-comment-header">
+            {% if reply.author %}
+            <span class="author-badge {{ reply.author.get_badge_class }}">
+                {% if reply.author.profile_emoji %}
+                <span class="profile-emoji">{{ reply.author.profile_emoji }}</span>
+                {% endif %}
+                <span class="author-name"><strong>{{ reply.author.nickname }}</strong></span>
+            </span>
+            {% else %}
+            <strong>{{ reply.display_name }}</strong>
+            {% endif %}
+            <span class="cm-comment-date">{{ reply.created_at|date:"m/d H:i" }}</span>
+        </div>
+        <div class="cm-comment-body">
+            {% if reply.content %}{{ reply.content|linebreaks }}{% endif %}
+            {% if reply.has_photo %}
+            <img src="{{ reply.photo.url }}" alt="댓글 사진" class="cm-comment-photo" loading="lazy">
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+    {% endfor %}
+</div>
+{% endfor %}
+{% else %}
+<p class="cm-empty">아직 댓글이 없습니다. 첫 댓글을 남겨보세요!</p>
+{% endif %}

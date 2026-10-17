@@ -11,4 +11,10 @@ urlpatterns = [
     path('api/default-location/', views.default_location, name='default_location'),
     path('suggestion/', views.suggestion_form, name='suggestion'),
     path('suggestion/done/', views.suggestion_done, name='suggestion_done'),
+
+    # 새 디자인(수첩) 체험
+    path('design/beta/on/', views.design_beta_on, name='design_beta_on'),
+    path('design/beta/off/', views.design_beta_off, name='design_beta_off'),
+    path('design/popup/dismiss/', views.design_popup_dismiss, name='design_popup_dismiss'),
+    path('design/vote/', views.design_vote, name='design_vote'),
 ]

@@ -1,0 +1,194 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{{ post.caption|default:"피크민 자랑" }} | 피크민 다이어리{% endblock %}
+{% block description %}{{ post.caption|default:"유저가 자랑한 피크민 블룸 사진" }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="brag-detail">
+        <div class="brag-detail-nav">
+            <a href="{% url 'brag:list' %}" class="btn btn-text">← {% trans "자랑 목록" %}</a>
+            {% if is_owner or not post.author %}
+            <a href="{% url 'brag:delete' pk=post.pk %}" class="btn btn-danger-text">{% trans "삭제" %}</a>
+            {% endif %}
+        </div>
+
+        <figure class="brag-detail-photo">
+            <img src="{{ post.image.url }}" alt="{{ post.caption|default:'자랑 사진' }}">
+        </figure>
+
+        {% if post.caption %}
+        <p class="brag-detail-caption">{{ post.caption }}</p>
+        {% endif %}
+
+        <div class="brag-detail-meta">
+            <span class="brag-detail-author">{{ post.display_name }}</span>
+            <span>{{ post.created_at|date:"Y.m.d H:i" }}</span>
+            <span>{% trans "조회" %} {{ post.view_count }}</span>
+        </div>
+
+        <div class="brag-detail-actions">
+            <button type="button" class="brag-like-big {% if liked %}on{% endif %}" data-pk="{{ post.pk }}">
+                <span class="brag-like-icon">❤️</span>
+                <span class="brag-like-count">{{ post.like_count }}</span>
+                <span class="brag-like-text">{% trans "좋아요" %}</span>
+            </button>
+        </div>
+
+        <section class="brag-comments">
+            <h2 class="brag-comments-title">💬 {% trans "댓글" %} <span>{{ post.comment_count }}</span></h2>
+
+            {% for comment in comments %}
+            <article class="brag-comment">
+                <div class="brag-comment-head">
+                    <span class="brag-comment-name">{{ comment.display_name }}</span>
+                    <span class="brag-comment-date">{{ comment.created_at|date:"n/j H:i" }}</span>
+                </div>
+                {% if comment.content %}<p class="brag-comment-body">{{ comment.content }}</p>{% endif %}
+                {% if comment.photo %}
+                <img class="brag-comment-photo" src="{{ comment.photo.url }}" alt="{% trans '댓글 사진' %}" loading="lazy">
+                {% endif %}
+
+                {% for reply in comment.replies.all %}
+                {% if not reply.is_deleted %}
+                <div class="brag-comment-reply">
+                    <div class="brag-comment-head">
+                        <span class="brag-comment-name">{{ reply.display_name }}</span>
+                        <span class="brag-comment-date">{{ reply.created_at|date:"n/j H:i" }}</span>
+                    </div>
+                    {% if reply.content %}<p class="brag-comment-body">{{ reply.content }}</p>{% endif %}
+                    {% if reply.photo %}
+                    <img class="brag-comment-photo" src="{{ reply.photo.url }}" alt="{% trans '댓글 사진' %}" loading="lazy">
+                    {% endif %}
+                </div>
+                {% endif %}
+                {% endfor %}
+            </article>
+            {% empty %}
+            <p class="brag-comments-empty">{% trans "첫 댓글을 남겨보세요." %}</p>
+            {% endfor %}
+
+            <form method="post" action="{% url 'brag:comment' pk=post.pk %}" enctype="multipart/form-data" class="brag-comment-form">
+                {% csrf_token %}
+                {% if not user.is_authenticated %}
+                <div class="brag-guest-fields">
+                    <input type="text" name="guest_nickname" class="form-control" placeholder="{% trans '닉네임' %}" maxlength="30" required>
+                    <input type="password" name="guest_password" class="form-control" placeholder="{% trans '비밀번호' %}" required>
+                </div>
+                {% endif %}
+                <textarea name="content" class="form-control" rows="2" maxlength="500"
+                          placeholder="{% trans '댓글을 남겨주세요' %}"></textarea>
+                <div class="brag-comment-form-foot">
+                    <label class="brag-photo-pick">
+                        📷 <span>{% trans "사진" %}</span>
+                        <input type="file" name="photo" accept="image/*" hidden>
+                    </label>
+                    <button type="submit" class="btn btn-primary">{% trans "등록" %}</button>
+                </div>
+            </form>
+        </section>
+    </div>
+</div>
+
+<style>
+    .brag-detail {
+        max-width: 720px;
+        margin: var(--spacing-lg) auto var(--spacing-2xl);
+    }
+    .brag-detail-nav { display: flex; justify-content: space-between; margin-bottom: var(--spacing-sm); }
+    .brag-detail-photo {
+        margin: 0;
+        background: var(--bg-primary);
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        box-shadow: var(--shadow-sm);
+    }
+    .brag-detail-photo img { width: 100%; display: block; }
+    .brag-detail-caption { font-size: 1.15rem; line-height: 1.6; margin: var(--spacing-md) 0 var(--spacing-sm); }
+    .brag-detail-meta {
+        display: flex; gap: var(--spacing-md); flex-wrap: wrap;
+        color: var(--text-secondary); font-size: 0.92rem; margin-bottom: var(--spacing-md);
+    }
+    .brag-detail-author { font-weight: 700; color: var(--text-primary); }
+    .brag-detail-actions { margin-bottom: var(--spacing-xl); }
+    .brag-like-big {
+        display: inline-flex; align-items: center; gap: 8px;
+        border: none; background: var(--bg-primary); color: var(--text-secondary);
+        padding: 12px 22px; border-radius: var(--radius-full); cursor: pointer;
+        font-size: 1rem; box-shadow: var(--shadow-sm);
+    }
+    .brag-like-big .brag-like-icon { filter: grayscale(1); opacity: .5; }
+    .brag-like-big.on { background: #FDE4E4; color: #C0392B; font-weight: 700; }
+    .brag-like-big.on .brag-like-icon { filter: none; opacity: 1; }
+    .brag-like-count { font-variant-numeric: tabular-nums; }
+
+    .brag-comments-title { font-size: 1.15rem; margin-bottom: var(--spacing-md); }
+    .brag-comment {
+        background: var(--bg-primary);
+        border-radius: var(--radius-md);
+        padding: var(--spacing-md);
+        margin-bottom: var(--spacing-sm);
+    }
+    .brag-comment-head { display: flex; gap: var(--spacing-sm); align-items: baseline; margin-bottom: 4px; }
+    .brag-comment-name { font-weight: 700; }
+    .brag-comment-date { font-size: 0.82rem; color: var(--text-secondary); }
+    .brag-comment-body { margin: 0; line-height: 1.6; white-space: pre-wrap; }
+    .brag-comment-photo { max-width: 240px; border-radius: var(--radius-sm); margin-top: var(--spacing-sm); display: block; }
+    .brag-comment-reply {
+        margin: var(--spacing-sm) 0 0 var(--spacing-md);
+        padding-left: var(--spacing-md);
+        border-left: 2px solid var(--bg-tertiary);
+    }
+    .brag-comments-empty { color: var(--text-secondary); padding: var(--spacing-md) 0; }
+
+    .brag-comment-form {
+        background: var(--bg-primary);
+        border-radius: var(--radius-md);
+        padding: var(--spacing-md);
+        margin-top: var(--spacing-md);
+    }
+    .brag-guest-fields { display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-sm); margin-bottom: var(--spacing-sm); }
+    .brag-comment-form textarea { width: 100%; resize: vertical; }
+    .brag-comment-form-foot { display: flex; justify-content: space-between; align-items: center; margin-top: var(--spacing-sm); }
+    .brag-photo-pick { cursor: pointer; color: var(--text-secondary); font-size: 0.92rem; }
+    @media (max-width: 560px) {
+        .brag-guest-fields { grid-template-columns: 1fr; }
+    }
+</style>
+
+<script>
+(function () {
+    function getCookie(name) {
+        var m = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+        return m ? decodeURIComponent(m.pop()) : '';
+    }
+    var btn = document.querySelector('.brag-like-big');
+    if (btn) {
+        btn.addEventListener('click', function () {
+            btn.disabled = true;
+            fetch('/brag/' + btn.getAttribute('data-pk') + '/like/', {
+                method: 'POST',
+                headers: { 'X-CSRFToken': getCookie('csrftoken'), 'X-Requested-With': 'XMLHttpRequest' },
+                credentials: 'same-origin'
+            })
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                btn.disabled = false;
+                if (data.error) { alert(data.error); return; }
+                btn.classList.toggle('on', data.liked);
+                btn.querySelector('.brag-like-count').textContent = data.like_count;
+            })
+            .catch(function () { btn.disabled = false; });
+        });
+    }
+    var pick = document.querySelector('.brag-photo-pick input');
+    if (pick) {
+        pick.addEventListener('change', function () {
+            var label = document.querySelector('.brag-photo-pick span');
+            label.textContent = pick.files.length ? pick.files[0].name.slice(0, 18) : '사진';
+        });
+    }
+})();
+</script>
+{% endblock %}

@@ -37,7 +37,7 @@
                 </div>
                 <div class="hof-name">{{ ranking.user.nickname }}</div>
                 {% if ranking.user.bio %}
-                <div class="hof-bio">{{ ranking.user.bio|truncatechars:20 }}</div>
+                <div class="hof-bio" data-bio="{{ ranking.user.bio }}">{{ ranking.user.bio }}</div>
                 {% endif %}
                 <div class="hof-pedestal">
                     <div class="hof-score">{{ ranking.score }}</div>
