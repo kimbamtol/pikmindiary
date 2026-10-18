@@ -110,8 +110,17 @@
             </div>
 
             <!-- 좌표 목록 -->
+            <div class="density-bar">
+                <span class="density-label">보기</span>
+                <div class="density-group" role="group" aria-label="목록 보기 방식">
+                    <button type="button" class="density-btn {% if list_density == 'large' %}on{% endif %}" data-density="large">크게</button>
+                    <button type="button" class="density-btn {% if list_density == 'normal' %}on{% endif %}" data-density="normal">보통</button>
+                    <button type="button" class="density-btn {% if list_density == 'dense' %}on{% endif %}" data-density="dense">촘촘</button>
+                </div>
+            </div>
+
             {% if coords %}
-            <div class="coord-grid grid">
+            <div class="coord-grid grid" data-density="{{ list_density }}" data-density-target>
                 {% include 'coordinates/_card_list.html' %}
             </div>
 
@@ -185,20 +194,69 @@
         }
     }
 
-    .coord-grid {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+    /* 보기 전환 버튼 */
+    .density-bar {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+        margin-bottom: var(--spacing-md);
+    }
+    .density-label { font-size: 0.88rem; color: var(--text-secondary); }
+    .density-group {
+        display: inline-flex;
+        background: var(--bg-tertiary);
+        border-radius: var(--radius-full);
+        padding: 3px;
+        gap: 2px;
+    }
+    .density-btn {
+        border: none;
+        background: none;
+        color: var(--text-secondary);
+        font-size: 0.88rem;
+        padding: 6px 14px;
+        border-radius: var(--radius-full);
+        cursor: pointer;
+        transition: background 0.15s ease, color 0.15s ease;
+    }
+    .density-btn.on {
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        font-weight: 700;
+        box-shadow: var(--shadow-sm);
     }
 
+    /* 밀도별 칸 수 */
+    .coord-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .coord-grid[data-density="large"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .coord-grid[data-density="dense"] { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: var(--spacing-sm); }
+
     @media (max-width: 1100px) {
-        .coord-grid {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-        }
+        .coord-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .coord-grid[data-density="large"] { grid-template-columns: minmax(0, 1fr); }
+        .coord-grid[data-density="dense"] { grid-template-columns: repeat(4, minmax(0, 1fr)); }
     }
 
     @media (max-width: 620px) {
-        .coord-grid {
-            grid-template-columns: minmax(0, 1fr);
-        }
+        .coord-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--spacing-sm); }
+        .coord-grid[data-density="large"] { grid-template-columns: minmax(0, 1fr); }
+        .coord-grid[data-density="dense"] { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+    }
+
+    /* 촘촘: 사진 격자로 (제목·좌표·작성자·통계 숨김) */
+    .coord-grid[data-density="dense"] .coord-card-content,
+    .coord-grid[data-density="dense"] .coord-card-stats { display: none; }
+    .coord-grid[data-density="dense"] .coord-card-image { aspect-ratio: 1 / 1; height: auto; }
+    .coord-grid[data-density="dense"] .coord-card-category { font-size: 0.7rem; padding: 2px 7px; }
+
+    /* 좁은 화면 2열: 카드 안쪽을 조금 줄인다 */
+    @media (max-width: 620px) {
+        .coord-grid:not([data-density="large"]) .coord-card-title { font-size: 0.95rem; }
+        .coord-grid:not([data-density="large"]) .coord-card-meta { font-size: 0.72rem; }
+        .coord-grid:not([data-density="large"]) .coord-card-postcard { font-size: 0.72rem; }
+        .coord-grid:not([data-density="large"]) .coord-card-stats button,
+        .coord-grid:not([data-density="large"]) .coord-card-stats .coord-stat { font-size: 0.72rem; padding: 6px 2px; }
+        .coord-grid:not([data-density="large"]) .coord-card-content { padding: 10px; gap: 4px; }
     }
 
     /* 우측 자랑 위젯 (PC 전용) */

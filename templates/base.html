@@ -44,10 +44,10 @@
     <!-- CSS -->
     <link rel="stylesheet" href="{% static 'css/main.css' %}?v=20260220a">
     <link rel="stylesheet" href="{% static 'css/seasons.css' %}?v=20260103d">
-    {% if beta_enabled %}<link rel="stylesheet" href="{% static 'css/design-beta.css' %}?v=20261017n">{% endif %}
+    {% if beta_enabled %}<link rel="stylesheet" href="{% static 'css/design-beta.css' %}?v=20261018b">{% endif %}
     {% if ui_notebook %}
     <link href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/notebook.css' %}?v=20261017n">
+    <link rel="stylesheet" href="{% static 'css/notebook.css' %}?v=20261018b">
     {% endif %}
     {% block extra_css %}{% endblock %}
 
@@ -394,8 +394,39 @@
     {% if beta_popup_show %}{% include 'core/_design_beta_popup.html' %}{% endif %}
     {% if ui_notebook %}{% include 'core/_design_vote_bar.html' %}{% endif %}
 
+    <script>
+    // 목록 보기 방식 전환 (회원은 계정, 비회원은 쿠키에 저장)
+    (function () {
+        var buttons = document.querySelectorAll('.density-btn');
+        if (!buttons.length) return;
+        function csrf() {
+            var m = document.cookie.match('(^|;)\\s*csrftoken\\s*=\\s*([^;]+)');
+            return m ? decodeURIComponent(m.pop()) : '';
+        }
+        buttons.forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var value = btn.getAttribute('data-density');
+                document.querySelectorAll('[data-density-target]').forEach(function (grid) {
+                    grid.setAttribute('data-density', value);
+                });
+                buttons.forEach(function (b) { b.classList.toggle('on', b === btn); });
+                fetch('/display/density/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRFToken': csrf(),
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: 'density=' + encodeURIComponent(value),
+                    credentials: 'same-origin'
+                }).catch(function () {});
+            });
+        });
+    })();
+    </script>
+
     <!-- JavaScript -->
-    {% if beta_enabled %}<script src="{% static 'js/design-beta.js' %}?v=20261017n"></script>{% endif %}
+    {% if beta_enabled %}<script src="{% static 'js/design-beta.js' %}?v=20261018b"></script>{% endif %}
     <script src="{% static 'js/weather-theme.js' %}?v=20260103e"></script>
     <script src="{% static 'js/main.js' %}?v=20260220a"></script>
     {% block extra_js %}{% endblock %}

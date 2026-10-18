@@ -199,3 +199,23 @@ def design_vote(request):
 
     tally = DesignVote.tally()
     return JsonResponse({'ok': True, 'choice': choice, 'tally': tally})
+
+
+@require_POST
+def set_list_density(request):
+    """목록 보기 방식 저장 - 회원은 계정에, 비회원은 쿠키에"""
+    from apps.accounts.models import CustomUser
+
+    value = request.POST.get('density', '')
+    if value not in dict(CustomUser.ListDensity.choices):
+        return JsonResponse({'ok': False, 'error': '알 수 없는 보기 방식입니다.'}, status=400)
+
+    response = JsonResponse({'ok': True, 'density': value})
+    response.set_cookie(
+        'pd_density', value, max_age=COOKIE_MAX_AGE,
+        samesite='Lax', secure=request.is_secure()
+    )
+    if request.user.is_authenticated:
+        # 기기를 옮겨도 따라오도록 계정에도 남긴다
+        CustomUser.objects.filter(pk=request.user.pk).update(list_density=value)
+    return response

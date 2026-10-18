@@ -6,6 +6,20 @@ from .models import SiteSettings, DesignVote
 UI_COOKIE = 'pd_ui'
 POPUP_COOKIE = 'pd_beta_popup'
 UI_NOTEBOOK = 'notebook'
+DENSITY_COOKIE = 'pd_density'
+DENSITIES = ('large', 'normal', 'dense')
+
+
+def list_density(request):
+    """목록 보기 밀도. 회원은 계정 설정, 비회원은 쿠키"""
+    value = ''
+    if request.user.is_authenticated:
+        value = getattr(request.user, 'list_density', '') or ''
+    if value not in DENSITIES:
+        value = request.COOKIES.get(DENSITY_COOKIE, '')
+    if value not in DENSITIES:
+        value = 'normal'
+    return {'list_density': value}
 
 
 def design_beta(request):

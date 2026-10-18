@@ -1050,3 +1050,26 @@ body[data-ui="notebook"][data-time="night"] .brag-hall-week,
 body[data-ui="notebook"][data-time="night"] .brag-hall-likes {
     color: var(--nb-on-dark-soft) !important;
 }
+
+/* 촘촘 보기에서는 테이프를 작게 (작은 타일에서 과하지 않도록) */
+body[data-ui="notebook"] .coord-grid[data-density="dense"] .coord-card::before,
+body[data-ui="notebook"] .brag-grid[data-density="dense"] .brag-card::before {
+    width: 34px;
+    height: 10px;
+    top: -5px;
+}
+body[data-ui="notebook"] .coord-grid[data-density="dense"] .coord-card,
+body[data-ui="notebook"] .brag-grid[data-density="dense"] .brag-card {
+    padding-top: 5px;
+}
+body[data-ui="notebook"] .density-group {
+    background: var(--bg-secondary);
+    border: 1.5px solid var(--nb-rule);
+    border-radius: 999px;
+}
+body[data-ui="notebook"] .density-btn.on {
+    background: var(--primary);
+    color: #fff;
+    box-shadow: none;
+}
+body[data-ui="notebook"][data-time="night"] .density-label { color: var(--nb-on-dark-soft) !important; }

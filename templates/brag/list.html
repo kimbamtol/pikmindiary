@@ -41,6 +41,11 @@
             <a href="?sort=likes" class="brag-sort {% if sort == 'likes' %}on{% endif %}">{% trans "좋아요순" %}</a>
             <a href="?sort=comments" class="brag-sort {% if sort == 'comments' %}on{% endif %}">{% trans "댓글순" %}</a>
         </div>
+        <div class="density-group" role="group" aria-label="보기 방식">
+            <button type="button" class="density-btn {% if list_density == 'large' %}on{% endif %}" data-density="large">크게</button>
+            <button type="button" class="density-btn {% if list_density == 'normal' %}on{% endif %}" data-density="normal">보통</button>
+            <button type="button" class="density-btn {% if list_density == 'dense' %}on{% endif %}" data-density="dense">촘촘</button>
+        </div>
         <span class="brag-count">{{ total_count }}{% trans "장" %}</span>
     </div>
 
@@ -54,7 +59,7 @@
             <span class="brag-week-count">{{ group.posts|length }}장</span>
         </h2>
     </div>
-    <div class="brag-grid">
+    <div class="brag-grid" data-density="{{ list_density }}" data-density-target>
         {% for post in group.posts %}
         <article class="brag-card">
             <a href="{% url 'brag:detail' pk=post.pk %}" class="brag-photo">
@@ -81,7 +86,7 @@
     </div>
     {% endfor %}
     {% else %}
-    <div class="brag-grid">
+    <div class="brag-grid" data-density="{{ list_density }}" data-density-target>
         {% for post in posts %}
         <article class="brag-card">
             <a href="{% url 'brag:detail' pk=post.pk %}" class="brag-photo">
@@ -225,8 +230,39 @@
     /* 그리드 */
     .brag-grid {
         display: grid;
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(4, minmax(0, 1fr));
         gap: var(--spacing-md);
+    }
+    .brag-grid[data-density="large"] { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .brag-grid[data-density="dense"] { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: var(--spacing-sm); }
+
+    /* 촘촘: 사진만 */
+    .brag-grid[data-density="dense"] .brag-body,
+    .brag-grid[data-density="dense"] .brag-actions { display: none; }
+
+    /* 보기 전환 버튼 */
+    .density-group {
+        display: inline-flex;
+        background: var(--bg-tertiary);
+        border-radius: var(--radius-full);
+        padding: 3px;
+        gap: 2px;
+        margin-left: auto;
+    }
+    .density-btn {
+        border: none;
+        background: none;
+        color: var(--text-secondary);
+        font-size: 0.88rem;
+        padding: 6px 14px;
+        border-radius: var(--radius-full);
+        cursor: pointer;
+    }
+    .density-btn.on {
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        font-weight: 700;
+        box-shadow: var(--shadow-sm);
     }
     .brag-card {
         background: var(--bg-primary);
@@ -358,11 +394,17 @@
     .brag-pager-now { color: var(--text-secondary); }
 
     @media (max-width: 1024px) {
-        .brag-grid { grid-template-columns: repeat(3, 1fr); }
+        .brag-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        .brag-grid[data-density="large"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .brag-grid[data-density="dense"] { grid-template-columns: repeat(4, minmax(0, 1fr)); }
     }
     @media (max-width: 768px) {
-        .brag-grid { grid-template-columns: repeat(2, 1fr); }
+        .brag-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .brag-grid[data-density="large"] { grid-template-columns: minmax(0, 1fr); }
+        .brag-grid[data-density="dense"] { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
         .brag-top-card { grid-template-columns: 1fr; }
+        .brag-toolbar { flex-wrap: wrap; }
+        .density-group { margin-left: 0; }
     }
 </style>
 

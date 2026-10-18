@@ -17,4 +17,7 @@ urlpatterns = [
     path('design/beta/off/', views.design_beta_off, name='design_beta_off'),
     path('design/popup/dismiss/', views.design_popup_dismiss, name='design_popup_dismiss'),
     path('design/vote/', views.design_vote, name='design_vote'),
+
+    # 목록 보기 방식
+    path('display/density/', views.set_list_density, name='set_list_density'),
 ]

@@ -155,6 +155,19 @@ class CustomUser(AbstractUser):
     )
 
     # 통계 (캐시용)
+    # 목록 보기 밀도 (크게/보통/촘촘) - 비회원은 쿠키에 저장
+    class ListDensity(models.TextChoices):
+        LARGE = 'large', '크게'
+        NORMAL = 'normal', '보통'
+        DENSE = 'dense', '촘촘'
+
+    list_density = models.CharField(
+        '목록 보기 방식',
+        max_length=10,
+        choices=ListDensity.choices,
+        default=ListDensity.NORMAL,
+    )
+
     total_posts = models.PositiveIntegerField(default=0)
     total_likes_received = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
