@@ -44,10 +44,10 @@
     <!-- CSS -->
     <link rel="stylesheet" href="{% static 'css/main.css' %}?v=20260220a">
     <link rel="stylesheet" href="{% static 'css/seasons.css' %}?v=20260103d">
-    {% if beta_enabled %}<link rel="stylesheet" href="{% static 'css/design-beta.css' %}?v=20261018b">{% endif %}
+    {% if beta_enabled %}<link rel="stylesheet" href="{% static 'css/design-beta.css' %}?v=20261018d">{% endif %}
     {% if ui_notebook %}
     <link href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/notebook.css' %}?v=20261018b">
+    <link rel="stylesheet" href="{% static 'css/notebook.css' %}?v=20261018d">
     {% endif %}
     {% block extra_css %}{% endblock %}
 
@@ -426,7 +426,7 @@
     </script>
 
     <!-- JavaScript -->
-    {% if beta_enabled %}<script src="{% static 'js/design-beta.js' %}?v=20261018b"></script>{% endif %}
+    {% if beta_enabled %}<script src="{% static 'js/design-beta.js' %}?v=20261018d"></script>{% endif %}
     <script src="{% static 'js/weather-theme.js' %}?v=20260103e"></script>
     <script src="{% static 'js/main.js' %}?v=20260220a"></script>
     {% block extra_js %}{% endblock %}

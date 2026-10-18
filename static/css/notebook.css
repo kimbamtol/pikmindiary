@@ -1072,4 +1072,3 @@ body[data-ui="notebook"] .density-btn.on {
     color: #fff;
     box-shadow: none;
 }
-body[data-ui="notebook"][data-time="night"] .density-label { color: var(--nb-on-dark-soft) !important; }

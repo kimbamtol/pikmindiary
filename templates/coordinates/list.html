@@ -110,13 +110,13 @@
             </div>
 
             <!-- 좌표 목록 -->
-            <div class="density-bar">
-                <span class="density-label">보기</span>
+            <div class="density-bar" data-density="{{ list_density }}" data-density-target>
                 <div class="density-group" role="group" aria-label="목록 보기 방식">
                     <button type="button" class="density-btn {% if list_density == 'large' %}on{% endif %}" data-density="large">크게</button>
                     <button type="button" class="density-btn {% if list_density == 'normal' %}on{% endif %}" data-density="normal">보통</button>
                     <button type="button" class="density-btn {% if list_density == 'dense' %}on{% endif %}" data-density="dense">촘촘</button>
                 </div>
+                <span class="density-hint">사진을 누르면 좌표가 복사됩니다</span>
             </div>
 
             {% if coords %}
@@ -200,8 +200,8 @@
         align-items: center;
         gap: var(--spacing-sm);
         margin-bottom: var(--spacing-md);
+        flex-wrap: wrap;
     }
-    .density-label { font-size: 0.88rem; color: var(--text-secondary); }
     .density-group {
         display: inline-flex;
         background: var(--bg-tertiary);
@@ -217,6 +217,7 @@
         padding: 6px 14px;
         border-radius: var(--radius-full);
         cursor: pointer;
+        white-space: nowrap;
         transition: background 0.15s ease, color 0.15s ease;
     }
     .density-btn.on {
@@ -242,6 +243,53 @@
         .coord-grid[data-density="large"] { grid-template-columns: minmax(0, 1fr); }
         .coord-grid[data-density="dense"] { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
     }
+
+    /* 촘촘 보기 안내 */
+    .density-hint {
+        display: none;
+        font-size: 0.82rem;
+        color: var(--text-secondary);
+    }
+    .density-bar[data-density="dense"] .density-hint { display: inline; }
+
+    @media (max-width: 620px) {
+        /* 좁은 화면에서는 안내를 아랫줄로 내린다 */
+        .density-bar[data-density="dense"] .density-hint {
+            display: block;
+            flex-basis: 100%;
+            margin-top: 2px;
+        }
+    }
+
+    /* 촘촘에서 복사했을 때 그 타일을 잠깐 표시 */
+    .coord-card.copied-flash { position: relative; }
+    .coord-card.copied-flash::after {
+        content: "복사됨";
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(76, 175, 80, 0.85);
+        color: #fff;
+        font-weight: 700;
+        font-size: 0.85rem;
+        border-radius: inherit;
+        z-index: 5;
+        animation: copiedFade 1.2s ease forwards;
+    }
+    @keyframes copiedFade {
+        0% { opacity: 0; }
+        15% { opacity: 1; }
+        70% { opacity: 1; }
+        100% { opacity: 0; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .coord-card.copied-flash::after { animation: none; }
+    }
+
+    /* 촘촘 보기에서는 손가락 모양으로 (복사 버튼처럼) */
+    .coord-grid[data-density="dense"] .coord-card a[href] { cursor: copy; }
 
     /* 촘촘: 사진 격자로 (제목·좌표·작성자·통계 숨김) */
     .coord-grid[data-density="dense"] .coord-card-content,
@@ -1085,6 +1133,22 @@
     // 복사 버튼 이벤트 리스너 부착 (초기 + 동적 카드 공용)
     function attachCopyListeners(card) {
         var btn = card.querySelector('.copy-btn');
+
+        // 촘촘 보기에서는 사진을 누르면 글로 가지 않고 좌표가 복사된다
+        var photoLink = card.querySelector('a[href]');
+        if (photoLink && btn) {
+            photoLink.addEventListener('click', function (e) {
+                var grid = card.closest('.coord-grid');
+                if (!grid || grid.getAttribute('data-density') !== 'dense') return;
+                e.preventDefault();
+                var coords = btn.getAttribute('data-coords');
+                if (!coords) return;
+                handleCopy(coords, btn);
+                card.classList.add('copied-flash');
+                setTimeout(function () { card.classList.remove('copied-flash'); }, 1200);
+            });
+        }
+
         if (btn) {
             btn.addEventListener('click', function (e) {
                 e.preventDefault();
