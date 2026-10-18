@@ -212,7 +212,7 @@
     .density-btn {
         border: none;
         background: none;
-        color: var(--text-secondary);
+        color: #555555;
         font-size: 0.88rem;
         padding: 6px 14px;
         border-radius: var(--radius-full);
@@ -251,6 +251,19 @@
         color: var(--text-secondary);
     }
     .density-bar[data-density="dense"] .density-hint { display: inline; }
+
+    /* 어두운 테마(밤·비·폭풍)에서는 바탕 위 글씨를 밝게 */
+    body[data-time="night"] .density-hint,
+    body[data-weather="rain"] .density-hint,
+    body[data-weather="storm"] .density-hint,
+    body[data-time="night"] .scroll-loading,
+    body[data-weather="rain"] .scroll-loading,
+    body[data-weather="storm"] .scroll-loading,
+    body[data-time="night"] .scroll-loading span,
+    body[data-weather="rain"] .scroll-loading span,
+    body[data-weather="storm"] .scroll-loading span {
+        color: #E6E9EE;
+    }
 
     @media (max-width: 620px) {
         /* 좁은 화면에서는 안내를 아랫줄로 내린다 */
