@@ -79,6 +79,11 @@ class Coordinate(models.Model):
     bookmark_count = models.PositiveIntegerField(_('북마크 수'), default=0)
     comment_count = models.PositiveIntegerField(_('댓글 수'), default=0)
     copy_count = models.PositiveIntegerField(_('복사 수'), default=0)
+
+    # 엽서 변경(너프) 제보
+    nerf_report_count = models.PositiveIntegerField(_('엽서 변경 제보 수'), default=0)
+    is_nerfed = models.BooleanField(_('엽서 변경됨'), default=False)
+    nerfed_at = models.DateTimeField(_('변경 표시일'), null=True, blank=True)
     
     # 타임스탬프
     created_at = models.DateTimeField(_('작성일'), auto_now_add=True)
@@ -272,3 +277,45 @@ class CoordinateImage(models.Model):
             # 워터마크 실패해도 이미지는 유지
             import logging
             logging.error(f"워터마크 적용 실패: {e}")
+
+
+class NerfReport(models.Model):
+    """엽서가 바뀌었다는 제보 - 비회원 포함 1인 1표"""
+
+    coordinate = models.ForeignKey(
+        Coordinate,
+        on_delete=models.CASCADE,
+        related_name='nerf_reports',
+        verbose_name=_('좌표')
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        null=True, blank=True,
+        related_name='nerf_reports',
+        verbose_name=_('회원')
+    )
+    session_key = models.CharField(_('세션 키'), max_length=40, blank=True, db_index=True)
+    ip_address = models.GenericIPAddressField(_('IP'), null=True, blank=True)
+    created_at = models.DateTimeField(_('제보일'), auto_now_add=True)
+
+    class Meta:
+        verbose_name = _('엽서 변경 제보')
+        verbose_name_plural = _('엽서 변경 제보')
+        ordering = ['-created_at']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['coordinate', 'user'],
+                condition=models.Q(user__isnull=False),
+                name='unique_nerf_report_user'
+            ),
+            models.UniqueConstraint(
+                fields=['coordinate', 'session_key'],
+                condition=models.Q(user__isnull=True),
+                name='unique_nerf_report_session'
+            ),
+        ]
+
+    def __str__(self):
+        who = self.user.nickname if self.user else f'비회원({self.session_key[:6]})'
+        return f'{who} -> {self.coordinate.title}'

@@ -12,6 +12,7 @@ from django.contrib.auth.hashers import make_password, check_password
 from .models import Coordinate, CoordinateImage
 from apps.interactions.models import Like, Bookmark
 from apps.rankings.utils import update_user_ranking
+from django.views.decorators.http import require_POST
 
 
 def coordinate_list(request):
@@ -221,6 +222,27 @@ def coordinate_detail(request, pk):
         # 비회원은 세션에서 가져오기
         user_liked_comments = request.session.get('liked_comments', [])
 
+    # 엽서 변경(너프) 제보 상태
+    from datetime import timedelta
+
+    from django.utils import timezone
+
+    from apps.core.models import SiteSettings
+    from .models import NerfReport
+
+    nerf_settings = SiteSettings.get_settings()
+    nerf_window = max(1, nerf_settings.nerf_window_days)
+    nerf_since = timezone.now() - timedelta(days=nerf_window)
+    nerf_recent = NerfReport.objects.filter(coordinate=coordinate, created_at__gte=nerf_since).count()
+
+    if request.user.is_authenticated:
+        my_nerf = NerfReport.objects.filter(coordinate=coordinate, user=request.user).exists()
+    else:
+        key = request.session.session_key
+        my_nerf = bool(key) and NerfReport.objects.filter(
+            coordinate=coordinate, user__isnull=True, session_key=key
+        ).exists()
+
     context = {
         'coordinate': coordinate,
         'images': coordinate.images.all(),
@@ -229,6 +251,14 @@ def coordinate_detail(request, pk):
         'comments': comments,
         'comment_sort': sort,
         'user_liked_comments': user_liked_comments,
+        'nerf_recent_count': nerf_recent,
+        'nerf_threshold': max(1, nerf_settings.nerf_threshold),
+        'nerf_window_days': nerf_window,
+        'my_nerf_report': my_nerf,
+        'is_nerf_owner': bool(
+            request.user.is_authenticated
+            and (coordinate.author_id == request.user.pk or request.user.is_staff)
+        ),
     }
     return render(request, 'coordinates/detail.html', context)
 
@@ -564,3 +594,101 @@ def map_view(request):
         'category': category,
     }
     return render(request, 'coordinates/map.html', context)
+
+
+# ===== 엽서 변경(너프) 제보 =====
+
+@require_POST
+def toggle_nerf_report(request, pk):
+    """엽서가 바뀌었다는 제보 토글. 정해진 기간 안에 기준 인원을 넘으면 [너프됨] 표시"""
+    from datetime import timedelta
+
+    from django.utils import timezone
+
+    from apps.core.models import SiteSettings
+    from apps.interactions.models import Notification
+    from .models import NerfReport
+
+    coordinate = get_object_or_404(Coordinate, pk=pk)
+    ip = request.META.get('HTTP_X_FORWARDED_FOR', '').split(',')[0].strip() \
+        or request.META.get('REMOTE_ADDR')
+
+    if request.user.is_authenticated:
+        existing = NerfReport.objects.filter(coordinate=coordinate, user=request.user).first()
+    else:
+        if not request.session.session_key:
+            request.session.save()
+        existing = NerfReport.objects.filter(
+            coordinate=coordinate, user__isnull=True, session_key=request.session.session_key
+        ).first()
+
+    if existing:
+        existing.delete()
+        reported = False
+    else:
+        NerfReport.objects.create(
+            coordinate=coordinate,
+            user=request.user if request.user.is_authenticated else None,
+            session_key='' if request.user.is_authenticated else request.session.session_key,
+            ip_address=ip,
+        )
+        reported = True
+
+    settings_obj = SiteSettings.get_settings()
+    threshold = max(1, settings_obj.nerf_threshold)
+    window = max(1, settings_obj.nerf_window_days)
+    since = timezone.now() - timedelta(days=window)
+
+    recent = NerfReport.objects.filter(coordinate=coordinate, created_at__gte=since).count()
+    total = NerfReport.objects.filter(coordinate=coordinate).count()
+
+    was_nerfed = coordinate.is_nerfed
+    is_nerfed = recent >= threshold
+
+    Coordinate.objects.filter(pk=coordinate.pk).update(
+        nerf_report_count=total,
+        is_nerfed=is_nerfed,
+        nerfed_at=timezone.now() if (is_nerfed and not was_nerfed) else coordinate.nerfed_at,
+    )
+
+    # 처음 표시될 때 작성자에게 알림
+    if is_nerfed and not was_nerfed and coordinate.author:
+        Notification.objects.create(
+            recipient=coordinate.author,
+            actor=request.user if request.user.is_authenticated else None,
+            notification_type=Notification.NotificationType.NERF,
+            coordinate=coordinate,
+            message=_("'%(title)s'의 엽서가 바뀌었다는 제보가 %(count)d건 모여 [너프됨]으로 표시되었어요") % {
+                'title': coordinate.title, 'count': recent
+            },
+        )
+
+    return JsonResponse({
+        'reported': reported,
+        'recent_count': recent,
+        'total_count': total,
+        'is_nerfed': is_nerfed,
+        'threshold': threshold,
+        'window_days': window,
+    })
+
+
+@require_POST
+def clear_nerf_report(request, pk):
+    """작성자나 관리자가 [너프됨] 표시를 해제 (사진을 새로 올렸을 때)"""
+    from .models import NerfReport
+
+    coordinate = get_object_or_404(Coordinate, pk=pk)
+
+    is_owner = (
+        request.user.is_authenticated
+        and coordinate.author_id == request.user.pk
+    )
+    if not (is_owner or (request.user.is_authenticated and request.user.is_staff)):
+        return JsonResponse({'error': _('글 작성자만 해제할 수 있습니다.')}, status=403)
+
+    NerfReport.objects.filter(coordinate=coordinate).delete()
+    Coordinate.objects.filter(pk=coordinate.pk).update(
+        nerf_report_count=0, is_nerfed=False, nerfed_at=None
+    )
+    return JsonResponse({'ok': True, 'is_nerfed': False, 'recent_count': 0})

@@ -12,4 +12,6 @@ urlpatterns = [
     path('<int:pk>/edit/', views.coordinate_edit, name='edit'),
     path('<int:pk>/delete/', views.coordinate_delete, name='delete'),
     path('<int:pk>/copy-coords/', views.copy_coords, name='copy_coords'),
+    path('<int:pk>/nerf/', views.toggle_nerf_report, name='toggle_nerf'),
+    path('<int:pk>/nerf/clear/', views.clear_nerf_report, name='clear_nerf'),
 ]

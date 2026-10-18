@@ -40,7 +40,16 @@
                     {% endif %}
                 </div>
 
-                <h1 class="detail-title">{{ coordinate.title }}</h1>
+                <h1 class="detail-title">{% if coordinate.is_nerfed %}<span class="nerf-badge">[너프됨]</span> {% endif %}{{ coordinate.title }}</h1>
+                {% if coordinate.is_nerfed %}
+                <div class="nerf-notice">
+                    이 자리의 엽서가 바뀌었다는 제보가 모였습니다.
+                    사진과 다를 수 있으니 참고해 주세요.
+                    {% if is_nerf_owner %}
+                    <button type="button" class="nerf-clear" onclick="clearNerf({{ coordinate.pk }})">사진을 새로 올렸어요 (표시 해제)</button>
+                    {% endif %}
+                </div>
+                {% endif %}
 
                 <div class="detail-meta">
                     <span>작성자: {% if coordinate.author %}<a href="{% url 'accounts:user_profile' user_id=coordinate.author.pk %}" class="author-link"><strong>{{ coordinate.author.nickname }}</strong></a>{% else %}<strong>익명</strong>{% endif %}</span>
@@ -91,6 +100,14 @@
                     </button>
                     {% endif %}
                     {% endif %}
+
+                    <button type="button" class="btn-interaction btn-nerf {% if my_nerf_report %}active{% endif %}"
+                        id="nerfBtn" onclick="toggleNerf({{ coordinate.pk }}, this)"
+                        title="이 자리의 엽서가 사진과 달라졌다면 눌러주세요">
+                        <span class="nerf-icon">🔄</span>
+                        <span class="nerf-text">{% if my_nerf_report %}엽서 바뀜 제보함{% else %}엽서 바뀜{% endif %}</span>
+                        <span class="nerf-count">{{ nerf_recent_count }}</span>
+                    </button>
 
                     <a href="{% url 'reports:report_coordinate' coordinate_id=coordinate.pk %}"
                         class="btn-interaction btn-report">
@@ -515,6 +532,44 @@
     .btn-interaction.active {
         border-color: var(--primary);
         background: var(--primary-light);
+    }
+
+    .nerf-badge {
+        color: #C0392B;
+        font-weight: 700;
+    }
+
+    .nerf-notice {
+        background: #FDECEA;
+        color: #8E2B21;
+        border-radius: var(--radius-md);
+        padding: 12px 14px;
+        margin: 10px 0 4px;
+        font-size: 0.92rem;
+        line-height: 1.6;
+    }
+
+    .nerf-clear {
+        display: inline-block;
+        margin-top: 8px;
+        background: #fff;
+        border: 1px solid #C0392B;
+        color: #C0392B;
+        border-radius: var(--radius-sm);
+        padding: 6px 12px;
+        font-size: 0.85rem;
+        cursor: pointer;
+    }
+
+    .btn-nerf.active {
+        background: #FDECEA;
+        color: #C0392B;
+        font-weight: 700;
+    }
+
+    .nerf-count {
+        font-variant-numeric: tabular-nums;
+        opacity: 0.8;
     }
 
     .btn-report {
@@ -1144,4 +1199,45 @@
         font-size: 0.85rem;
     }
 </style>
+
+<script>
+function nerfCsrf() {
+    var m = document.cookie.match('(^|;)\\s*csrftoken\\s*=\\s*([^;]+)');
+    return m ? decodeURIComponent(m.pop()) : '';
+}
+
+function toggleNerf(pk, btn) {
+    btn.disabled = true;
+    fetch('/coordinates/' + pk + '/nerf/', {
+        method: 'POST',
+        headers: { 'X-CSRFToken': nerfCsrf(), 'X-Requested-With': 'XMLHttpRequest' },
+        credentials: 'same-origin'
+    })
+    .then(function (r) { return r.json(); })
+    .then(function (d) {
+        btn.disabled = false;
+        if (d.error) { alert(d.error); return; }
+        btn.classList.toggle('active', d.reported);
+        btn.querySelector('.nerf-text').textContent = d.reported ? '엽서 바뀜 제보함' : '엽서 바뀜';
+        btn.querySelector('.nerf-count').textContent = d.recent_count;
+        if (typeof showFeedbackToast === 'function') {
+            showFeedbackToast(d.reported
+                ? '제보했습니다. ' + d.window_days + '일 안에 ' + d.threshold + '명이 모이면 [너프됨]으로 표시됩니다. (현재 ' + d.recent_count + '명)'
+                : '제보를 취소했습니다.');
+        }
+        if (d.is_nerfed) { setTimeout(function () { location.reload(); }, 1200); }
+    })
+    .catch(function () { btn.disabled = false; });
+}
+
+function clearNerf(pk) {
+    fetch('/coordinates/' + pk + '/nerf/clear/', {
+        method: 'POST',
+        headers: { 'X-CSRFToken': nerfCsrf(), 'X-Requested-With': 'XMLHttpRequest' },
+        credentials: 'same-origin'
+    })
+    .then(function (r) { return r.json(); })
+    .then(function (d) { if (d.ok) location.reload(); else if (d.error) alert(d.error); });
+}
+</script>
 {% endblock %}

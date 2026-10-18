@@ -13,7 +13,7 @@
         </div>
 
         <div class="coord-card-content">
-            <h3 class="coord-card-title">{{ coord.title }}</h3>
+            <h3 class="coord-card-title">{% if coord.is_nerfed %}<span class="nerf-badge">[너프됨]</span> {% endif %}{{ coord.title }}</h3>
             {% if coord.postcard_name %}
             <div class="coord-card-postcard">🏷️ {{ coord.postcard_name }}</div>
             {% endif %}

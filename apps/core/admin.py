@@ -97,6 +97,10 @@ class SiteSettingsAdmin(admin.ModelAdmin):
             'fields': ('daily_upload_limit', 'ranker_limit_exempt_rank'),
             'description': '랭커 제한 해제 순위를 0으로 설정하면 비활성화됩니다.'
         }),
+        ('엽서 변경(너프) 표시', {
+            'fields': ('nerf_threshold', 'nerf_window_days'),
+            'description': '정해진 기간 안에 기준 인원 이상이 제보하면 제목 앞에 [너프됨]이 자동으로 붙습니다.'
+        }),
         ('새 디자인(수첩) 체험', {
             'fields': ('design_beta_enabled', 'design_beta_popup_enabled'),
             'description': '체험 공개를 끄면 팝업·전환 버튼이 모두 사라지고 모든 유저가 기존 디자인을 봅니다.'

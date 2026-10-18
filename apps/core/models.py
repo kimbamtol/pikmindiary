@@ -126,6 +126,18 @@ class SiteSettings(models.Model):
         help_text='좌표 목록 첫 진입 시 안내 팝업을 띄웁니다. (체험 공개가 켜져 있을 때만 동작)'
     )
     
+    # 엽서 변경(너프) 자동 표시
+    nerf_threshold = models.PositiveIntegerField(
+        '너프 표시 기준 인원',
+        default=3,
+        help_text='정해진 기간 안에 이 인원 이상이 제보하면 제목 앞에 [너프됨]이 붙습니다.'
+    )
+    nerf_window_days = models.PositiveIntegerField(
+        '너프 집계 기간(일)',
+        default=7,
+        help_text='최근 며칠간의 제보를 셀지 정합니다.'
+    )
+
     updated_at = models.DateTimeField('수정일', auto_now=True)
     
     class Meta:

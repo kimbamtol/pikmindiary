@@ -195,6 +195,17 @@
     }
 
     /* 보기 전환 버튼 */
+    .nerf-badge {
+        color: #C0392B;
+        font-weight: 700;
+    }
+
+    body[data-time="night"] .nerf-badge,
+    body[data-weather="rain"] .nerf-badge,
+    body[data-weather="storm"] .nerf-badge {
+        color: #FF9B8E;
+    }
+
     .density-bar {
         display: flex;
         align-items: center;

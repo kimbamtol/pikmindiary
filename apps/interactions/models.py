@@ -100,6 +100,7 @@ class Notification(models.Model):
         COMMENT = 'COMMENT', _('댓글')
         COPY_MILESTONE = 'COPY_MILESTONE', _('복사 마일스톤')
         SUGGESTION_REPLY = 'SUGGESTION_REPLY', _('건의사항 답변')
+        NERF = 'NERF', _('엽서 변경 제보')
     
     recipient = models.ForeignKey(
         settings.AUTH_USER_MODEL,
