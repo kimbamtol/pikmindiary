@@ -144,3 +144,4 @@ sudo tail -200 /var/log/nginx/access.log | awk '$9>=500'
 | 피크민이 안 그려진다 | `pk-mark`는 빈 껍데기다. `static/js/pikmin.js`가 채운다 |
 | 애니메이션이 버벅인다 | `left`·`top`을 움직이면 매 프레임 레이아웃을 다시 잰다. `transform`을 쓴다 |
 | 사이드바에 올리면 페이지가 안 움직인다 | 안 넘치는데 `overscroll-behavior:contain`을 걸었다. 넘칠 때만 건다 |
+| 새 템플릿태그를 쓴 페이지만 500 | 돌던 gunicorn은 뜰 때 만든 엔진을 쓴다. `{% load %}`한 태그를 모른다. **저장 직후 재시작** |
