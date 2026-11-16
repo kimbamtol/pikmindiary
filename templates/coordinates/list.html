@@ -431,6 +431,36 @@
         top: 80px;
     }
 
+    /* 본문은 무한 로딩이라 끝이 없다. 그래서 sticky 로 고정된 사이드바의
+       아래쪽은 페이지를 아무리 내려도 화면에 못 온다.
+       사이드바를 자기만의 스크롤 영역으로 만들고 본문과 끊는다 —
+       마우스가 올라간 쪽만 움직인다. */
+    @media (min-width: 993px) {
+        .ranking-sidebar,
+        .brag-sidebar {
+            max-height: calc(100vh - 96px);
+        }
+        /* 넘칠 때만 자기 스크롤을 갖는다.
+           안 넘치는데 overscroll-behavior:contain 을 걸면
+           사이드바에 마우스를 올렸을 때 페이지가 아예 안 움직인다. */
+        .ranking-sidebar.pk-scrollable,
+        .brag-sidebar.pk-scrollable {
+            overflow-y: auto;
+            overscroll-behavior: contain;
+            scrollbar-width: thin;
+            scrollbar-gutter: stable;
+        }
+        .pk-scrollable::-webkit-scrollbar { width: 7px; }
+        .pk-scrollable::-webkit-scrollbar-thumb {
+            background: rgba(120, 125, 110, .32);
+            border-radius: 4px;
+        }
+        .pk-scrollable:hover::-webkit-scrollbar-thumb {
+            background: rgba(120, 125, 110, .55);
+        }
+        .pk-scrollable::-webkit-scrollbar-track { background: transparent; }
+    }
+
     .ranking-widget {
         background: var(--bg-primary);
         border-radius: var(--radius-xl);
@@ -1154,6 +1184,29 @@
 <div id="feedback-toast" class="copy-toast"></div>
 
 <script>
+    /* 사이드바는 본문과 따로 스크롤한다.
+       본문이 무한 로딩이라 sticky 로 고정된 사이드바의 아래쪽은
+       페이지를 끝까지 내려도 화면에 못 온다.
+       단, 내용이 안 넘치면 스크롤을 주지 않는다 — 마우스를 올렸을 때
+       페이지까지 멈춰버리기 때문이다. */
+    (function () {
+        var sides = document.querySelectorAll('.ranking-sidebar, .brag-sidebar');
+        if (!sides.length) return;
+        function sync() {
+            for (var i = 0; i < sides.length; i++) {
+                var el = sides[i];
+                el.classList.toggle('pk-scrollable', el.scrollHeight > el.clientHeight + 1);
+            }
+        }
+        sync();
+        window.addEventListener('resize', sync, { passive: true });
+        window.addEventListener('load', sync);
+        if ('ResizeObserver' in window) {
+            var ro = new ResizeObserver(sync);
+            for (var j = 0; j < sides.length; j++) ro.observe(sides[j]);
+        }
+    })();
+
     // 복사 버튼 이벤트 리스너 부착 (초기 + 동적 카드 공용)
     function attachCopyListeners(card) {
         var btn = card.querySelector('.copy-btn');

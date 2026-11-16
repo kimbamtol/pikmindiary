@@ -8,14 +8,17 @@
 .pk-mark.has-mount{width:2.5em;height:2.4em;vertical-align:-.85em}
 /* 안 켠 사람 — 복사 효과용 값만 들고 있고 자리는 안 먹는다 */
 .pk-mark.pk-hidden{display:none}
+/* 화면 밖에 있으면 걸음을 멈춘다. 보이지도 않는데 돌 이유가 없다 */
+.pk-mark:not(.pk-on) svg *{animation-play-state:paused}
 .coord-card{position:relative}
 
 /* ───── 피크민 ───── */
 .pk{overflow:visible;flex:none;--d:0s;--P:.74s}
-.pk .leg{stroke:var(--pk-dark);stroke-width:1.6;stroke-linecap:round}
-.pk .foot{fill:var(--pk-dark)}
-.pk .arm{stroke:var(--pk-dark);stroke-width:1.4;stroke-linecap:round}
-.pk .legL,.pk .legR,.pk .armL,.pk .armR{transform-box:fill-box;transform-origin:top center}
+.pk{--pk-limb:var(--pk-dark)}
+.pk .leg{stroke:var(--pk-limb);stroke-width:1.6;stroke-linecap:round}
+.pk .foot{fill:var(--pk-limb)}
+.pk .arm{stroke:var(--pk-limb);stroke-width:1.5;stroke-linecap:round}
+.pk .legL,.pk .legR{transform-box:fill-box;transform-origin:top center}
 .pk .stem{transform-box:fill-box;transform-origin:bottom center}
 .pk .lean{transform-box:fill-box;transform-origin:bottom center}
 .pk .tilt{transform-box:fill-box;transform-origin:bottom center}
@@ -57,7 +60,6 @@
 }
 /* 잎·팔은 몸보다 한 박자 늦게 따라온다 */
 @keyframes sway{0%,100%{transform:rotate(-13deg)}50%{transform:rotate(13deg)}}
-@keyframes armsw{0%,100%{transform:rotate(17deg)}50%{transform:rotate(-15deg)}}
 /* 뛰기 — 접지 0~30%, 나머지는 공중. 반대쪽 다리가 50% 밀려 있으니
    30~50%와 80~100%는 두 발이 모두 떠 있다. 이 체공이 뛰기를 만든다. */
 @keyframes runstep{
@@ -92,9 +94,6 @@
 .walk .tilt,.runner .tilt{animation:waddle var(--P) ease-in-out infinite var(--d)}
 .walk .stem,.runner .stem{animation:sway var(--P) ease-in-out infinite;
   animation-delay:calc(var(--d) - var(--P) * .22)}
-.walk .armL,.runner .armL{animation:armsw var(--P) ease-in-out infinite;
-  animation-delay:calc(var(--d) - var(--P) * .5)}
-.walk .armR,.runner .armR{animation:armsw var(--P) ease-in-out infinite var(--d)}
 
 /* 날개 달린 분홍은 다리를 젓지 않는다 — 대신 그림자가 멀어지고 흐려진다 */
 .fly .wingL,.fly .wingR{animation:flap .2s ease-in-out infinite alternate}
@@ -109,11 +108,11 @@
 .c-red   {--pk:#E53935;--pk-light:#EF9A9A;--pk-dark:#8E1A17}
 .c-yellow{--pk:#FDD835;--pk-light:#FFF59D;--pk-dark:#A17D06}
 .c-blue  {--pk:#2196F3;--pk-light:#90CAF9;--pk-dark:#0D47A1}
-.c-white {--pk:#FAFAFA;--pk-light:#FFFFFF;--pk-dark:#8D8D8D;--pk-eye:#D32F2F}
+.c-white {--pk:#FAFAFA;--pk-light:#FFFFFF;--pk-dark:#8D8D8D;--pk-eye:#D32F2F;--pk-limb:#B0B0B0}
 .c-pink  {--pk:#F48FB1;--pk-light:#FCE4EC;--pk-dark:#AD1457}
 .c-rock  {--pk:#5D6D77;--pk-light:#90A4AE;--pk-dark:#21292E}
 .c-purple{--pk:#7E57C2;--pk-light:#D1C4E9;--pk-dark:#3F2A75}
-.c-ice   {--pk:#A5DFF5;--pk-light:#E1F5FE;--pk-dark:#0277BD}
+.c-ice   {--pk:#A5DFF5;--pk-light:#E1F5FE;--pk-dark:#0277BD;--pk-limb:#5BB4DE}
 
 /* 잎 — 꽃이 안 핀 사람끼리도 갈리게. 장수와 초록 농도가 같이 바뀐다 */
 .pk .lf2a,.pk .lf2b,.pk .lf3{display:none}
@@ -155,20 +154,25 @@
 .tt .rider .legL,.tt .rider .legR{animation:dangle calc(var(--P) * 1.3) ease-in-out infinite!important}
 .tt .rider .bod{animation:ride var(--P) ease-in-out infinite!important}
 .tt .rider .tilt{animation:rock calc(var(--P) * 2) ease-in-out infinite!important}
-.tt .rider .armL,.tt .rider .armR{animation:none}
 .tt.runner{--P:.42s}
 @keyframes ride{0%,50%,100%{transform:translateY(0)}24%,74%{transform:translateY(-1.5px)}}
 @keyframes rock{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(5deg)}}
 
 
 .pk-runners{position:absolute;left:0;right:0;top:0;height:36px;pointer-events:none;
-  overflow:hidden;z-index:2}
-.runner{position:absolute;bottom:0;left:-50px;opacity:0;
+  overflow:hidden;z-index:2;contain:layout paint}
+.runner{position:absolute;bottom:0;left:-62px;opacity:0;
   width:24px!important;height:34px!important;
+  will-change:transform,opacity;
   animation:dash 1.5s cubic-bezier(.32,0,.68,1) forwards}
-.runner.rider{width:46px!important;height:44px!important;left:-62px}
+.runner.rider{width:46px!important;height:44px!important}
 .runner.fly{bottom:16px}
-@keyframes dash{0%{opacity:0;left:-62px}7%{opacity:1}93%{opacity:1}100%{opacity:0;left:103%}}
+@keyframes dash{
+  0%  {opacity:0;transform:translate3d(0,0,0)}
+  7%  {opacity:1}
+  93% {opacity:1}
+  100%{opacity:0;transform:translate3d(var(--span,900px),0,0)}
+}
 /* 뛸 때는 주기가 짧아지고, 가는 쪽으로 몸이 기운다 */
 .runner{--P:.36s}
 .runner .tilt{animation-name:runwaddle}

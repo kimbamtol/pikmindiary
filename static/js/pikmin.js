@@ -76,17 +76,17 @@ function bodySvg(color, dy){
 /* ── 다리: 발이 있어야 땅에 닿는다. 선 끝만 둥글면 매달린 것처럼 보인다 ── */
 function legsSvg(dy){
   const y = n => (n + dy).toFixed(1);
-  return `<g class="legL"><line class="leg" x1="10.3" y1="${y(24.2)}" x2="9.9" y2="${y(29.7)}"/>
+  return `<g class="legL"><line class="leg" x1="10.4" y1="${y(21.6)}" x2="9.9" y2="${y(29.7)}"/>
       <ellipse class="foot" cx="9.7" cy="${y(30.4)}" rx="2.0" ry="1.15"/></g>
-    <g class="legR"><line class="leg" x1="13.7" y1="${y(24.2)}" x2="14.1" y2="${y(29.7)}"/>
+    <g class="legR"><line class="leg" x1="13.6" y1="${y(21.6)}" x2="14.1" y2="${y(29.7)}"/>
       <ellipse class="foot" cx="14.3" cy="${y(30.4)}" rx="2.0" ry="1.15"/></g>`;
 }
 
 /* ── 팔: 다리와 반대로 흔든다. 걷는다는 신호 중 제일 읽기 쉽다 ── */
 function armsSvg(dy){
   const y = n => (n + dy).toFixed(1);
-  return `<line class="arm armL" x1="6.6" y1="${y(20.8)}" x2="5.5" y2="${y(23.9)}"/>
-    <line class="arm armR" x1="17.4" y1="${y(20.8)}" x2="18.5" y2="${y(23.9)}"/>`;
+  return `<line class="arm armL" x1="9.6" y1="${y(19.4)}" x2="4.6" y2="${y(24.4)}"/>
+    <line class="arm armR" x1="14.4" y1="${y(19.4)}" x2="19.4" y2="${y(24.4)}"/>`;
 }
 
 /* ── 한 마리 전체. 쌓는 순서가 걸음의 전부다.
@@ -100,8 +100,8 @@ function figure(color, tier, dy){
       ${legsSvg(dy)}
       <g class="bod"><g class="tilt">
         ${headSvg(tier, dy)}
-        ${bodySvg(color, dy)}
         ${armsSvg(dy)}
+        ${bodySvg(color, dy)}
       </g></g>
     </g>`;
 }
@@ -158,8 +158,8 @@ function turtleSvg(color, tier){
         <ellipse class="foot" cx="15.0" cy="33.1" rx="2.0" ry="1.15"/></g>
       <g class="bod"><g class="tilt">
         ${headSvg(tier, 2)}
-        ${bodySvg(color, 2)}
         ${armsSvg(2)}
+        ${bodySvg(color, 2)}
       </g></g>
     </g>`;
 }
@@ -184,6 +184,17 @@ function markSvg(k, walking){
     size: 'width:100%;height:100%'});
 }
 
+/* 화면 안에 있을 때만 걷는다.
+   목록 20장이면 영구 애니메이션이 120개다 — 안 보이는 것까지 돌 이유가 없다. */
+let io = null;
+function watch(el){
+  if (!('IntersectionObserver' in window)) { el.classList.add('pk-on'); return; }
+  if (!io) io = new IntersectionObserver(entries => {
+    entries.forEach(e => e.target.classList.toggle('pk-on', e.isIntersecting));
+  }, {rootMargin: '120px'});
+  io.observe(el);
+}
+
 function drawMarks(root){
   const q = (root || document).querySelectorAll('.pk-mark:not([data-pk-done])');
   q.forEach(el => {
@@ -192,6 +203,7 @@ function drawMarks(root){
     const k = look(el);
     if (k.m) el.classList.add('has-mount');
     el.innerHTML = markSvg(k, true);
+    watch(el);
   });
 }
 
@@ -233,6 +245,9 @@ function parade(card, k, mark){
   }
   box.innerHTML = '';
   void box.offsetWidth;          // 리플로우 강제 — 연달아 눌러도 처음부터 다시 간다
+  // left 를 움직이면 매 프레임 레이아웃을 다시 잰다. transform 은 GPU 가 한다.
+  // 얼마나 가야 하는지는 여기서만 알 수 있어서 변수로 넘긴다.
+  box.style.setProperty('--span', (box.clientWidth + 130) + 'px');
   box.innerHTML = html;
   clearTimeout(box._t);
   box._t = setTimeout(() => { box.innerHTML = ''; }, 1900);
