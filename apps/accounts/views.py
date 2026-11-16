@@ -2,6 +2,7 @@
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
+from django.utils.translation import gettext as _
 
 from .models import CustomUser
 from apps.coordinates.models import Coordinate
@@ -129,12 +130,29 @@ def my_settings(request):
             if nickname_bg_color == '' or (nickname_bg_color in dict(user.ColorChoice.choices) and user.can_use_color(nickname_bg_color)):
                 user.nickname_bg_color = nickname_bg_color
 
+        # 피크민 — 색과 꽃은 누구나 고를 수 있다.
+        # 머리와 마릿수는 안 받는다. 받은 복사 수가 정하는 거라 고를 수 있으면 안 된다.
+        pikmin_color = request.POST.get('pikmin_color', '')
+        if pikmin_color in dict(user.PIKMIN_COLORS):
+            user.pikmin_color = pikmin_color
+
+        pikmin_flower = request.POST.get('pikmin_flower', '')
+        if pikmin_flower in dict(user.PIKMIN_FLOWERS):
+            user.pikmin_flower = pikmin_flower
+
+        # 탈것은 전용이다. exclusive_perks 에 코드가 없으면 저장해도 안 먹는다
+        mount = request.POST.get('pikmin_mount', '')
+        user.pikmin_mount = mount if mount in user.get_available_mounts() else ''
+
         user.save()
 
     # 선택 가능한 칭호 목록
     available_titles = request.user.get_available_titles()
     ranking_position = request.user.get_ranking_position()
     can_customize = request.user.can_customize_badge()
+
+    next_tier = request.user.pikmin_next_tier()
+    tier_names = {'bud': _('봉오리'), 'flower': _('꽃')}
 
     context = {
         'pikmin_emojis': PIKMIN_EMOJIS,
@@ -143,6 +161,11 @@ def my_settings(request):
         'can_customize': can_customize,
         'badge_styles': request.user.get_available_styles() if can_customize else [],
         'color_choices': request.user.get_available_colors() if can_customize else [],
+        'pikmin_colors': request.user.PIKMIN_COLORS,
+        'pikmin_flowers': request.user.PIKMIN_FLOWERS,
+        'available_mounts': request.user.get_available_mounts(),
+        'next_tier': next_tier,
+        'next_tier_label': tier_names.get(next_tier[0]) if next_tier else '',
     }
     return render(request, 'accounts/my_settings.html', context)
 

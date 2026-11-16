@@ -168,6 +168,52 @@ class CustomUser(AbstractUser):
         default=ListDensity.NORMAL,
     )
 
+    # ───── 피크민 (이름 옆 표식 + 복사 효과) ─────
+    # 색과 꽃은 고를 수 있다. 비워두면 id 에서 자동으로 뽑는다.
+    # 머리(잎/봉오리/꽃)와 마릿수는 못 고른다 — copy_total 에서 계산된다.
+    PIKMIN_COLORS = [
+        ('red', _('빨강')), ('yellow', _('노랑')), ('blue', _('파랑')), ('white', _('흰색')),
+        ('pink', _('분홍')), ('rock', _('바위')), ('purple', _('보라')), ('ice', _('얼음')),
+    ]
+    PIKMIN_FLOWERS = [
+        ('pink', _('분홍꽃')), ('white', _('흰꽃')), ('yellow', _('노란꽃')),
+        ('red', _('붉은꽃')), ('blue', _('푸른꽃')),
+    ]
+    PIKMIN_BUD_AT = 1000        # 봉오리가 열리는 받은 복사 수
+    PIKMIN_FLOWER_AT = 10000    # 꽃이 열리는 받은 복사 수
+    PIKMIN_PER_HERD = 1000      # 무리 한 마리당 복사 수
+    PIKMIN_MAX_HERD = 12
+    EXCLUSIVE_MOUNT_CODES = {'turtle'}
+
+    pikmin_color = models.CharField(
+        _('피크민 색'),
+        max_length=10,
+        choices=PIKMIN_COLORS,
+        blank=True,
+        default='',
+        help_text=_('비워두면 회원 번호로 자동 배정')
+    )
+    pikmin_flower = models.CharField(
+        _('피크민 꽃 색'),
+        max_length=10,
+        choices=PIKMIN_FLOWERS,
+        blank=True,
+        default='',
+        help_text=_('비워두면 회원 번호로 자동 배정')
+    )
+    pikmin_mount = models.CharField(
+        _('타고 다니는 것'),
+        max_length=10,
+        blank=True,
+        default='',
+        help_text=_('exclusive_perks 에 같은 코드가 있어야 적용됨 (예: turtle)')
+    )
+    copy_total = models.PositiveIntegerField(
+        _('받은 복사 합계'),
+        default=0,
+        help_text=_('승인된 글이 복사된 총 횟수. 복사할 때마다 올라간다.')
+    )
+
     total_posts = models.PositiveIntegerField(default=0)
     total_likes_received = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -225,6 +271,93 @@ class CustomUser(AbstractUser):
         elif position == 3:
             return 'badge-bronze'
         return ''
+
+    # ───── 피크민 ─────
+    # 안 고른 사람도 비어 보이지 않아야 한다. 그래서 기본값을 회원 번호에서 뽑는다.
+    # 같은 사람은 언제나 같은 색이 나오고, 저장할 필요가 없다.
+    def _pikmin_seed(self):
+        if self.pk:
+            return self.pk
+        # 저장 전이거나 비회원이면 닉네임 글자로 대신한다
+        seed = 7
+        for ch in (self.nickname or ''):
+            seed = (seed * 31 + ord(ch)) % 100000
+        return seed
+
+    @property
+    def pikmin_color_key(self):
+        """고른 색, 없으면 자동 배정된 색"""
+        if self.pikmin_color:
+            return self.pikmin_color
+        return self.PIKMIN_COLORS[self._pikmin_seed() % 8][0]
+
+    @property
+    def pikmin_flower_key(self):
+        """고른 꽃 색, 없으면 자동 배정된 꽃 색"""
+        if self.pikmin_flower:
+            return self.pikmin_flower
+        return self.PIKMIN_FLOWERS[(self._pikmin_seed() // 3) % 5][0]
+
+    @property
+    def pikmin_sub_key(self):
+        """무리에 섞이는 보조색. 이건 안 고른다 — 섞여야 무리처럼 보인다"""
+        return self.PIKMIN_COLORS[(self._pikmin_seed() // 8) % 8][0]
+
+    @property
+    def pikmin_leaf_key(self):
+        """잎 모양 번호(0~4). 꽃이 안 핀 사람끼리 갈리라고 둔다"""
+        for idx, (code, _label) in enumerate(self.PIKMIN_FLOWERS):
+            if code == self.pikmin_flower_key:
+                return idx
+        return 0
+
+    @property
+    def pikmin_tier(self):
+        """머리. 고를 수 없다 — 받은 복사 수가 정한다"""
+        if self.copy_total >= self.PIKMIN_FLOWER_AT:
+            return 'flower'
+        if self.copy_total >= self.PIKMIN_BUD_AT:
+            return 'bud'
+        return 'leaf'
+
+    @property
+    def pikmin_herd(self):
+        """복사하면 지나가는 마리 수. 이것도 고를 수 없다"""
+        n = 1 + self.copy_total // self.PIKMIN_PER_HERD
+        return max(1, min(self.PIKMIN_MAX_HERD, n))
+
+    @property
+    def pikmin_mount_key(self):
+        """전용 탈것. exclusive_perks 에 코드가 있어야 적용된다"""
+        code = (self.pikmin_mount or '').strip()
+        if code and code in self.EXCLUSIVE_MOUNT_CODES and self._has_perk(code):
+            return code
+        return ''
+
+    def get_available_mounts(self):
+        """이 사람이 탈 수 있는 것 목록. 보통은 빈 목록이다"""
+        return [c for c in sorted(self.EXCLUSIVE_MOUNT_CODES) if self._has_perk(c)]
+
+    def pikmin_next_tier(self):
+        """다음 머리까지 남은 복사 수. 다 폈으면 None"""
+        if self.copy_total < self.PIKMIN_BUD_AT:
+            return ('bud', self.PIKMIN_BUD_AT - self.copy_total)
+        if self.copy_total < self.PIKMIN_FLOWER_AT:
+            return ('flower', self.PIKMIN_FLOWER_AT - self.copy_total)
+        return None
+
+    def recount_copy_total(self, save=True):
+        """승인된 글의 복사 수를 다시 더한다. 글이 지워지거나 반려되면 쓴다"""
+        from django.db.models import Sum
+        from apps.coordinates.models import Coordinate
+        total = Coordinate.objects.filter(
+            author=self, status=Coordinate.Status.APPROVED
+        ).aggregate(n=Sum('copy_count'))['n'] or 0
+        if total != self.copy_total:
+            self.copy_total = total
+            if save:
+                CustomUser.objects.filter(pk=self.pk).update(copy_total=total)
+        return total
 
     def is_admin_user(self):
         """관리자 여부 확인"""

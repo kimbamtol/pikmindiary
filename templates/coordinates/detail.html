@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load pikmin %}
 {% load static %}
 
 {% block title %}{{ coordinate.title }} - 피크민 다이어리{% endblock %}
@@ -52,7 +53,7 @@
                 {% endif %}
 
                 <div class="detail-meta">
-                    <span>작성자: {% if coordinate.author %}<a href="{% url 'accounts:user_profile' user_id=coordinate.author.pk %}" class="author-link"><strong>{{ coordinate.author.nickname }}</strong></a>{% else %}<strong>익명</strong>{% endif %}</span>
+                    <span>작성자: {% if coordinate.author %}{% pikmin_mark coordinate.author %}<a href="{% url 'accounts:user_profile' user_id=coordinate.author.pk %}" class="author-link"><strong>{{ coordinate.author.nickname }}</strong></a>{% else %}<strong>익명</strong>{% endif %}</span>
                     <span>{{ coordinate.created_at|date:"Y.m.d H:i" }}</span>
                 </div>
 
@@ -184,6 +185,7 @@
                         <a href="{% url 'accounts:user_profile' user_id=comment.author.pk %}" class="author-badge {{ comment.author.get_badge_class }}">
                             {% if comment.author.profile_emoji %}
                             <span class="profile-emoji">{{ comment.author.profile_emoji }}</span>
+                            {% endif %}{% if comment.author %}{% pikmin_mark comment.author %}
                             {% endif %}
                             <span class="author-name"><strong>{{ comment.author.nickname }}</strong></span>
                             {% if comment.author.special_title %}
@@ -297,6 +299,7 @@
                             <a href="{% url 'accounts:user_profile' user_id=reply.author.pk %}" class="author-badge {{ reply.author.get_badge_class }}">
                                 {% if reply.author.profile_emoji %}
                                 <span class="profile-emoji">{{ reply.author.profile_emoji }}</span>
+                                {% endif %}{% if reply.author %}{% pikmin_mark reply.author %}
                                 {% endif %}
                                 <span class="author-name"><strong>{{ reply.author.nickname }}</strong></span>
                                 {% if reply.author.special_title %}

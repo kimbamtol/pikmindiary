@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load pikmin humanize %}
 {% load i18n %}
 
 {% block title %}{% trans "계정 설정" %} - {% trans "피크민 다이어리" %}{% endblock %}
@@ -179,6 +180,88 @@
                 <label class="form-label">{% trans "이메일" %}</label>
                 <input type="email" value="{{ user.email }}" class="form-control" disabled>
                 <small class="form-help">{% trans "이메일은 변경할 수 없습니다." %}</small>
+            </div>
+
+            <!-- ───── 피크민 ───── -->
+            <div class="pk-settings">
+                <h3 class="pk-h">{% trans "내 피크민" %}</h3>
+                <p class="pk-lead">
+                    {% blocktrans %}이름 옆에 서 있고, 누가 좌표를 복사하면 무리가 지나갑니다.
+                    아무것도 안 고르셨어도 이미 하나 배정돼 있습니다 — 바꾸고 싶을 때만 바꾸세요.{% endblocktrans %}
+                </p>
+
+                <div class="pk-now">
+                    <span class="pk-mark pk-big{% if user.pikmin_mount_key %} has-mount{% endif %}"
+                          id="pk-preview"
+                          data-pk-c="{{ user.pikmin_color_key }}" data-pk-f="{{ user.pikmin_flower_key }}"
+                          data-pk-l="{{ user.pikmin_leaf_key }}" data-pk-t="{{ user.pikmin_tier }}"
+                          data-pk-h="{{ user.pikmin_herd }}" data-pk-s="{{ user.pikmin_sub_key }}"
+                          data-pk-m="{{ user.pikmin_mount_key }}"></span>
+                    <div class="pk-now-txt">
+                        <b>{% trans "받은 복사" %} {{ user.copy_total|intcomma }}{% trans "회" %}</b>
+                        <span>{% trans "머리" %}
+                            {% if user.pikmin_tier == 'flower' %}🌸 {% trans "꽃" %}
+                            {% elif user.pikmin_tier == 'bud' %}🌷 {% trans "봉오리" %}
+                            {% else %}🌱 {% trans "잎" %}{% endif %}
+                            · {% trans "무리" %} {{ user.pikmin_herd }}{% trans "마리" %}</span>
+                        {% if next_tier %}
+                        <span class="pk-next">{% blocktrans with n=next_tier.1|intcomma what=next_tier_label %}복사 {{ n }}번 더 받으면 {{ what }}이(가) 핍니다{% endblocktrans %}</span>
+                        {% else %}
+                        <span class="pk-next">{% trans "머리는 다 폈습니다." %}</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">{% trans "색" %}</label>
+                    <div class="pk-chips" id="pk-colors">
+                        {% for code, label in pikmin_colors %}
+                        <label class="pk-chip">
+                            <input type="radio" name="pikmin_color" value="{{ code }}"
+                                   {% if user.pikmin_color_key == code %}checked{% endif %}>
+                            <span class="pk-chip-art pk-mark" data-pk-c="{{ code }}" data-pk-f="{{ user.pikmin_flower_key }}"
+                                  data-pk-l="{{ user.pikmin_leaf_key }}" data-pk-t="{{ user.pikmin_tier }}"
+                                  data-pk-h="1" data-pk-s="{{ code }}" data-pk-m=""></span>
+                            <span class="pk-chip-tag">{{ label }}</span>
+                        </label>
+                        {% endfor %}
+                        {% for code in available_mounts %}
+                        <label class="pk-chip pk-chip-mount">
+                            <input type="checkbox" name="pikmin_mount" value="{{ code }}"
+                                   {% if user.pikmin_mount_key == code %}checked{% endif %}>
+                            <span class="pk-chip-art pk-mark has-mount"
+                                  data-pk-c="{{ user.pikmin_color_key }}" data-pk-f="{{ user.pikmin_flower_key }}"
+                                  data-pk-l="{{ user.pikmin_leaf_key }}" data-pk-t="{{ user.pikmin_tier }}"
+                                  data-pk-h="1" data-pk-s="{{ user.pikmin_color_key }}" data-pk-m="{{ code }}"></span>
+                            <span class="pk-chip-tag">🐢 {% trans "거북이" %}</span>
+                        </label>
+                        {% endfor %}
+                    </div>
+                    {% if available_mounts %}
+                    <small class="form-help">{% trans "거북이를 켜면 고른 피크민이 등에 타고 정면으로 걸어옵니다. 이 칸은 회원님만 보입니다." %}</small>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">{% trans "꽃 색" %}</label>
+                    <div class="pk-chips" id="pk-flowers">
+                        {% for code, label in pikmin_flowers %}
+                        <label class="pk-chip">
+                            <input type="radio" name="pikmin_flower" value="{{ code }}"
+                                   {% if user.pikmin_flower_key == code %}checked{% endif %}>
+                            <span class="pk-chip-art pk-mark" data-pk-c="{{ user.pikmin_color_key }}" data-pk-f="{{ code }}"
+                                  data-pk-l="{{ forloop.counter0 }}" data-pk-t="{{ user.pikmin_tier }}"
+                                  data-pk-h="1" data-pk-s="{{ user.pikmin_color_key }}" data-pk-m=""></span>
+                            <span class="pk-chip-tag">{{ label }}</span>
+                        </label>
+                        {% endfor %}
+                    </div>
+                    <small class="form-help">{% trans "잎만 났을 때는 꽃 대신 잎 모양이 바뀝니다. 봉오리부터 꽃 색이 보입니다." %}</small>
+                </div>
+
+                <p class="pk-locked">
+                    🔒 {% trans "머리와 마릿수는 고를 수 없습니다. 받은 복사 수가 정합니다 — 1,000회에 봉오리, 10,000회에 꽃입니다." %}
+                </p>
             </div>
 
             <div class="form-actions">

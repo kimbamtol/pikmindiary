@@ -1,3 +1,4 @@
+{% load pikmin %}
 {% for coord in coords %}
 <article class="card coord-card">
     <a href="{% url 'coordinates:detail' pk=coord.pk %}">
@@ -26,6 +27,7 @@
                     {% if coord.author.profile_emoji %}
                         <span class="profile-emoji">{{ coord.author.profile_emoji }}</span>
                     {% endif %}
+                    {% pikmin_mark coord.author %}
                     <span class="author-name">{{ coord.author.nickname|default:_("익명") }}</span>
                     {% if coord.author.special_title %}
                     <span class="special-title-tag">{{ coord.author.get_special_title_display }}</span>

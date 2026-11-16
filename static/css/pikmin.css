@@ -1,0 +1,207 @@
+/* 피크민 — 이름 옆 표식과 복사 효과
+   색·꽃은 본인이 고르거나(설정 안 하면) 회원 번호로 자동 배정된다.
+   머리와 마릿수는 받은 복사 수가 정한다. SVG 는 static/js/pikmin.js 가 만든다. */
+
+/* 자리를 미리 잡아둔다 — JS 가 채우기 전에 글자가 밀리지 않게 */
+.pk-mark{display:inline-flex;align-items:center;flex:none;width:1.45em;height:2em;
+  vertical-align:-.6em;margin-right:1px}
+.pk-mark.has-mount{width:2.5em;height:2.4em;vertical-align:-.85em}
+.coord-card{position:relative}
+
+/* ───── 피크민 ───── */
+.pk{overflow:visible;flex:none;--d:0s;--P:.74s}
+.pk .leg{stroke:var(--pk-dark);stroke-width:1.6;stroke-linecap:round}
+.pk .foot{fill:var(--pk-dark)}
+.pk .arm{stroke:var(--pk-dark);stroke-width:1.4;stroke-linecap:round}
+.pk .legL,.pk .legR,.pk .armL,.pk .armR{transform-box:fill-box;transform-origin:top center}
+.pk .stem{transform-box:fill-box;transform-origin:bottom center}
+.pk .lean{transform-box:fill-box;transform-origin:bottom center}
+.pk .tilt{transform-box:fill-box;transform-origin:bottom center}
+.pk .body{fill:var(--pk);stroke:var(--pk-dark);stroke-width:.55}
+.pk .leaf{fill:var(--pk-leaf,#7CB342)}
+.pk .pupil{fill:var(--pk-eye,#1B3A1F)}
+.pk{--shad-a:.2;--shad-b:.09}
+:root[data-theme=dark] .pk{--shad-a:.46;--shad-b:.2}
+.pk .shadow{fill:#000;opacity:var(--shad-b);transform-box:fill-box;transform-origin:center}
+.pk .wing{fill:#fff;stroke:var(--pk-dark);stroke-width:.5;opacity:.92;
+  transform-box:fill-box;transform-origin:right center}
+.pk .wingR{transform-origin:left center}
+
+/* ── 걷기 ──────────────────────────────────────────────
+   한 바퀴(--P) = 두 걸음. 떠 보이지 않게 하는 핵심이 세 가지다.
+   1) 발이 땅에 붙어 '멈춰 있는' 구간(0~46%)이 있다. 진자처럼 계속
+      흔들면 스케이트 타는 것처럼 보인다.
+   2) 몸은 한 바퀴에 두 번 내려앉는다. 발 디딜 때가 가장 낮다.
+   3) 발밑 그림자가 몸높이에 맞춰 커졌다 작아진다. 땅에 붙었다는
+      가장 강한 신호다.                                        */
+@keyframes step{
+  0%,46%  {transform:translateY(0) rotate(0)}
+  60%     {transform:translateY(-3.4px) rotate(-11deg)}
+  76%     {transform:translateY(-1.6px) rotate(8deg)}
+  88%,100%{transform:translateY(0) rotate(0)}
+}
+@keyframes bob{
+  0%,50%,100%{transform:translateY(0)}
+  24%,74%    {transform:translateY(-2.7px)}
+}
+@keyframes shad{
+  0%,50%,100%{transform:scale(1);opacity:var(--shad-a)}
+  24%,74%    {transform:scale(.78);opacity:var(--shad-b)}
+}
+/* 디딘 발 쪽으로 체중이 쏠린다 — 뒤뚱거림 */
+@keyframes waddle{
+  0%,100%{transform:translateX(.75px) rotate(3.2deg)}
+  50%    {transform:translateX(-.75px) rotate(-3.2deg)}
+}
+/* 잎·팔은 몸보다 한 박자 늦게 따라온다 */
+@keyframes sway{0%,100%{transform:rotate(-13deg)}50%{transform:rotate(13deg)}}
+@keyframes armsw{0%,100%{transform:rotate(17deg)}50%{transform:rotate(-15deg)}}
+/* 뛰기 — 접지 0~30%, 나머지는 공중. 반대쪽 다리가 50% 밀려 있으니
+   30~50%와 80~100%는 두 발이 모두 떠 있다. 이 체공이 뛰기를 만든다. */
+@keyframes runstep{
+  0%,30%  {transform:translateY(0) rotate(0)}
+  44%     {transform:translateY(-4.6px) rotate(-17deg)}
+  62%     {transform:translateY(-2.3px) rotate(13deg)}
+  78%,100%{transform:translateY(0) rotate(0)}
+}
+@keyframes runbob{
+  0%,50%,100%{transform:translateY(-.4px)}
+  12%,62%    {transform:translateY(0)}
+  34%,84%    {transform:translateY(-3.2px)}
+}
+@keyframes runwaddle{
+  0%,100%{transform:translateX(.5px) rotate(8deg)}
+  50%    {transform:translateX(-.5px) rotate(4.6deg)}
+}
+@keyframes runshad{
+  0%,50%,100%{transform:scale(.94);opacity:var(--shad-a)}
+  12%,62%    {transform:scale(1);opacity:var(--shad-a)}
+  34%,84%    {transform:scale(.66);opacity:var(--shad-b)}
+}
+@keyframes hover{0%,100%{transform:translateY(0)}50%{transform:translateY(-2.6px)}}
+@keyframes dangle{0%,100%{transform:rotate(6deg)}50%{transform:rotate(-6deg)}}
+@keyframes flap{from{transform:scaleY(1) rotate(0)}to{transform:scaleY(.45) rotate(-16deg)}}
+
+.walk .legL,.runner .legL{animation:step var(--P) linear infinite var(--d)}
+.walk .legR,.runner .legR{animation:step var(--P) linear infinite;
+  animation-delay:calc(var(--d) - var(--P) * .5)}
+.walk .bod,.runner .bod{animation:bob var(--P) ease-in-out infinite var(--d)}
+.walk .shadow,.runner .shadow{animation:shad var(--P) ease-in-out infinite var(--d)}
+.walk .tilt,.runner .tilt{animation:waddle var(--P) ease-in-out infinite var(--d)}
+.walk .stem,.runner .stem{animation:sway var(--P) ease-in-out infinite;
+  animation-delay:calc(var(--d) - var(--P) * .22)}
+.walk .armL,.runner .armL{animation:armsw var(--P) ease-in-out infinite;
+  animation-delay:calc(var(--d) - var(--P) * .5)}
+.walk .armR,.runner .armR{animation:armsw var(--P) ease-in-out infinite var(--d)}
+
+/* 날개 달린 분홍은 다리를 젓지 않는다 — 대신 그림자가 멀어지고 흐려진다 */
+.fly .wingL,.fly .wingR{animation:flap .2s ease-in-out infinite alternate}
+.walk.fly .legL,.walk.fly .legR,.runner.fly .legL,.runner.fly .legR{
+  animation:dangle 1s ease-in-out infinite}
+.runner.fly .legL,.runner.fly .legR{animation-duration:.5s}
+.walk.fly .bod{animation:hover 1s ease-in-out infinite}
+.runner.fly .bod{animation:hover .42s ease-in-out infinite}
+.walk.fly .tilt,.runner.fly .tilt{animation:none}
+.walk.fly .shadow,.runner.fly .shadow{animation:none;opacity:.1;transform:scale(.62)}
+
+.c-red   {--pk:#E53935;--pk-light:#EF9A9A;--pk-dark:#8E1A17}
+.c-yellow{--pk:#FDD835;--pk-light:#FFF59D;--pk-dark:#A17D06}
+.c-blue  {--pk:#2196F3;--pk-light:#90CAF9;--pk-dark:#0D47A1}
+.c-white {--pk:#FAFAFA;--pk-light:#FFFFFF;--pk-dark:#8D8D8D;--pk-eye:#D32F2F}
+.c-pink  {--pk:#F48FB1;--pk-light:#FCE4EC;--pk-dark:#AD1457}
+.c-rock  {--pk:#5D6D77;--pk-light:#90A4AE;--pk-dark:#21292E}
+.c-purple{--pk:#7E57C2;--pk-light:#D1C4E9;--pk-dark:#3F2A75}
+.c-ice   {--pk:#A5DFF5;--pk-light:#E1F5FE;--pk-dark:#0277BD}
+
+/* 잎 — 꽃이 안 핀 사람끼리도 갈리게. 장수와 초록 농도가 같이 바뀐다 */
+.pk .lf2a,.pk .lf2b,.pk .lf3{display:none}
+.lv-1 .lf1,.lv-2 .lf1,.lv-3 .lf1,.lv-4 .lf1{display:none}
+.lv-1 .lf2a,.lv-1 .lf2b,.lv-3 .lf2a,.lv-3 .lf2b{display:inline}
+.lv-2 .lf2a,.lv-2 .lf2b,.lv-2 .lf3,
+.lv-4 .lf2a,.lv-4 .lf2b,.lv-4 .lf3{display:inline}
+.lv-0{--pk-leaf:#8BC34A}
+.lv-1{--pk-leaf:#689F38}
+.lv-2{--pk-leaf:#43A047}
+.lv-3{--pk-leaf:#AED581}
+.lv-4{--pk-leaf:#33691E}
+
+/* 꽃 색 — 머리에 핀 꽃/봉오리 색. 피크민 색과 따로 배정된다 */
+.pk{--fl:#F8BBD0;--fl-d:#F06292;--fl-c:#FFF176}
+.f-pink  {--fl:#F8BBD0;--fl-d:#EC407A;--fl-c:#FFF176}
+.f-white {--fl:#FFFFFF;--fl-d:#B0BEC5;--fl-c:#FFE082}
+.f-yellow{--fl:#FFE082;--fl-d:#FFA000;--fl-c:#FFFDE7}
+.f-red   {--fl:#EF9A9A;--fl-d:#D32F2F;--fl-c:#FFF176}
+.f-blue  {--fl:#B3E5FC;--fl-d:#0288D1;--fl-c:#FFF176}
+
+/* ───── 거북이 (달리는거북이님 전용) ───── */
+/* 정면에서 걸어온다. 피크민과 같은 걸음 규칙을 쓴다 */
+.tt{--P:.86s}
+.tt .shell{fill:#43A047;stroke:#1B5E20;stroke-width:.8}
+.tt .plate{fill:#66BB6A;opacity:.85}
+.tt .rim{fill:#2E7D32;stroke:#1B5E20;stroke-width:.7}
+.tt .dim{filter:brightness(.82)}
+.tt .skin{fill:#7CB342;stroke:#33691E;stroke-width:.7}
+.tt .tleg{transform-box:fill-box;transform-origin:top center}
+.tt .tlegs ellipse{opacity:.9}
+.tt .shadow{fill:#000;opacity:var(--shad-b)}
+.tt.go .tlegL{animation:step var(--P) linear infinite}
+.tt.go .tlegR{animation:step var(--P) linear infinite;animation-delay:calc(var(--P) * -.5)}
+.tt.go .tbod{animation:bob var(--P) ease-in-out infinite}
+.tt.go .thead{animation:bob var(--P) ease-in-out infinite;animation-delay:calc(var(--P) * -.05)}
+.tt.go .shadow{animation:shad var(--P) ease-in-out infinite}
+/* 탄 피크민은 걷지 않는다 — 흔들릴 뿐 */
+.tt .rider .legL,.tt .rider .legR{animation:dangle calc(var(--P) * 1.3) ease-in-out infinite!important}
+.tt .rider .bod{animation:ride var(--P) ease-in-out infinite!important}
+.tt .rider .tilt{animation:rock calc(var(--P) * 2) ease-in-out infinite!important}
+.tt .rider .armL,.tt .rider .armR{animation:none}
+.tt.runner{--P:.42s}
+@keyframes ride{0%,50%,100%{transform:translateY(0)}24%,74%{transform:translateY(-1.5px)}}
+@keyframes rock{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(5deg)}}
+
+
+.pk-runners{position:absolute;left:0;right:0;top:0;height:36px;pointer-events:none;
+  overflow:hidden;z-index:2}
+.runner{position:absolute;bottom:0;left:-50px;opacity:0;
+  width:24px!important;height:34px!important;
+  animation:dash 1.5s cubic-bezier(.32,0,.68,1) forwards}
+.runner.rider{width:46px!important;height:44px!important;left:-62px}
+.runner.fly{bottom:16px}
+@keyframes dash{0%{opacity:0;left:-62px}7%{opacity:1}93%{opacity:1}100%{opacity:0;left:103%}}
+/* 뛸 때는 주기가 짧아지고, 가는 쪽으로 몸이 기운다 */
+.runner{--P:.36s}
+.runner .tilt{animation-name:runwaddle}
+.runner .legL{animation-name:runstep}
+.runner .legR{animation-name:runstep}
+.runner .bod{animation-name:runbob}
+.runner .shadow{animation-name:runshad}
+.runner.rider .legL,.runner.rider .legR{animation:dangle .4s ease-in-out infinite}
+.runner.rider .bod{animation:none}
+.runner.rider .tilt,.runner.rider .shadow{animation:none}
+
+/* ───── 설정 화면 ───── */
+.pk-settings{border-top:1px solid var(--border-color,#e5e1d3);margin-top:22px;padding-top:18px}
+.pk-h{margin:0 0 6px;font-size:1.05rem}
+.pk-lead{margin:0 0 14px;font-size:.85rem;line-height:1.65;color:var(--text-secondary,#6b7363)}
+.pk-now{display:flex;align-items:center;gap:14px;padding:12px 14px;border-radius:10px;
+  background:var(--bg-secondary,#f6f4ec);margin-bottom:16px}
+.pk-mark.pk-big{width:3.4em;height:4.4em;vertical-align:baseline}
+.pk-mark.pk-big.has-mount{width:5em;height:4.4em}
+.pk-now-txt{display:flex;flex-direction:column;gap:3px;font-size:.86rem;line-height:1.5}
+.pk-now-txt .pk-next{font-size:.78rem;color:var(--text-secondary,#6b7363)}
+.pk-chips{display:flex;flex-wrap:wrap;gap:7px}
+.pk-chip{position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;
+  width:56px;padding:6px 2px 5px;border:2px solid transparent;border-radius:10px;cursor:pointer;
+  background:var(--bg-card,#fff);font-size:.68rem;font-weight:600;
+  color:var(--text-secondary,#6b7363);line-height:1.2;transition:border-color .12s,background .12s}
+.pk-chip input{position:absolute;opacity:0;width:0;height:0}
+.pk-chip:hover{border-color:var(--border-color,#e5e1d3)}
+.pk-chip:has(input:checked){border-color:#2E7D32;background:rgba(76,175,80,.1);
+  color:var(--text-primary,#24291f)}
+.pk-chip:focus-within{outline:2px solid #2E7D32;outline-offset:2px}
+.pk-chip .pk-chip-art{width:30px;height:38px;vertical-align:baseline}
+.pk-chip.pk-chip-mount{width:68px}
+.pk-chip.pk-chip-mount .pk-chip-art{width:44px;height:38px}
+.pk-chip.pk-chip-mount:has(input:checked){border-color:#E8891A;background:rgba(232,137,26,.12)}
+.pk-locked{margin:14px 0 0;font-size:.78rem;line-height:1.6;color:var(--text-secondary,#6b7363)}
+[data-theme="dark"] .pk-chip:has(input:checked){background:rgba(76,175,80,.18)}
+[data-theme="dark"] .pk-chip.pk-chip-mount:has(input:checked){background:rgba(232,137,26,.2)}

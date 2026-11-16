@@ -495,7 +495,11 @@ def coordinate_delete(request, pk):
             messages.error(request, _('삭제 권한이 없습니다.'))
             return redirect('coordinates:detail', pk=pk)
         
+        author = coordinate.author
         coordinate.delete()
+        # 글이 사라지면 그 글이 받은 복사도 합계에서 빠진다
+        if author:
+            author.recount_copy_total()
         messages.success(request, _('좌표가 삭제되었습니다.'))
         return redirect('coordinates:list')
     
@@ -530,6 +534,31 @@ def copy_coords(request, pk):
         coordinate.refresh_from_db()
         new_count = coordinate.copy_count
         
+        # 글쓴이가 받은 복사 합계도 같이 올린다.
+        # 랭킹을 다시 계산하면 한 번에 9쿼리라 복사처럼 자주 눌리는 곳엔 못 붙인다.
+        # UPDATE 한 줄이면 피크민 머리/마릿수를 화면에서 바로 계산할 수 있다.
+        if coordinate.author_id and coordinate.status == Coordinate.Status.APPROVED:
+            from apps.accounts.models import CustomUser
+            author = coordinate.author
+            before = author.copy_total
+            CustomUser.objects.filter(pk=coordinate.author_id).update(
+                copy_total=F('copy_total') + 1
+            )
+            after = before + 1
+            # 머리가 새로 열리면 알려준다
+            for step, label in ((CustomUser.PIKMIN_BUD_AT, _('봉오리')),
+                                (CustomUser.PIKMIN_FLOWER_AT, _('꽃'))):
+                if before < step <= after:
+                    Notification.objects.create(
+                        recipient=author,
+                        actor=None,
+                        notification_type=Notification.NotificationType.COPY_MILESTONE,
+                        coordinate=coordinate,
+                        message=_('받은 복사가 %(step)s회를 넘었어요. 피크민 머리에 %(label)s이(가) 폈습니다!') % {
+                            'step': f'{step:,}', 'label': label}
+                    )
+                    break
+
         # 마일스톤 알림 (5, 10, 50, 100, 500, 1000)
         milestones = [5, 10, 50, 100, 500, 1000]
         for milestone in milestones:

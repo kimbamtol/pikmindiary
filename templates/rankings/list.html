@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load pikmin %}
 {% load i18n %}
 
 {% block title %}{% trans "랭킹" %} - {% trans "피크민 다이어리" %}{% endblock %}
@@ -35,7 +36,7 @@
                     <div class="avatar-placeholder">{{ ranking.user.nickname|slice:":1" }}</div>
                     {% endif %}
                 </div>
-                <div class="hof-name">{{ ranking.user.nickname }}</div>
+                <div class="hof-name">{% pikmin_mark ranking.user %}{{ ranking.user.nickname }}</div>
                 {% if ranking.user.bio %}
                 <div class="hof-bio" data-bio="{{ ranking.user.bio }}">{{ ranking.user.bio }}</div>
                 {% endif %}
@@ -67,7 +68,7 @@
                     <div class="avatar-placeholder">{{ ranking.user.nickname|slice:":1" }}</div>
                     {% endif %}
                 </div>
-                <span class="nickname">{{ ranking.user.nickname }}</span>
+                <span class="nickname">{% pikmin_mark ranking.user %}{{ ranking.user.nickname }}</span>
                 <div class="score-detail">
                     <span title="{% trans "승인된 글" %}">📝 {{ ranking.approved_posts_count }}</span>
                     <span title="{% trans "받은 좋아요" %}">❤️ {{ ranking.likes_received_count }}</span>

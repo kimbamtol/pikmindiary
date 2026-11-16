@@ -1210,6 +1210,9 @@
         var pk = btn.getAttribute('data-pk');
         var copyCountSpan = btn.querySelector('.copy-count');
 
+        // 피크민 무리 — 복사가 일어나는 길목이 여기 하나뿐이라 여기서 부른다
+        if (window.pikminParade) window.pikminParade(btn);
+
         function showSuccess(newCount) {
             var displayCount = newCount !== undefined ? newCount : (copyCountSpan ? copyCountSpan.textContent : '');
             btn.innerHTML = '<span class="stat-icon">✅</span><span class="copy-count">' + displayCount + '</span>';

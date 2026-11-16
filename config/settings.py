@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.sites',
     'django.contrib.sitemaps',  # SEO sitemap
+    'django.contrib.humanize',  # 복사 수에 천 단위 쉼표
     
     # Third party apps
     'allauth',

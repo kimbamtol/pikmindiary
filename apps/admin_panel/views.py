@@ -71,7 +71,10 @@ def approve_coordinate(request, pk):
                 status=Coordinate.Status.APPROVED
             ).count()
             coordinate.author.save(update_fields=['total_posts'])
-            
+
+            # 승인되면 그 글의 복사 수가 합계에 들어온다
+            coordinate.author.recount_copy_total()
+
             # 랭킹 업데이트
             update_user_ranking(coordinate.author)
         
@@ -88,6 +91,9 @@ def reject_coordinate(request, pk):
     if request.method == 'POST':
         coordinate.status = Coordinate.Status.REJECTED
         coordinate.save()
+        # 거절되면 합계에서 빠진다
+        if coordinate.author:
+            coordinate.author.recount_copy_total()
         messages.success(request, f'"{coordinate.title}"이(가) 거절되었습니다.')
     
     return redirect('admin_panel:pending_list')
