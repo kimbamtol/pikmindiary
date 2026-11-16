@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>피크민 다이어리 회귀 테스트</title>
+<style>
+/* 레이아웃: 한 칼럼 문서. 두 겹 구조를 먼저 보여주고 모듈별로 내려간다. */
+:root {
+    --bg: #FAFAF7;
+    --surface: #FFFFFF;
+    --ink: #1C1F1A;
+    --ink-soft: #5B6358;
+    --line: #E2E5DC;
+    --accent: #3C7A3F;
+    --accent-soft: #EAF2E7;
+    --warn: #A8601B;
+    --warn-soft: #F8EEE1;
+    --mono-bg: #11150F;
+    --mono-ink: #DCE5D6;
+    --display: 'Nanum Myeongjo', Georgia, serif;
+    --body: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+    --mono: 'Nanum Gothic Coding', ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+        --bg: #14170F;
+        --surface: #1C2017;
+        --ink: #E8EADF;
+        --ink-soft: #9BA592;
+        --line: #2E3427;
+        --accent: #8FC48C;
+        --accent-soft: #232C20;
+        --warn: #D7A468;
+        --warn-soft: #2B2418;
+        --mono-bg: #0C0F08;
+        --mono-ink: #CFDAC8;
+        color-scheme: dark;
+    }
+}
+:root[data-theme="dark"] {
+    --bg: #14170F;
+    --surface: #1C2017;
+    --ink: #E8EADF;
+    --ink-soft: #9BA592;
+    --line: #2E3427;
+    --accent: #8FC48C;
+    --accent-soft: #232C20;
+    --warn: #D7A468;
+    --warn-soft: #2B2418;
+    --mono-bg: #0C0F08;
+    --mono-ink: #CFDAC8;
+    color-scheme: dark;
+}
+
+body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--body);
+    font-size: 16px;
+    line-height: 1.75;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-block: 0 72px;
+}
+.wrap { max-width: 760px; margin: 0 auto; }
+
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(1.9rem, 5vw, 2.6rem); line-height: 1.3; letter-spacing: -0.01em; }
+h2 { font-size: 1.45rem; margin-top: 56px; }
+h3 { font-size: 1.08rem; }
+p { margin: 0 0 1em; }
+p:last-child { margin-bottom: 0; }
+a { color: var(--accent); }
+
+header { padding-block: 56px 8px; border-bottom: 1px solid var(--line); }
+.eyebrow {
+    font-size: 0.78rem; font-weight: 700; letter-spacing: 0.14em;
+    color: var(--accent); text-transform: uppercase; margin-bottom: 14px;
+}
+.lede { color: var(--ink-soft); font-size: 1.05rem; margin-top: 16px; margin-bottom: 36px; }
+
+.layers { display: grid; gap: 14px; margin-top: 28px; }
+@media (min-width: 620px) { .layers { grid-template-columns: 1fr 1fr; } }
+.layer {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: 10px; padding: 20px 22px; min-width: 0;
+}
+.layer .n {
+    font-family: var(--mono); font-size: 0.78rem; color: var(--ink-soft);
+    letter-spacing: 0.08em;
+}
+.layer h3 { margin: 6px 0 4px; }
+.layer .when { font-size: 0.88rem; color: var(--ink-soft); }
+.layer p { font-size: 0.92rem; margin-top: 10px; }
+.layer.auto { border-left: 3px solid var(--accent); }
+.layer.human { border-left: 3px solid var(--warn); }
+
+pre {
+    background: var(--mono-bg); color: var(--mono-ink);
+    font-family: var(--mono); font-size: 0.85rem; line-height: 1.7;
+    padding: 16px 18px; border-radius: 8px; overflow-x: auto; margin: 0 0 1em;
+}
+code { font-family: var(--mono); font-size: 0.88em; }
+p code, li code, td code {
+    background: var(--accent-soft); color: var(--ink);
+    padding: 1px 5px; border-radius: 4px;
+}
+
+.guards { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+.guards li {
+    display: grid; grid-template-columns: auto 1fr; gap: 12px; align-items: baseline;
+    font-size: 0.94rem; min-width: 0;
+}
+.guards .tick { color: var(--accent); font-weight: 700; }
+
+table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+.scroll { overflow-x: auto; }
+th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-size: 0.8rem; letter-spacing: 0.06em; color: var(--ink-soft); text-transform: uppercase; }
+td.num { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+tfoot td { font-weight: 700; border-bottom: none; }
+
+.mod {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: 10px; padding: 20px 22px; margin-top: 14px; min-width: 0;
+}
+.mod-head { display: flex; flex-wrap: wrap; gap: 10px; align-items: baseline; justify-content: space-between; }
+.mod-head .file { font-family: var(--mono); font-size: 0.9rem; color: var(--accent); }
+.mod-head .count {
+    font-family: var(--mono); font-size: 0.78rem; color: var(--ink-soft);
+    font-variant-numeric: tabular-nums;
+}
+.mod p { font-size: 0.93rem; margin: 10px 0 0; }
+.mod ul { margin: 12px 0 0; padding-left: 0; list-style: none; display: grid; gap: 5px; }
+.mod ul li {
+    font-family: var(--mono); font-size: 0.8rem; color: var(--ink-soft);
+    padding-left: 16px; position: relative; word-break: break-word;
+}
+.mod ul li::before { content: "·"; position: absolute; left: 4px; color: var(--accent); }
+
+.note {
+    background: var(--warn-soft); border-radius: 8px;
+    padding: 16px 18px; font-size: 0.93rem; margin-top: 16px;
+}
+.note strong { color: var(--warn); }
+
+footer {
+    margin-top: 64px; padding-top: 20px; border-top: 1px solid var(--line);
+    font-size: 0.85rem; color: var(--ink-soft);
+}
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&family=Noto+Sans+KR:wght@400;500;700&family=Nanum+Gothic+Coding&display=swap">
+<style>
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; }
+img { max-width: 100%; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+    <div class="eyebrow">pikmindiary.com</div>
+    <h1>회귀 테스트 구성</h1>
+</header>
+
+<p class="lede">
+    기능이나 화면을 바꿀 때마다 <strong>원래 되던 것이 여전히 되는지</strong> 확인하는 장치입니다.
+    바꾼 곳은 당연히 들여다보게 되지만, 사고는 늘 안 건드린 쪽에서 납니다.
+</p>
+
+<h2>두 겹으로 돌립니다</h2>
+<p>
+    기계가 잘하는 일과 사람만 할 수 있는 일을 나눴습니다. 반복해서 확인해야 하는 규칙은 전부 자동으로 넘기고,
+    사람은 눈으로만 알 수 있는 것에 5분을 씁니다.
+</p>
+
+<div class="layers">
+    <div class="layer auto">
+        <div class="n">1겹</div>
+        <h3>자동 테스트 68개</h3>
+        <div class="when">코드를 고칠 때마다 · 30초</div>
+        <p>로그인, 글 작성, 사진 업로드, 좋아요, 댓글, 자랑 게시판, 너프 제보, 디자인 설정.
+        규칙으로 적을 수 있는 건 전부 여기 있습니다.</p>
+    </div>
+    <div class="layer human">
+        <div class="n">2겹</div>
+        <h3>사람 체크리스트</h3>
+        <div class="when">배포 전 · 5분</div>
+        <p>글씨가 배경에 묻히지 않는지, 실제 휴대폰에서 어떤지, 복사 버튼이 진짜 붙여넣어지는지.
+        저장소의 <code>TESTING.md</code>에 있습니다.</p>
+    </div>
+</div>
+
+<h2>돌리는 법</h2>
+<pre>source venv/bin/activate
+
+python manage.py test tests                   # 68개 전부 (30초)
+python manage.py test tests.test_upload       # 한 묶음만
+python manage.py test tests.test_nerf -v 2    # 테스트 이름까지 보면서</pre>
+
+<h2>운영 데이터는 건드리지 않습니다</h2>
+<p>
+    같은 서버에서 운영 DB와 테스트가 공존하므로, 안전장치를 세 겹으로 뒀습니다.
+    이게 없으면 테스트를 돌릴 때마다 실제 게시글과 좋아요가 오염됩니다.
+</p>
+<ul class="guards">
+    <li><span class="tick">✓</span><span><strong>별도 테스트 DB</strong> — Django가 새로 만들고 끝나면 지웁니다. <code>db.sqlite3</code>는 열지도 않습니다.</span></li>
+    <li><span class="tick">✓</span><span><strong>임시 업로드 폴더</strong> — 테스트가 올린 사진은 임시 디렉터리로 가고 끝나면 통째로 지워집니다. <code>media/</code>에 쓰레기가 안 쌓입니다.</span></li>
+    <li><span class="tick">✓</span><span><strong>외부 API 차단</strong> — 좌표를 저장하면 Nominatim으로 지역을 조회하는 시그널이 백그라운드 스레드로 뜹니다. 테스트에서는 막아둡니다. 네트워크가 끊겨도, 상대 서버가 느려도 결과가 흔들리지 않습니다.</span></li>
+</ul>
+
+<h2>무엇을 지키고 있나</h2>
+<div class="scroll">
+<table>
+    <thead>
+        <tr><th>파일</th><th>담당</th><th class="num">개수</th></tr>
+    </thead>
+    <tbody>
+        <tr><td><code>test_smoke</code></td><td>주요 화면이 500 없이 뜨는지, 필터·정렬</td><td class="num">4</td></tr>
+        <tr><td><code>test_auth</code></td><td>로그인 상태 분기, 차단된 사용자</td><td class="num">6</td></tr>
+        <tr><td><code>test_coordinate</code></td><td>글 작성, 수정·삭제 권한, 하루 한도</td><td class="num">10</td></tr>
+        <tr><td><code>test_upload</code></td><td>사진 업로드, 5장 제한, 워터마크</td><td class="num">7</td></tr>
+        <tr><td><code>test_interactions</code></td><td>좋아요·북마크·좌표 복사·댓글</td><td class="num">11</td></tr>
+        <tr><td><code>test_brag</code></td><td>자랑 게시판, 주 단위 묶기, 주간 1위</td><td class="num">11</td></tr>
+        <tr><td><code>test_nerf</code></td><td>엽서 바뀜 제보, 기준 인원·기간</td><td class="num">10</td></tr>
+        <tr><td><code>test_display</code></td><td>디자인 토글, 보기 밀도 저장</td><td class="num">9</td></tr>
+    </tbody>
+    <tfoot>
+        <tr><td colspan="2">합계</td><td class="num">68</td></tr>
+    </tfoot>
+</table>
+</div>
+
+<h2>묶음별로 보면</h2>
+
+<div class="mod">
+    <div class="mod-head"><span class="file">test_auth.py</span><span class="count">6개</span></div>
+    <p>구글 OAuth 왕복 자체는 구글 서버가 필요해 자동화하지 않았습니다. 대신 <strong>로그인한 사람과 안 한 사람이
+    다르게 보이고 다르게 할 수 있다</strong>는 규칙을 지킵니다. 차단된 계정이 403을 받는지, 차단을 풀면 다시 들어오는지도 봅니다.</p>
+    <ul>
+        <li>test_로그인하면_로그아웃_버튼이_보인다</li>
+        <li>test_차단된_회원은_403</li>
+        <li>test_차단_해제하면_다시_들어간다</li>
+    </ul>
+</div>
+
+<div class="mod">
+    <div class="mod-head"><span class="file">test_coordinate.py</span><span class="count">10개</span></div>
+    <p>이 사이트의 본체입니다. 특히 <strong>비회원이 닉네임과 비밀번호로 쓰고 고치는 흐름</strong>을 집중해서 봅니다.
+    비밀번호는 해시로 저장되므로 맞는 비밀번호는 통과하고 틀린 비밀번호는 막히는 것을 둘 다 확인하고,
+    평문이 그대로 남지 않는 것도 봅니다. 하루 업로드 한도는 카테고리별로 따로 세는 것까지 확인합니다.</p>
+    <ul>
+        <li>test_비회원_글은_비밀번호가_맞아야_수정된다</li>
+        <li>test_남의_글은_삭제할_수_없다</li>
+        <li>test_카테고리가_다르면_한도가_따로_센다</li>
+    </ul>
+</div>
+
+<div class="mod">
+    <div class="mod-head"><span class="file">test_upload.py</span><span class="count">7개</span></div>
+    <p>진짜 이미지 파일을 만들어서 올립니다. 더미 바이트열로는 안 되는데, 워터마크가 PIL로 사진을 다시 그려
+    저장하기 때문입니다. <strong>워터마크를 켠 사진을 다시 열어보는</strong> 테스트가 있어서, 저장 과정에서 파일이 깨지면 바로 걸립니다.</p>
+    <ul>
+        <li>test_여섯_장을_올려도_다섯_장만_저장된다</li>
+        <li>test_워터마크를_켜도_이미지가_살아있다</li>
+        <li>test_글을_지우면_이미지도_지워진다</li>
+    </ul>
+</div>
+
+<div class="mod">
+    <div class="mod-head"><span class="file">test_interactions.py</span><span class="count">11개</span></div>
+    <p>좋아요 수 같은 숫자는 모델에 그대로 저장해 두고 뷰에서 직접 올리고 내립니다. 그래서
+    <strong>눌렀다 취소하면 정확히 원래대로 돌아오는지</strong>를 매번 봅니다. 한 번만 세거나 두 번 세는 사고가
+    이 구조에서 제일 흔합니다. 비회원 좋아요는 세션으로 중복을 막는 것까지 확인합니다.</p>
+    <ul>
+        <li>test_회원이_좋아요를_눌렀다_취소한다</li>
+        <li>test_본인_글에는_좋아요를_못_누른다</li>
+        <li>test_좋아요를_받으면_작성자에게_알림이_간다</li>
+    </ul>
+</div>
+
+<div class="mod">
+    <div class="mod-head"><span class="file">test_brag.py</span><span class="count">11개</span></div>
+    <p>주 단위로 묶이고 주마다 1등이 새로 뽑히는 구조라, <strong>'이번 주'의 기준이 랭킹과 같은 월요일</strong>인지가 핵심입니다.
+    여기가 어긋나면 좌표 목록 옆 위젯이 엉뚱한 글을 1등으로 보여줍니다. 지난주 글이 이번 주 1등에 끼지 않는 것도 확인합니다.</p>
+    <ul>
+        <li>test_주의_시작은_랭킹과_같은_규칙을_쓴다</li>
+        <li>test_지난주_글은_이번주_1등에_끼지_않는다</li>
+        <li>test_좋아요가_없으면_가장_최근_글을_보여준다</li>
+    </ul>
+</div>
+
+<div class="mod">
+    <div class="mod-head"><span class="file">test_nerf.py</span><span class="count">10개</span></div>
+    <p>7일 안에 3명이 제보하면 제목 앞에 [너프됨]이 붙는 기능입니다. <strong>기간이 지난 제보가 집계에서 빠지는지</strong>가
+    가장 중요합니다. 여기가 틀리면 한 번 붙은 표시가 영원히 남습니다. 10일 전 제보를 만들어 두고 확인합니다.
+    제목 문자열 자체는 건드리지 않는다는 것도 못 박아 뒀습니다.</p>
+    <ul>
+        <li>test_기간이_지난_제보는_세지_않는다</li>
+        <li>test_제목_자체는_바뀌지_않는다</li>
+        <li>test_기준_인원을_바꾸면_바로_반영된다</li>
+    </ul>
+</div>
+
+<div class="mod">
+    <div class="mod-head"><span class="file">test_display.py</span><span class="count">9개</span></div>
+    <p>디자인 선택과 보기 밀도는 둘 다 <strong>다음에 와도 내 선택이 그대로인가</strong>가 전부입니다.
+    회원은 계정에, 비회원은 쿠키에 저장하므로 양쪽을 다 봅니다. 쿠키를 지워도 계정 설정이 살아 있는지까지 확인합니다.</p>
+    <ul>
+        <li>test_처음_온_사람은_수첩_디자인을_본다</li>
+        <li>test_회원은_계정에_저장된다</li>
+        <li>test_투표_주소는_사라졌다</li>
+    </ul>
+</div>
+
+<h2>자동으로 못 잡는 것</h2>
+<p>
+    테스트가 통과했다고 화면이 멀쩡하다는 뜻은 아닙니다. 아래는 구조상 기계가 볼 수 없어서
+    사람 체크리스트로 넘긴 것들입니다.
+</p>
+<ul class="guards">
+    <li><span class="tick">→</span><span><strong>글씨 대비와 레이아웃</strong> — 흰 배경에 흰 글씨를 서버는 알 수 없습니다. 실제로 지난달 랭킹·안내 페이지 제목이 밤 테마에서 한 달간 안 보이는 상태였습니다.</span></li>
+    <li><span class="tick">→</span><span><strong>구글 로그인 왕복</strong> — 구글 서버가 필요합니다. www 주소와 없는 주소 양쪽을 직접 눌러봐야 합니다.</span></li>
+    <li><span class="tick">→</span><span><strong>아이폰 HEIC 변환</strong> — 브라우저가 올리기 전에 하는 일이라 서버에서 재현할 수 없습니다.</span></li>
+    <li><span class="tick">→</span><span><strong>클립보드 복사</strong> — 좌표가 진짜 붙여넣어지는지는 실제 브라우저에서만 알 수 있습니다.</span></li>
+</ul>
+
+<div class="note">
+    <strong>테스트가 통과한다고 끝이 아닙니다.</strong>
+    자동 테스트는 "적어둔 규칙이 깨지지 않았다"만 말해 줍니다. 적지 않은 규칙은 아무도 지켜주지 않습니다.
+    새 기능을 만들 때 테스트를 같이 늘려야 그물이 촘촘해집니다.
+</div>
+
+<h2>앞으로 늘릴 만한 곳</h2>
+<p>
+    지금 비어 있는 자리입니다. 급하지 않지만, 해당 영역을 건드릴 일이 생기면 그때 같이 채우는 게 좋습니다.
+</p>
+<ul class="guards">
+    <li><span class="tick">·</span><span>랭킹 점수 계산 — 승인 10점, 좋아요 2점 같은 배점이 바뀌어도 안 깨지는지</span></li>
+    <li><span class="tick">·</span><span>신고 접수와 관리자 처리 흐름</span></li>
+    <li><span class="tick">·</span><span>번역 캐시 — 글을 고치면 옛 번역이 지워지는지</span></li>
+    <li><span class="tick">·</span><span>알림 읽음 처리와 모두 삭제</span></li>
+</ul>
+
+<footer>
+    테스트 코드는 저장소의 <code>tests/</code>, 사람 체크리스트는 <code>TESTING.md</code>에 있습니다.
+    공통 재료(<code>make_user</code>, <code>make_coord</code>, <code>make_image</code>)는 <code>tests/base.py</code>에 모여 있습니다.
+</footer>
+</div>
+</body>
+</html>
