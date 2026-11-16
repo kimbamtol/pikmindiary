@@ -276,13 +276,43 @@ def coordinate_create(request):
             ip = request.META.get('REMOTE_ADDR')
         return ip
     
+    def back_to_form(msg):
+        """오류를 알리고 폼으로 되돌린다. 쓴 내용은 그대로 둔다 —
+        여기서 빈 폼을 주면 긴 설명을 다시 쓰게 된다."""
+        messages.error(request, msg)
+        return render(request, 'coordinates/create.html', {
+            'categories': Coordinate.Category.choices,
+            'form_data': request.POST,
+        })
+
     if request.method == 'POST':
-        title = request.POST.get('title')
+        title = (request.POST.get('title') or '').strip()
         postcard_name = request.POST.get('postcard_name', '')
         description = request.POST.get('description', '')
-        latitude = request.POST.get('latitude')
-        longitude = request.POST.get('longitude')
+        latitude = (request.POST.get('latitude') or '').strip()
+        longitude = (request.POST.get('longitude') or '').strip()
         category = request.POST.get('category', Coordinate.Category.OTHER)
+
+        # ===== 좌표 검증 =====
+        # 여기서 안 막으면 Coordinate.save() 안의 float() 에서 터진다.
+        # 브라우저 required 는 붙어 있지만 붙여넣기로 '35.1도' 같은 값이
+        # 들어오면 통과한다. 실제로 16번 500 이 났다.
+        if not title:
+            return back_to_form(_('제목을 입력해주세요.'))
+
+        try:
+            lat_f = float(latitude)
+            lon_f = float(longitude)
+        except (TypeError, ValueError):
+            return back_to_form(
+                _('위도와 경도는 숫자로 입력해주세요. 예: 37.498095 / 127.027610'))
+
+        if not (-90 <= lat_f <= 90) or not (-180 <= lon_f <= 180):
+            return back_to_form(
+                _('좌표 범위를 벗어났습니다. 위도는 -90~90, 경도는 -180~180입니다.'))
+
+        latitude, longitude = f'{lat_f:.6f}', f'{lon_f:.6f}'
+        # ===== 좌표 검증 끝 =====
         
         # 비회원 처리
         guest_nickname = request.POST.get('guest_nickname', '')
@@ -294,10 +324,7 @@ def coordinate_create(request):
         else:
             # 비회원 - 닉네임과 비밀번호 필수
             if not guest_nickname or not guest_password:
-                messages.error(request, _('비회원은 닉네임과 비밀번호를 입력해야 합니다.'))
-                return render(request, 'coordinates/create.html', {
-                    'categories': Coordinate.Category.choices,
-                })
+                return back_to_form(_('비회원은 닉네임과 비밀번호를 입력해야 합니다.'))
             author = None
             hashed_password = make_password(guest_password)
         
@@ -348,10 +375,7 @@ def coordinate_create(request):
             
             if today_count >= DAILY_LIMIT:
                 category_label = dict(Coordinate.Category.choices).get(category, category)
-                messages.error(request, _('오늘 %(category)s 카테고리에 %(limit)s개를 이미 등록했습니다. 내일 다시 시도해주세요.') % {'category': category_label, 'limit': DAILY_LIMIT})
-                return render(request, 'coordinates/create.html', {
-                    'categories': Coordinate.Category.choices,
-                })
+                return back_to_form(_('오늘 %(category)s 카테고리에 %(limit)s개를 이미 등록했습니다. 내일 다시 시도해주세요.') % {'category': category_label, 'limit': DAILY_LIMIT})
         # ===== 제한 체크 끝 =====
         
         # 워터마크 옵션

@@ -31,13 +31,13 @@
             <!-- 기본 정보 -->
             <div class="form-group">
                 <label class="form-label">{% trans "제목" %} *</label>
-                <input type="text" name="title" class="form-control" placeholder="{% trans "예: 강남역 근처 버섯" %}" required
+                <input type="text" name="title" class="form-control" value="{{ form_data.title|default:'' }}" placeholder="{% trans "예: 강남역 근처 버섯" %}" required
                     maxlength="100">
             </div>
 
             <div class="form-group">
                 <label class="form-label">{% trans "엽서이름" %}</label>
-                <input type="text" name="postcard_name" class="form-control" placeholder="{% trans "예: 강남역 엽서" %}" maxlength="100">
+                <input type="text" name="postcard_name" class="form-control" value="{{ form_data.postcard_name|default:'' }}" placeholder="{% trans "예: 강남역 엽서" %}" maxlength="100">
             </div>
 
             <div class="form-group">
@@ -53,12 +53,12 @@
             <div class="form-row">
                 <div class="form-group">
                     <label class="form-label">{% trans "위도 (Latitude)" %} *</label>
-                    <input type="text" name="latitude" id="latitude" class="form-control" placeholder="예: 37.498095"
+                    <input type="text" name="latitude" id="latitude" class="form-control" value="{{ form_data.latitude|default:'' }}" placeholder="예: 37.498095"
                         required>
                 </div>
                 <div class="form-group">
                     <label class="form-label">{% trans "경도 (Longitude)" %} *</label>
-                    <input type="text" name="longitude" id="longitude" class="form-control" placeholder="예: 127.027610"
+                    <input type="text" name="longitude" id="longitude" class="form-control" value="{{ form_data.longitude|default:'' }}" placeholder="예: 127.027610"
                         required>
                 </div>
             </div>
@@ -85,7 +85,7 @@
             <!-- 설명 -->
             <div class="form-group">
                 <label class="form-label">{% trans "설명" %}</label>
-                <textarea name="description" class="form-control" rows="4" placeholder="{% trans "위치에 대한 추가 설명 (선택사항)" %}"></textarea>
+                <textarea name="description" class="form-control" rows="4" placeholder="{% trans "위치에 대한 추가 설명 (선택사항)" %}">{{ form_data.description|default:'' }}</textarea>
             </div>
 
             <!-- 이미지 업로드 -->
@@ -627,20 +627,18 @@
         const lngInput = document.querySelector('input[name="longitude"]');
 
         if (latInput && lngInput) {
+            // 붙여넣은 글에서 숫자 두 개를 뽑아낸다.
+            // "35.1, 129.1" 뿐 아니라 "위도 35.1 경도 129.1" 같은 것도 받는다.
+            // 예전에는 쉼표가 정확히 하나일 때만 갈랐고, 아니면 '35.1도' 같은
+            // 값이 그대로 넘어가 서버에서 500 이 났다.
             latInput.addEventListener('input', function (e) {
                 const value = e.target.value;
-                if (value.includes(',')) {
-                    const parts = value.split(',');
-                    if (parts.length === 2) {
-                        const lat = parts[0].trim();
-                        const lng = parts[1].trim();
-
-                        latInput.value = lat;
-                        lngInput.value = lng;
-
-                        lngInput.focus();
-                    }
-                }
+                if (!/[,\s]/.test(value)) return;          // 숫자만 치는 중이면 둔다
+                const nums = value.match(/-?\d+(?:\.\d+)?/g);
+                if (!nums || nums.length < 2) return;
+                latInput.value = nums[0];
+                lngInput.value = nums[1];
+                lngInput.focus();
             });
         }
 

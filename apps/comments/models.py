@@ -116,13 +116,27 @@ class Comment(models.Model):
     def save(self, *args, **kwargs):
         """저장 시 이미지 리사이징"""
         super().save(*args, **kwargs)
+        self._shrink_photo()
 
-        if self.photo:
+    def _shrink_photo(self):
+        """큰 사진을 1920px 안으로 줄인다.
+
+        여기서 예외가 나가면 안 된다. super().save() 가 이미 끝난 뒤라
+        댓글은 DB에 들어갔는데 사용자는 500만 보게 된다 —
+        실제로 그래서 같은 댓글을 두 번 쓰고 지우지도 못한 분이 있었다.
+        """
+        if not self.photo:
+            return
+        try:
             img_path = self.photo.path
             img = Image.open(img_path)
-
-            # 최대 크기 제한 (1920px)
-            max_size = (1920, 1920)
-            if img.height > max_size[0] or img.width > max_size[1]:
-                img.thumbnail(max_size, Image.Lanczos)
+            max_w, max_h = 1920, 1920
+            if img.width > max_w or img.height > max_h:
+                img.thumbnail((max_w, max_h), Image.LANCZOS)
+                if img.mode in ('RGBA', 'P', 'LA'):
+                    img = img.convert('RGB')   # JPEG 는 알파를 못 담는다
                 img.save(img_path, optimize=True, quality=85)
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).warning(
+                '댓글 사진 축소 실패 (댓글은 저장됨) pk=%s: %s', self.pk, e)

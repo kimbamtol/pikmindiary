@@ -129,9 +129,16 @@ class Coordinate(models.Model):
         return f"{self.latitude}, {self.longitude}"
     
     def detect_region(self):
-        """위도/경도로 지역 자동 감지"""
-        lat = float(self.latitude)
-        lon = float(self.longitude)
+        """위도/경도로 지역 자동 감지.
+
+        좌표가 비었거나 숫자가 아니면 '기타'로 둔다. 여기서 터지면
+        글 등록 자체가 500 이 된다 — 실제로 16번 그랬다.
+        """
+        try:
+            lat = float(self.latitude)
+            lon = float(self.longitude)
+        except (TypeError, ValueError, ArithmeticError):
+            return self.Region.OTHER
         
         # 한국: 위도 33~38.5, 경도 124~130
         if 33 <= lat <= 38.5 and 124 <= lon <= 130:
