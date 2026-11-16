@@ -39,6 +39,48 @@ def make_image(name='test.jpg', size=(80, 60), fmt='JPEG'):
     return SimpleUploadedFile(name, buf.read(), content_type=ctype)
 
 
+def make_heic(name='iphone.heic', size=(2000, 1200)):
+    """아이폰이 올리는 HEIC 사진을 흉내 낸다.
+
+    content_type 을 application/octet-stream 으로 두는 게 핵심이다 —
+    브라우저가 실제로 그렇게 보내는 경우가 있고, 예전 검사는 그걸 막았다.
+    """
+    import pillow_heif
+    pillow_heif.register_heif_opener()
+    from PIL import Image
+
+    buf = io.BytesIO()
+    Image.new('RGB', size, (200, 80, 80)).save(buf, format='HEIF')
+    buf.seek(0)
+    return SimpleUploadedFile(name, buf.read(), content_type='application/octet-stream')
+
+
+def make_rotated_image(name='sideways.jpg', size=(400, 200), orientation=6):
+    """폰으로 세워 찍은 사진. 눕혀 저장되고 EXIF 에 회전값만 들어온다."""
+    from PIL import Image
+
+    buf = io.BytesIO()
+    img = Image.new('RGB', size, (80, 80, 200))
+    exif = img.getexif()
+    exif[0x0112] = orientation          # Orientation 태그
+    img.save(buf, format='JPEG', exif=exif)
+    buf.seek(0)
+    return SimpleUploadedFile(name, buf.read(), content_type='image/jpeg')
+
+
+def make_oversized(name='huge.jpg', mb=6):
+    """용량 제한에 실제로 걸리는 파일. 내용은 중요하지 않다 —
+    용량 검사가 디코딩보다 먼저 돌아야 한다는 게 요점이다."""
+    return SimpleUploadedFile(name, b'\xff\xd8' + b'x' * (mb * 1024 * 1024),
+                              content_type='image/jpeg')
+
+
+def make_junk(name='bad.jpg', size_bytes=2000):
+    """이미지가 아닌데 .jpg 를 뒤집어쓴 파일."""
+    return SimpleUploadedFile(name, b'\x00NOT-AN-IMAGE' * (size_bytes // 13),
+                              content_type='image/jpeg')
+
+
 class BaseTest(TestCase):
     @classmethod
     def setUpClass(cls):

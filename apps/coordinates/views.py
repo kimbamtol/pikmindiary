@@ -12,6 +12,7 @@ from django.contrib.auth.hashers import make_password, check_password
 from .models import Coordinate, CoordinateImage
 from apps.interactions.models import Like, Bookmark
 from apps.rankings.utils import update_user_ranking
+from apps.core.images import prepare_upload
 from django.views.decorators.http import require_POST
 
 
@@ -386,6 +387,18 @@ def coordinate_create(request):
         if watermark_enabled and not watermark_name and not author:
             watermark_name = guest_nickname
 
+        # ===== 사진 검사 =====
+        # 글을 만들기 전에 한다. 뒤에서 걸러내면 사진 없는 빈 글만 남는다.
+        # 여기서 HEIC 는 JPEG 로 바뀌고, 눕힌 폰 사진은 세워진다.
+        prepared = []
+        for image in request.FILES.getlist('images')[:5]:   # 최대 5장
+            ready, err = prepare_upload(image, max_px=2560)
+            if err:
+                return back_to_form('%s (%s)' % (err, image.name))
+            if ready:
+                prepared.append(ready)
+        # ===== 사진 검사 끝 =====
+
         coordinate = Coordinate.objects.create(
             author=author,
             title=title,
@@ -407,15 +420,11 @@ def coordinate_create(request):
             current_count = request.session.get(upload_key, 0)
             request.session[upload_key] = current_count + 1
         
-        # 이미지 처리
-        images = request.FILES.getlist('images')
-        for i, image in enumerate(images[:5]):  # 최대 5장
+        for i, ready in enumerate(prepared):
             CoordinateImage.objects.create(
-                coordinate=coordinate,
-                image=image,
-                order=i
+                coordinate=coordinate, image=ready, order=i
             )
-        
+
         # 랭킹 갱신 (회원인 경우)
         if author:
             update_user_ranking(author)

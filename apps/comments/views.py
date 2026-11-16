@@ -14,15 +14,15 @@ from apps.interactions.models import Notification, CommentLike
 # ===== 헬퍼 함수 =====
 
 def _validate_photo(photo):
-    """사진 파일 검증. 오류 시 메시지 문자열 반환, 정상이면 None"""
-    if not photo:
-        return None
-    if photo.size > 5 * 1024 * 1024:
-        return _('사진 파일 크기는 5MB를 초과할 수 없습니다.')
-    allowed_types = ['image/jpeg', 'image/png', 'image/webp']
-    if photo.content_type not in allowed_types:
-        return _('허용되지 않는 파일 형식입니다. (JPG, PNG, WEBP만 가능)')
-    return None
+    """사진 검사 + 손질. (쓸 파일, 오류메시지) 를 돌려준다.
+
+    예전에는 content_type 만 봤는데 그건 브라우저가 적어 보내는 값이라
+    아이폰 HEIC 가 application/octet-stream 으로 와서 막혔다.
+    이제 공용 모듈이 PIL 로 직접 열어보고, HEIC 는 JPEG 로 바꾸고
+    눕힌 사진은 세워서 돌려준다.
+    """
+    from apps.core.images import prepare_upload
+    return prepare_upload(photo, max_px=1920)
 
 
 def _create_comment(request, content, photo=None, parent=None, coordinate=None, farming_journal=None, brag_post=None):
@@ -78,7 +78,7 @@ def comment_create(request, coordinate_id):
         messages.error(request, _('댓글 내용이나 사진 중 하나는 입력해주세요.'))
         return redirect('coordinates:detail', pk=coordinate_id)
 
-    photo_error = _validate_photo(photo)
+    photo, photo_error = _validate_photo(photo)
     if photo_error:
         messages.error(request, photo_error)
         return redirect('coordinates:detail', pk=coordinate_id)
@@ -195,7 +195,7 @@ def comment_reply(request, pk):
         messages.error(request, _('댓글 내용이나 사진 중 하나는 입력해주세요.'))
         return redirect('coordinates:detail', pk=coordinate.pk)
 
-    photo_error = _validate_photo(photo)
+    photo, photo_error = _validate_photo(photo)
     if photo_error:
         messages.error(request, photo_error)
         return redirect('coordinates:detail', pk=coordinate.pk)

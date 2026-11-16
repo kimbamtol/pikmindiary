@@ -51,8 +51,8 @@ def _validate_image(image):
         return _('사진을 선택해주세요.')
     if image.size > MAX_IMAGE_SIZE:
         return _('사진 파일 크기는 8MB를 초과할 수 없습니다.')
-    if getattr(image, 'content_type', None) not in ALLOWED_TYPES:
-        return _('허용되지 않는 파일 형식입니다. (JPG, PNG, WEBP, GIF만 가능)')
+    # 형식 검사는 prepare_upload 가 PIL 로 직접 한다.
+    # content_type 은 브라우저가 적어 보내는 값이라 아이폰 HEIC 가 걸린다.
     return None
 
 
@@ -150,6 +150,10 @@ def brag_create(request):
 
     image = request.FILES.get('image')
     error = _validate_image(image)
+    if not error:
+        # HEIC 변환 + 눕힌 사진 세우기
+        from apps.core.images import prepare_upload
+        image, error = prepare_upload(image, max_px=2560)
     if error:
         messages.error(request, error)
         return render(request, 'brag/create.html', {'caption': request.POST.get('caption', '')})
@@ -262,7 +266,7 @@ def brag_comment(request, pk):
         messages.error(request, _('댓글 내용이나 사진 중 하나는 입력해주세요.'))
         return redirect('brag:detail', pk=pk)
 
-    photo_error = _validate_photo(photo)
+    photo, photo_error = _validate_photo(photo)
     if photo_error:
         messages.error(request, photo_error)
         return redirect('brag:detail', pk=pk)

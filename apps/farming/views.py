@@ -88,9 +88,14 @@ def journal_create(request):
             journal.latitude = lat
             journal.longitude = lng
 
-        # 이미지 처리
+        # 이미지 처리 — HEIC 변환 + 눕힌 사진 세우기
         if 'image' in request.FILES:
-            journal.image = request.FILES['image']
+            from apps.core.images import prepare_upload
+            ready, img_err = prepare_upload(request.FILES['image'], max_px=2560)
+            if img_err:
+                messages.error(request, img_err)
+            elif ready:
+                journal.image = ready
 
         journal.save()
 
