@@ -166,16 +166,47 @@ class MountTest(BaseTest):
 class MarkRenderTest(BaseTest):
     """화면에 실제로 나오나"""
 
-    def test_목록에_표식이_나온다(self):
+    def test_기본은_이름_옆에_안_나온다(self):
+        """아무도 안 물어보고 켜면 안 된다. 기본은 꺼짐이다."""
+        author = self.make_user()
+        self.assertFalse(author.pikmin_show_mark)
+        self.make_coord(author=author)
+        body = self.client.get(reverse('coordinates:list')).content.decode()
+        self.assertIn('data-pk-show="0"', body)
+        self.assertIn('pk-hidden', body)
+
+    def test_켜면_나온다(self):
         author = self.make_user()
         author.copy_total = 2500
-        author.save(update_fields=['copy_total'])
+        author.pikmin_show_mark = True
+        author.save(update_fields=['copy_total', 'pikmin_show_mark'])
         self.make_coord(author=author)
-        r = self.client.get(reverse('coordinates:list'))
-        body = r.content.decode()
-        self.assertIn('pk-mark', body)
+        body = self.client.get(reverse('coordinates:list')).content.decode()
+        self.assertIn('data-pk-show="1"', body)
+        self.assertNotIn('pk-hidden', body)
         self.assertIn('data-pk-t="bud"', body)
         self.assertIn('data-pk-h="3"', body)
+
+    def test_꺼도_복사_효과용_값은_남는다(self):
+        """표식을 꺼도 무리는 지나간다. 값까지 없애면 무리를 못 만든다."""
+        author = self.make_user()
+        author.copy_total = 5000
+        author.save(update_fields=['copy_total'])
+        self.make_coord(author=author)
+        body = self.client.get(reverse('coordinates:list')).content.decode()
+        self.assertIn('data-pk-h="6"', body)
+        self.assertIn('data-pk-t="bud"', body)
+
+    def test_설정에서_켜고_끌_수_있다(self):
+        u = self.login()
+        self.client.post(reverse('accounts:my_settings'),
+                         {'nickname': u.nickname, 'bio': '', 'pikmin_show_mark': '1'})
+        u.refresh_from_db()
+        self.assertTrue(u.pikmin_show_mark)
+        self.client.post(reverse('accounts:my_settings'),
+                         {'nickname': u.nickname, 'bio': ''})
+        u.refresh_from_db()
+        self.assertFalse(u.pikmin_show_mark)
 
     def test_비회원_글에는_표식이_없다(self):
         self.make_coord(author=None)

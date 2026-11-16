@@ -140,6 +140,9 @@ def my_settings(request):
         if pikmin_flower in dict(user.PIKMIN_FLOWERS):
             user.pikmin_flower = pikmin_flower
 
+        # 이름 옆에 세울지는 본인이 정한다. 기본은 꺼져 있다
+        user.pikmin_show_mark = bool(request.POST.get('pikmin_show_mark'))
+
         # 탈것은 전용이다. exclusive_perks 에 코드가 없으면 저장해도 안 먹는다
         mount = request.POST.get('pikmin_mount', '')
         user.pikmin_mount = mount if mount in user.get_available_mounts() else ''

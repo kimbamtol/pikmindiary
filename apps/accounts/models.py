@@ -201,6 +201,11 @@ class CustomUser(AbstractUser):
         default='',
         help_text=_('비워두면 회원 번호로 자동 배정')
     )
+    pikmin_show_mark = models.BooleanField(
+        _('이름 옆에 피크민 세우기'),
+        default=False,
+        help_text=_('끄면 이름 옆에 안 나온다. 복사 효과는 이것과 상관없이 돈다.')
+    )
     pikmin_mount = models.CharField(
         _('타고 다니는 것'),
         max_length=10,

@@ -186,13 +186,20 @@
             <div class="pk-settings">
                 <h3 class="pk-h">{% trans "내 피크민" %}</h3>
                 <p class="pk-lead">
-                    {% blocktrans %}이름 옆에 서 있고, 누가 좌표를 복사하면 무리가 지나갑니다.
-                    아무것도 안 고르셨어도 이미 하나 배정돼 있습니다 — 바꾸고 싶을 때만 바꾸세요.{% endblocktrans %}
+                    {% blocktrans %}누가 좌표를 복사하면 무리가 지나갑니다. 이건 늘 돕니다.
+                    이름 옆에 세워둘지는 따로 고르세요 — 기본은 꺼져 있습니다.{% endblocktrans %}
                 </p>
+
+                <label class="pk-switch">
+                    <input type="checkbox" name="pikmin_show_mark" value="1"
+                           {% if user.pikmin_show_mark %}checked{% endif %}>
+                    <span><b>{% trans "이름 옆에 세워두기" %}</b>
+                    <small>{% trans "목록·댓글·랭킹에서 닉네임 왼쪽에 서 있습니다. 꺼도 복사 효과는 그대로 돕니다." %}</small></span>
+                </label>
 
                 <div class="pk-now">
                     <span class="pk-mark pk-big{% if user.pikmin_mount_key %} has-mount{% endif %}"
-                          id="pk-preview"
+                          id="pk-preview" data-pk-show="1"
                           data-pk-c="{{ user.pikmin_color_key }}" data-pk-f="{{ user.pikmin_flower_key }}"
                           data-pk-l="{{ user.pikmin_leaf_key }}" data-pk-t="{{ user.pikmin_tier }}"
                           data-pk-h="{{ user.pikmin_herd }}" data-pk-s="{{ user.pikmin_sub_key }}"
@@ -219,7 +226,7 @@
                         <label class="pk-chip">
                             <input type="radio" name="pikmin_color" value="{{ code }}"
                                    {% if user.pikmin_color_key == code %}checked{% endif %}>
-                            <span class="pk-chip-art pk-mark" data-pk-c="{{ code }}" data-pk-f="{{ user.pikmin_flower_key }}"
+                            <span class="pk-chip-art pk-mark" data-pk-show="1" data-pk-c="{{ code }}" data-pk-f="{{ user.pikmin_flower_key }}"
                                   data-pk-l="{{ user.pikmin_leaf_key }}" data-pk-t="{{ user.pikmin_tier }}"
                                   data-pk-h="1" data-pk-s="{{ code }}" data-pk-m=""></span>
                             <span class="pk-chip-tag">{{ label }}</span>
@@ -229,7 +236,7 @@
                         <label class="pk-chip pk-chip-mount">
                             <input type="checkbox" name="pikmin_mount" value="{{ code }}"
                                    {% if user.pikmin_mount_key == code %}checked{% endif %}>
-                            <span class="pk-chip-art pk-mark has-mount"
+                            <span class="pk-chip-art pk-mark has-mount" data-pk-show="1"
                                   data-pk-c="{{ user.pikmin_color_key }}" data-pk-f="{{ user.pikmin_flower_key }}"
                                   data-pk-l="{{ user.pikmin_leaf_key }}" data-pk-t="{{ user.pikmin_tier }}"
                                   data-pk-h="1" data-pk-s="{{ user.pikmin_color_key }}" data-pk-m="{{ code }}"></span>
@@ -249,7 +256,7 @@
                         <label class="pk-chip">
                             <input type="radio" name="pikmin_flower" value="{{ code }}"
                                    {% if user.pikmin_flower_key == code %}checked{% endif %}>
-                            <span class="pk-chip-art pk-mark" data-pk-c="{{ user.pikmin_color_key }}" data-pk-f="{{ code }}"
+                            <span class="pk-chip-art pk-mark" data-pk-show="1" data-pk-c="{{ user.pikmin_color_key }}" data-pk-f="{{ code }}"
                                   data-pk-l="{{ forloop.counter0 }}" data-pk-t="{{ user.pikmin_tier }}"
                                   data-pk-h="1" data-pk-s="{{ user.pikmin_color_key }}" data-pk-m=""></span>
                             <span class="pk-chip-tag">{{ label }}</span>

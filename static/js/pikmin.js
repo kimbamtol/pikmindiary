@@ -187,10 +187,11 @@ function markSvg(k, walking){
 function drawMarks(root){
   const q = (root || document).querySelectorAll('.pk-mark:not([data-pk-done])');
   q.forEach(el => {
+    el.setAttribute('data-pk-done', '1');
+    if (el.dataset.pkShow === '0') return;   // 안 켠 사람은 안 그린다
     const k = look(el);
     if (k.m) el.classList.add('has-mount');
     el.innerHTML = markSvg(k, true);
-    el.setAttribute('data-pk-done', '1');
   });
 }
 

@@ -6,6 +6,8 @@
 .pk-mark{display:inline-flex;align-items:center;flex:none;width:1.45em;height:2em;
   vertical-align:-.6em;margin-right:1px}
 .pk-mark.has-mount{width:2.5em;height:2.4em;vertical-align:-.85em}
+/* 안 켠 사람 — 복사 효과용 값만 들고 있고 자리는 안 먹는다 */
+.pk-mark.pk-hidden{display:none}
 .coord-card{position:relative}
 
 /* ───── 피크민 ───── */
@@ -205,3 +207,10 @@
 .pk-locked{margin:14px 0 0;font-size:.78rem;line-height:1.6;color:var(--text-secondary,#6b7363)}
 [data-theme="dark"] .pk-chip:has(input:checked){background:rgba(76,175,80,.18)}
 [data-theme="dark"] .pk-chip.pk-chip-mount:has(input:checked){background:rgba(232,137,26,.2)}
+.pk-switch{display:flex;align-items:flex-start;gap:10px;padding:11px 13px;border-radius:10px;
+  border:1px solid var(--border-color,#e5e1d3);background:var(--bg-card,#fff);
+  cursor:pointer;margin-bottom:16px}
+.pk-switch input{margin-top:3px;width:17px;height:17px;accent-color:#2E7D32;flex:none}
+.pk-switch span{display:flex;flex-direction:column;gap:2px;font-size:.86rem}
+.pk-switch small{font-size:.76rem;color:var(--text-secondary,#6b7363);line-height:1.5}
+.pk-switch:has(input:checked){border-color:#2E7D32;background:rgba(76,175,80,.08)}
