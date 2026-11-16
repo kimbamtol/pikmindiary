@@ -23,6 +23,10 @@ MAX_BYTES = getattr(settings, 'MAX_UPLOAD_SIZE', 5 * 1024 * 1024)
 # 그대로 저장해도 되는 형식. 손댈 이유가 없으면 다시 압축하지 않는다.
 WEB_FORMATS = {'JPEG', 'PNG', 'WEBP', 'GIF'}
 
+# 브라우저가 제대로 그리는 색 모드. CMYK(인쇄용) 는 여기 없다 —
+# 포토샵에서 나온 CMYK JPEG 는 형식은 JPEG 라 통과하는데 색이 뒤집힌다.
+WEB_MODES = {'RGB', 'L', 'P', 'RGBA'}
+
 # EXIF Orientation 태그 번호
 _ORIENTATION = 0x0112
 
@@ -67,7 +71,8 @@ def prepare_upload(f, *, max_px=None):
     too_big = bool(max_px) and (img.width > max_px or img.height > max_px)
 
     # 손댈 게 없으면 원본을 그대로 쓴다. 괜히 다시 압축하면 화질만 깎인다.
-    if fmt in WEB_FORMATS and not rotated and not too_big:
+    # (움직이는 GIF 도 여기로 빠져서 원본 그대로 남는다)
+    if fmt in WEB_FORMATS and img.mode in WEB_MODES and not rotated and not too_big:
         f.seek(0)
         return f, None
 
@@ -76,9 +81,10 @@ def prepare_upload(f, *, max_px=None):
         if too_big:
             img.thumbnail((max_px, max_px), Image.LANCZOS)
 
-        keep_png = (fmt == 'PNG')
-        if not keep_png and img.mode in ('RGBA', 'P', 'LA'):
-            img = img.convert('RGB')                   # JPEG 는 알파를 못 담는다
+        keep_png = (fmt == 'PNG' and img.mode in WEB_MODES)
+        if not keep_png and img.mode not in ('RGB', 'L'):
+            # JPEG 는 알파를 못 담고, CMYK 는 브라우저가 색을 뒤집는다
+            img = img.convert('RGB')
 
         buf = io.BytesIO()
         if keep_png:

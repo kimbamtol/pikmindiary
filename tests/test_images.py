@@ -5,6 +5,8 @@
 2. 아이폰 HEIC 를 서버가 못 열어서 깨진 채로 저장됐다
 3. 세워 찍은 폰 사진이 눕혀서 올라갔다
 """
+import io
+
 from PIL import Image
 from django.urls import reverse
 
@@ -62,6 +64,51 @@ class PrepareUploadTest(BaseTest):
 
     def test_빈_값은_조용히_넘어간다(self):
         self.assertEqual(self._prep(None), (None, None))
+
+    # ── 어떤 형식이 올라오나 ──────────────────────────────
+
+    def _mk(self, fmt, mode='RGB', size=(400, 300), **kw):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        buf = io.BytesIO()
+        fill = (180, 90, 90) if mode in ('RGB', 'CMYK') else 128
+        Image.new(mode, size, fill).save(buf, format=fmt, **kw)
+        buf.seek(0)
+        # content_type 을 일부러 틀리게 준다 — 브라우저를 안 믿는다는 뜻
+        return SimpleUploadedFile('t.' + fmt.lower(), buf.read(),
+                                  content_type='application/octet-stream')
+
+    def test_흔한_형식은_다_올라간다(self):
+        import pillow_heif
+        pillow_heif.register_heif_opener()
+        for fmt in ['JPEG', 'PNG', 'WEBP', 'GIF', 'BMP', 'TIFF', 'HEIF', 'AVIF']:
+            with self.subTest(fmt):
+                out, err = self._prep(self._mk(fmt), max_px=2560)
+                self.assertIsNone(err, '%s 가 거부됐다: %s' % (fmt, err))
+                self.assertIn(Image.open(out).format, ('JPEG', 'PNG', 'WEBP', 'GIF'))
+
+    def test_cmyk는_rgb로_바뀐다(self):
+        """포토샵에서 나온 인쇄용 JPEG. 그대로 두면 브라우저가 색을 뒤집는다"""
+        out, err = self._prep(self._mk('JPEG', mode='CMYK'))
+        self.assertIsNone(err)
+        self.assertEqual(Image.open(out).mode, 'RGB')
+
+    def test_투명_png는_투명하게_남는다(self):
+        out, err = self._prep(self._mk('PNG', mode='RGBA'))
+        self.assertIsNone(err)
+        im = Image.open(out)
+        self.assertEqual((im.format, im.mode), ('PNG', 'RGBA'))
+
+    def test_움직이는_gif는_그대로_둔다(self):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        buf = io.BytesIO()
+        frames = [Image.new('P', (120, 80), i * 60) for i in range(1, 4)]
+        frames[0].save(buf, format='GIF', save_all=True,
+                       append_images=frames[1:], duration=200, loop=0)
+        raw = buf.getvalue()
+        out, err = self._prep(SimpleUploadedFile('a.gif', raw, content_type='image/gif'))
+        self.assertIsNone(err)
+        out.seek(0)
+        self.assertEqual(out.read(), raw)   # 손대지 않았다
 
 
 class CoordinateUploadTest(BaseTest):
