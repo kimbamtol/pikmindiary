@@ -101,9 +101,10 @@ class SiteSettingsAdmin(admin.ModelAdmin):
             'fields': ('nerf_threshold', 'nerf_window_days'),
             'description': '정해진 기간 안에 기준 인원 이상이 제보하면 제목 앞에 [너프됨]이 자동으로 붙습니다.'
         }),
-        ('새 디자인(수첩) 체험', {
-            'fields': ('design_beta_enabled', 'design_beta_popup_enabled'),
-            'description': '체험 공개를 끄면 팝업·전환 버튼이 모두 사라지고 모든 유저가 기존 디자인을 봅니다.'
+        ('디자인 선택', {
+            'fields': ('design_beta_enabled',),
+            'description': '기본은 수첩 디자인이고, 유저는 상단 토글로 기존 디자인을 고를 수 있습니다. '
+                           '이 설정을 끄면 전환 버튼이 사라지고 모든 유저가 기존 디자인을 봅니다.'
         }),
     )
     
@@ -117,6 +118,7 @@ class SiteSettingsAdmin(admin.ModelAdmin):
 
 @admin.register(DesignVote)
 class DesignVoteAdmin(admin.ModelAdmin):
+    """2026-11-16 투표 종료. 지난 기록 열람용으로만 남겨둔다."""
     list_display = ['voter', 'choice', 'comment', 'updated_at']
     list_filter = ['choice', 'updated_at']
     search_fields = ['user__nickname', 'comment', 'session_key']
@@ -133,7 +135,7 @@ class DesignVoteAdmin(admin.ModelAdmin):
         tally = DesignVote.tally()
         self.message_user(
             request,
-            f"집계 - 새 디자인 {tally['new']}표({tally['new_pct']}%) · "
+            f"종료된 투표의 최종 집계 - 새 디자인 {tally['new']}표({tally['new_pct']}%) · "
             f"예전 {tally['old']}표({tally['old_pct']}%) · 전체 {tally['total']}표"
         )
         return super().changelist_view(request, extra_context)

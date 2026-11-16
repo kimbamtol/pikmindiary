@@ -1728,3 +1728,41 @@ body[data-season="fall"] .card {
 body[data-season="winter"] .card {
     border: 2px solid rgba(65, 105, 225, 0.3);
 }
+
+/* ==============================================
+   어두운 테마 가독성 보정 (기존 디자인 전용)
+   - 수첩 디자인은 notebook.css가 따로 처리한다
+   ============================================== */
+
+/* (1) 밝은 종이 패널 '안'의 제목까지 흰색으로 칠해져 흰 배경에 묻히던 문제 */
+body:not([data-ui="notebook"])[data-time="night"] .ranking-page .page-title,
+body:not([data-ui="notebook"])[data-time="night"] .guide-page .page-title,
+body:not([data-ui="notebook"])[data-time="night"] .brag-form-page .page-title,
+body:not([data-ui="notebook"])[data-weather="rain"] .ranking-page .page-title,
+body:not([data-ui="notebook"])[data-weather="rain"] .guide-page .page-title,
+body:not([data-ui="notebook"])[data-weather="rain"] .brag-form-page .page-title,
+body:not([data-ui="notebook"])[data-weather="storm"] .ranking-page .page-title,
+body:not([data-ui="notebook"])[data-weather="storm"] .guide-page .page-title,
+body:not([data-ui="notebook"])[data-weather="storm"] .brag-form-page .page-title {
+    color: var(--text-primary) !important;
+    text-shadow: none !important;
+}
+
+/* (2) 어두운 바탕 위에 회색으로 남아 묻히던 잔글씨 */
+body:not([data-ui="notebook"])[data-time="night"] .back-link,
+body:not([data-ui="notebook"])[data-time="night"] .brag-intro,
+body:not([data-ui="notebook"])[data-time="night"] .brag-count,
+body:not([data-ui="notebook"])[data-time="night"] .brag-week-range,
+body:not([data-ui="notebook"])[data-time="night"] .brag-week-count,
+body:not([data-ui="notebook"])[data-weather="rain"] .back-link,
+body:not([data-ui="notebook"])[data-weather="rain"] .brag-intro,
+body:not([data-ui="notebook"])[data-weather="rain"] .brag-count,
+body:not([data-ui="notebook"])[data-weather="rain"] .brag-week-range,
+body:not([data-ui="notebook"])[data-weather="rain"] .brag-week-count,
+body:not([data-ui="notebook"])[data-weather="storm"] .back-link,
+body:not([data-ui="notebook"])[data-weather="storm"] .brag-intro,
+body:not([data-ui="notebook"])[data-weather="storm"] .brag-count,
+body:not([data-ui="notebook"])[data-weather="storm"] .brag-week-range,
+body:not([data-ui="notebook"])[data-weather="storm"] .brag-week-count {
+    color: #E2E8F0 !important;
+}

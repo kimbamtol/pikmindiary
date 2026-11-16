@@ -970,6 +970,13 @@ body[data-ui="notebook"][data-weather="storm"] .result-line b {
     color: var(--nb-on-dark) !important;
 }
 
+/* 상세 페이지 '목록으로' 링크 - 어두운 바탕 위에 그대로 두면 묻힌다 */
+body[data-ui="notebook"][data-time="night"] .back-link,
+body[data-ui="notebook"][data-weather="rain"] .back-link,
+body[data-ui="notebook"][data-weather="storm"] .back-link {
+    color: var(--nb-on-dark-soft) !important;
+}
+
 /* (2) 밝은 종이 패널 '안'의 제목은 어두운 잉크를 되찾는다 */
 body[data-ui="notebook"][data-time="night"] .ranking-page .page-title,
 body[data-ui="notebook"][data-time="night"] .guide-page .page-title,

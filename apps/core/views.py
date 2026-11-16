@@ -103,10 +103,9 @@ def suggestion_done(request):
 # ===== 새 디자인(수첩) 체험 =====
 
 UI_COOKIE = 'pd_ui'
-POPUP_COOKIE = 'pd_beta_popup'
 UI_NOTEBOOK = 'notebook'
-COOKIE_MAX_AGE = 60 * 60 * 24 * 180      # 체험 설정 180일 유지
-POPUP_HIDE_MAX_AGE = 60 * 60 * 24 * 7    # 일주일간 보지 않기
+UI_CLASSIC = 'classic'
+COOKIE_MAX_AGE = 60 * 60 * 24 * 180      # 디자인 선택 180일 유지
 
 
 def _safe_next(request, default_name='coordinates:list'):
@@ -131,74 +130,24 @@ def _beta_enabled():
 
 
 def design_beta_on(request):
-    """새 디자인으로 전환"""
+    """수첩 디자인으로 전환 (기본값)"""
     response = redirect(_safe_next(request))
     if _beta_enabled():
         response.set_cookie(
             UI_COOKIE, UI_NOTEBOOK, max_age=COOKIE_MAX_AGE,
             samesite='Lax', secure=request.is_secure()
         )
-        # 체험을 시작했으면 안내 팝업은 더 띄우지 않는다
-        response.set_cookie(
-            POPUP_COOKIE, '1', max_age=COOKIE_MAX_AGE,
-            samesite='Lax', secure=request.is_secure()
-        )
     return response
 
 
 def design_beta_off(request):
-    """기존 디자인으로 복귀"""
+    """기존 디자인으로 전환"""
     response = redirect(_safe_next(request))
-    response.delete_cookie(UI_COOKIE)
+    response.set_cookie(
+        UI_COOKIE, UI_CLASSIC, max_age=COOKIE_MAX_AGE,
+        samesite='Lax', secure=request.is_secure()
+    )
     return response
-
-
-@require_POST
-def design_popup_dismiss(request):
-    """안내 팝업 닫기. days=7이면 일주일간 보지 않기"""
-    days = request.POST.get('days', '')
-    response = JsonResponse({'ok': True})
-    if days == '7':
-        response.set_cookie(
-            POPUP_COOKIE, '1', max_age=POPUP_HIDE_MAX_AGE,
-            samesite='Lax', secure=request.is_secure()
-        )
-    else:
-        # 이번 방문 동안만 숨김 (브라우저 종료 시 사라짐)
-        response.set_cookie(
-            POPUP_COOKIE, '1', samesite='Lax', secure=request.is_secure()
-        )
-    return response
-
-
-@require_POST
-def design_vote(request):
-    """디자인 투표 - 비회원 포함 1인 1표, 변경 가능"""
-    from .models import DesignVote
-
-    choice = request.POST.get('choice', '')
-    if choice not in (DesignVote.Choice.NEW, DesignVote.Choice.OLD):
-        return JsonResponse({'ok': False, 'error': '잘못된 선택입니다.'}, status=400)
-
-    comment = (request.POST.get('comment') or '').strip()[:200]
-    ip = request.META.get('HTTP_X_FORWARDED_FOR', '').split(',')[0].strip() \
-        or request.META.get('REMOTE_ADDR')
-
-    if request.user.is_authenticated:
-        DesignVote.objects.update_or_create(
-            user=request.user,
-            defaults={'choice': choice, 'comment': comment, 'ip_address': ip},
-        )
-    else:
-        if not request.session.session_key:
-            request.session.save()
-        DesignVote.objects.update_or_create(
-            user=None, session_key=request.session.session_key,
-            defaults={'choice': choice, 'comment': comment, 'ip_address': ip},
-        )
-
-    tally = DesignVote.tally()
-    return JsonResponse({'ok': True, 'choice': choice, 'tally': tally})
 
 
 @require_POST
