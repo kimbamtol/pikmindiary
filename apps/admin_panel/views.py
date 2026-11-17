@@ -510,12 +510,12 @@ def change_apply(request, pk):
             return redirect(request.POST.get('next') or 'admin_panel:change_list')
 
         old_label = coordinate.get_category_display()
-        # 분류가 바뀌었다는 건 사진도 낡았다는 뜻이라 [너프됨]을 같이 켠다.
-        # 작성자가 사진을 새로 올리면 상세 화면에서 직접 끌 수 있다.
+        # [너프됨]은 '사진이 조금 바뀌었다'는 뜻으로 쓰이는 말이다.
+        # 빅플 → 버섯처럼 엽서가 통째로 다른 것이 된 경우는 너프가 아니므로
+        # 분류만 고치고 표시는 건드리지 않는다. 사진이 낡은 것도 맞지만
+        # 그건 '사진이 달라요' 제보로 따로 들어온다.
         Coordinate.objects.filter(pk=pk).update(
             category=new_category,
-            is_nerfed=True,
-            nerfed_at=coordinate.nerfed_at or now,
             change_checked_at=now,
         )
         if coordinate.author:

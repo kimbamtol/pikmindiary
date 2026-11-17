@@ -148,7 +148,7 @@ class ChangeAdminTest(BaseTest):
         html = self.client.get(self.list_url).content.decode()
         self.assertIn(self.coord.title, html)
 
-    def test_분류를_바꾸면_너프표시와_알림이_같이_붙는다(self):
+    def test_분류를_바꾸면_알림이_가고_목록에서_내려간다(self):
         self.report(Kind.MUSHROOM)
         self.login(self.staff)
 
@@ -156,8 +156,18 @@ class ChangeAdminTest(BaseTest):
 
         self.coord.refresh_from_db()
         self.assertEqual(self.coord.category, Coordinate.Category.MUSHROOM)
-        self.assertTrue(self.coord.is_nerfed)            # 사진은 낡은 것이므로
         self.assertIsNotNone(self.coord.change_checked_at)
+
+    def test_분류를_바꿔도_너프_표시는_붙지_않는다(self):
+        # [너프됨]은 '사진이 바뀜'이라는 뜻이다. 분류 변경은 다른 일이다.
+        self.report(Kind.MUSHROOM)
+        self.login(self.staff)
+
+        self.client.post(self.apply_url, {'action': 'category', 'category': 'MUSHROOM'})
+
+        self.coord.refresh_from_db()
+        self.assertFalse(self.coord.is_nerfed)
+        self.assertIsNone(self.coord.nerfed_at)
 
         note = Notification.objects.filter(recipient=self.owner).first()
         self.assertIsNotNone(note)
