@@ -766,37 +766,79 @@ def copy_coords(request, pk):
     })
 
 def map_view(request):
-    """지도 탐색 페이지 - Leaflet + OpenStreetMap"""
+    """지도 탐색 페이지 - Leaflet + OpenStreetMap
+
+    승인된 좌표 전부를 한 번에 내려준다. 2,500개가 넘으므로 여기서 한 글자라도
+    줄이는 게 그대로 체감된다. 2026-11-17 에 세 가지를 고쳤다.
+
+    1. 쿼리가 2,526개였다. 좌표 하나마다 `coord.images.first()` 를 따로 물어봤다
+       (N+1). SQL 자체는 1ms 인데 2,523번 왕복하느라 1.2초가 걸렸다.
+       -> 사진은 한 번에 모아 온다. 쿼리 3개.
+    2. HTML 이 790KB 였다. `category_display`·`region_display` 처럼 종류가
+       4개·십여 개뿐인 값을 2,523번 반복해 넣었다.
+       -> 코드만 보내고, 이름표는 아래 `label` 묶음으로 한 번만 보낸다.
+    3. 키 이름도 짧게 줄였다 (`category` -> `c` 등). 2,523번 반복되는 글자다.
+    """
     import json
-    
-    # 모든 승인된 좌표 가져오기
-    coordinates = Coordinate.objects.filter(status=Coordinate.Status.APPROVED)
-    
+
+    coordinates = (Coordinate.objects
+                   .filter(status=Coordinate.Status.APPROVED)
+                   .only('id', 'title', 'latitude', 'longitude', 'category',
+                         'region', 'copy_count', 'like_count'))
+
     # 카테고리 필터
     category = request.GET.get('category', '')
     if category:
         coordinates = coordinates.filter(category=category)
-    
-    # JSON 데이터 생성
+
+    coord_list = list(coordinates)
+
+    # 글마다 첫 사진 하나. 한 번의 쿼리로 모아 온다 (예전엔 글 수만큼 물어봤다)
+    first_image = {}
+    pks = [c.pk for c in coord_list]
+    if pks:
+        rows = (CoordinateImage.objects
+                .filter(coordinate_id__in=pks)
+                .order_by('coordinate_id', 'order', 'created_at')
+                .values_list('coordinate_id', 'image'))
+        for coord_id, name in rows:
+            if coord_id not in first_image and name:
+                first_image[coord_id] = name
+
+    # 사진 경로는 전부 'coordinates/' 아래다. 앞부분은 한 번만 보내고
+    # 글마다는 파일 이름만 넣는다 (2,523번 반복되던 19글자를 뺀다).
+    img_prefix = '%scoordinates/' % django_settings.MEDIA_URL
     markers_data = []
-    for coord in coordinates:
-        first_image = coord.images.first()
+    for coord in coord_list:
+        name = first_image.get(coord.pk)
+        if name:
+            name = name[len('coordinates/'):] if name.startswith('coordinates/') else \
+                   django_settings.MEDIA_URL + name
         markers_data.append({
-            'id': coord.pk,
-            'title': coord.title,
-            'lat': float(coord.latitude),
-            'lng': float(coord.longitude),
-            'category': coord.category,
-            'category_display': coord.get_category_display(),
-            'region': coord.region,
-            'region_display': coord.get_region_display(),
-            'image': first_image.image.url if first_image else None,
-            'copy_count': coord.copy_count,
-            'like_count': coord.like_count,
+            'i': coord.pk,
+            't': coord.title,
+            'a': float(coord.latitude),
+            'o': float(coord.longitude),
+            'c': coord.category,
+            'r': coord.region or '',
+            'm': name or None,
+            'p': coord.copy_count,
+            'l': coord.like_count,
         })
-    
+
+    # 이름표는 한 번만 보낸다. 예전엔 글마다 같은 문자열이 따라붙었다.
+    # choices 의 label 은 gettext_lazy 객체라 str() 로 풀어야 JSON 이 된다.
+    labels = {
+        'category': {k: str(v) for k, v in Coordinate.Category.choices},
+        'region': {k: str(v) for k, v in Coordinate.Region.choices},
+    }
+
     context = {
-        'markers_json': json.dumps(markers_data, ensure_ascii=False),
+        'markers_json': json.dumps(markers_data, ensure_ascii=False,
+                                   separators=(',', ':')),
+        'labels_json': json.dumps(labels, ensure_ascii=False,
+                                  separators=(',', ':')),
+        'img_prefix': img_prefix,
         'categories': Coordinate.Category.choices,
         'category': category,
     }

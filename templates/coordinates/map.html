@@ -186,6 +186,19 @@
         flex-shrink: 0;
     }
 
+    .list-more {
+        display: block;
+        width: 100%;
+        padding: 10px;
+        margin-top: 6px;
+        border: 1px solid var(--border-color, #ddd);
+        border-radius: 8px;
+        background: transparent;
+        color: inherit;
+        font-size: 0.88rem;
+        cursor: pointer;
+    }
+
     .list-item-placeholder {
         width: 60px;
         height: 60px;
@@ -605,7 +618,28 @@
 
 <script>
     // 마커 데이터
-    const markersData = {{ markers_json| safe }};
+    //
+    // 서버가 짧은 키로 보낸다 (2,523번 반복되는 글자라 HTML 790KB -> 416KB).
+    // 이름표(분류·지역)도 글마다 넣지 않고 한 번만 보낸다.
+    // 여기서 원래 이름으로 한 번 풀어두면 아래 코드는 손댈 필요가 없다.
+    const LABELS = {{ labels_json| safe }};
+    const IMG_PREFIX = '{{ img_prefix }}';
+
+    const markersData = {{ markers_json| safe }}.map(function (m) {
+        return {
+            id: m.i,
+            title: m.t,
+            lat: m.a,
+            lng: m.o,
+            category: m.c,
+            category_display: LABELS.category[m.c] || m.c,
+            region: m.r,
+            region_display: LABELS.region[m.r] || '',
+            image: m.m ? (m.m.charAt(0) === '/' ? m.m : IMG_PREFIX + m.m) : null,
+            copy_count: m.p,
+            like_count: m.l
+        };
+    });
 
     // 카테고리별 아이콘
     const categoryIcons = {
@@ -653,47 +687,74 @@
     }).addTo(map);
 
     // 마커 클러스터 그룹
+    // chunkedLoading: 마커 2,500개를 한 번에 넣으면 그 동안 화면이 멈춘다.
+    // 나눠 넣으면 중간에 숨을 쉬어서 터치가 먹는다.
     const markerCluster = L.markerClusterGroup({
         maxClusterRadius: 50,
         spiderfyOnMaxZoom: true,
         showCoverageOnHover: false,
-        zoomToBoundsOnClick: true
+        zoomToBoundsOnClick: true,
+        chunkedLoading: true,
+        chunkInterval: 100,
+        chunkDelay: 20
     });
+
+    // 아이콘은 분류마다 하나씩만 만들어 돌려 쓴다.
+    // 예전에는 글마다 새로 만들어서 2,523개가 생겼다 (종류는 4개뿐이다).
+    const sharedIcons = {};
+    function iconFor(category) {
+        if (!sharedIcons[category]) {
+            sharedIcons[category] = L.divIcon({
+                className: 'custom-marker',
+                html: '<div style="font-size: 24px; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">'
+                      + (categoryIcons[category] || '📍') + '</div>',
+                iconSize: [30, 30],
+                iconAnchor: [15, 15]
+            });
+        }
+        return sharedIcons[category];
+    }
+
+    function escapeAttr(v) {
+        return String(v == null ? '' : v)
+            .replace(/&/g, '&amp;').replace(/"/g, '&quot;')
+            .replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    // 팝업 내용은 **누를 때** 만든다.
+    // 예전에는 2,523개를 미리 다 만들어 뒀다 — 열리지도 않는 HTML 문자열이다.
+    function popupHtml(coord) {
+        let h = '<div class="coord-popup">';
+        if (coord.image) {
+            h += '<img src="' + escapeAttr(coord.image) + '" class="coord-popup-image" alt="'
+                 + escapeAttr(coord.title) + '">';
+        }
+        h += '<div class="coord-popup-title">' + escapeAttr(coord.title) + '</div>';
+        h += '<div class="coord-popup-meta">' + escapeAttr(coord.category_display)
+             + ' · ' + escapeAttr(coord.region_display) + '</div>';
+        h += '<div class="coord-popup-stats">';
+        h += '<span class="popup-copy-btn" data-id="' + coord.id + '" data-coords="'
+             + coord.lat + ', ' + coord.lng + '" title="좌표 복사">📋 <span class="popup-copy-count">'
+             + coord.copy_count + '</span></span>';
+        h += '<span>❤️ ' + coord.like_count + '</span>';
+        h += '</div>';
+        h += '<a href="/coordinates/' + coord.id + '/" class="coord-popup-link">상세보기 →</a></div>';
+        return h;
+    }
 
     // 모든 마커와 데이터 저장
     const allMarkers = [];
 
     // 마커 생성
     markersData.forEach(function (coord) {
-        const icon = L.divIcon({
-            className: 'custom-marker',
-            html: '<div style="font-size: 24px; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">' + (categoryIcons[coord.category] || '📍') + '</div>',
-            iconSize: [30, 30],
-            iconAnchor: [15, 15]
-        });
-
-        const marker = L.marker([coord.lat, coord.lng], { icon: icon });
+        const marker = L.marker([coord.lat, coord.lng], { icon: iconFor(coord.category) });
         marker.coordData = coord; // 마커에 데이터 저장
-
-        // 팝업 내용
-        let popupContent = '<div class="coord-popup">';
-        if (coord.image) {
-            popupContent += '<img src="' + coord.image + '" class="coord-popup-image" alt="' + coord.title + '">';
-        }
-        popupContent += '<div class="coord-popup-title">' + coord.title + '</div>';
-        popupContent += '<div class="coord-popup-meta">' + coord.category_display + ' · ' + coord.region_display + '</div>';
-        popupContent += '<div class="coord-popup-stats">';
-        popupContent += '<span class="popup-copy-btn" data-id="' + coord.id + '" data-coords="' + coord.lat + ', ' + coord.lng + '" title="좌표 복사">📋 <span class="popup-copy-count">' + coord.copy_count + '</span></span>';
-        popupContent += '<span>❤️ ' + coord.like_count + '</span>';
-        popupContent += '</div>';
-        popupContent += '<a href="/coordinates/' + coord.id + '/" class="coord-popup-link">상세보기 →</a></div>';
-
-        marker.bindPopup(popupContent, { maxWidth: 250 });
-
+        marker.bindPopup(function () { return popupHtml(coord); }, { maxWidth: 250 });
         allMarkers.push(marker);
-        markerCluster.addLayer(marker);
     });
 
+    // 한 번에 넣는다 (addLayer 를 2,523번 부르면 그때마다 다시 계산한다)
+    markerCluster.addLayers(allMarkers);
     map.addLayer(markerCluster);
 
     // 마커가 있으면 해당 범위로 이동
@@ -761,9 +822,48 @@
     }
 
     // 리스트 업데이트
-    function updateList() {
-        const visibleMarkers = getVisibleMarkers();
-        const count = visibleMarkers.length;
+    //
+    // 2026-11-17 까지 여기가 이 화면을 느리게 만든 범인이었다.
+    // 화면에 보이는 마커를 **전부** 그렸는데, 세계 지도에서는 그게 2,523개다.
+    // <img> 에 loading="lazy" 도 없어서 **사진 2,523장(약 280MB)을 즉시 받았다.**
+    // 게다가 지도를 움직일 때마다(moveend/zoomend) 처음부터 다시 그렸다.
+    //
+    // 고친 것
+    //   - 한 번에 LIST_PAGE 개까지만 그리고, 「더 보기」로 늘린다
+    //   - 사진은 loading="lazy" + 크기 지정 -> 스크롤해서 보이는 것만 받는다
+    //   - 지도 움직임은 debounce (아래 scheduleListUpdate)
+    const LIST_PAGE = 50;
+    let listShown = LIST_PAGE;
+    let listVisible = [];
+
+    function listItemHtml(coord) {
+        let h = '<div class="list-item" data-lat="' + coord.lat + '" data-lng="' + coord.lng
+                + '" data-id="' + coord.id + '">';
+        if (coord.image) {
+            // width/height 를 적어두면 사진이 늦게 와도 칸이 안 움직인다
+            h += '<img src="' + escapeAttr(coord.image) + '" class="list-item-image" alt=""'
+                 + ' loading="lazy" decoding="async" width="60" height="60">';
+        } else {
+            h += '<div class="list-item-placeholder">' + (categoryIcons[coord.category] || '📍') + '</div>';
+        }
+        h += '<div class="list-item-info">';
+        h += '<div class="list-item-title">' + escapeAttr(coord.title) + '</div>';
+        h += '<div class="list-item-meta">' + escapeAttr(coord.category_display)
+             + ' · ' + escapeAttr(coord.region_display) + '</div>';
+        h += '<div class="list-item-stats">';
+        h += '<span class="copy-btn" data-id="' + coord.id + '" data-coords="'
+             + coord.lat + ', ' + coord.lng + '" title="좌표 복사">📋 <span class="copy-count">'
+             + coord.copy_count + '</span></span>';
+        h += ' · ❤️ ' + coord.like_count;
+        h += '</div>';
+        h += '</div></div>';
+        return h;
+    }
+
+    function updateList(keepShown) {
+        listVisible = getVisibleMarkers();
+        const count = listVisible.length;
+        if (!keepShown) listShown = LIST_PAGE;
 
         document.getElementById('visibleCount').textContent = count;
         document.getElementById('sidebarCount').textContent = count;
@@ -775,28 +875,25 @@
             return;
         }
 
+        const shown = Math.min(listShown, count);
         let html = '';
-        visibleMarkers.forEach(function (marker) {
-            const coord = marker.coordData;
-            html += '<div class="list-item" data-lat="' + coord.lat + '" data-lng="' + coord.lng + '" data-id="' + coord.id + '">';
-
-            if (coord.image) {
-                html += '<img src="' + coord.image + '" class="list-item-image" alt="">';
-            } else {
-                html += '<div class="list-item-placeholder">' + (categoryIcons[coord.category] || '📍') + '</div>';
-            }
-
-            html += '<div class="list-item-info">';
-            html += '<div class="list-item-title">' + coord.title + '</div>';
-            html += '<div class="list-item-meta">' + coord.category_display + ' · ' + coord.region_display + '</div>';
-            html += '<div class="list-item-stats">';
-            html += '<span class="copy-btn" data-id="' + coord.id + '" data-coords="' + coord.lat + ', ' + coord.lng + '" title="좌표 복사">📋 <span class="copy-count">' + coord.copy_count + '</span></span>';
-            html += ' · ❤️ ' + coord.like_count;
-            html += '</div>';
-            html += '</div></div>';
-        });
+        for (let i = 0; i < shown; i++) {
+            html += listItemHtml(listVisible[i].coordData);
+        }
+        if (shown < count) {
+            html += '<button type="button" class="list-more" id="listMoreBtn">'
+                 + (count - shown) + '개 더 보기</button>';
+        }
 
         listContent.innerHTML = html;
+
+        const moreBtn = document.getElementById('listMoreBtn');
+        if (moreBtn) {
+            moreBtn.addEventListener('click', function () {
+                listShown += LIST_PAGE;
+                updateList(true);
+            });
+        }
 
         // 복사 버튼 클릭 이벤트
         listContent.querySelectorAll('.copy-btn').forEach(function (btn) {
@@ -861,11 +958,18 @@
     }
 
     // 지도 이동/줌 시 리스트 업데이트
-    map.on('moveend', updateList);
-    map.on('zoomend', updateList);
+    // 예전에는 멈출 때마다 바로 다시 그렸다. 손가락으로 쓸면 그 횟수만큼 돈다.
+    let listTimer = null;
+    function scheduleListUpdate() {
+        if (listTimer) clearTimeout(listTimer);
+        listTimer = setTimeout(function () { updateList(); }, 200);
+    }
+
+    map.on('moveend', scheduleListUpdate);
+    map.on('zoomend', scheduleListUpdate);
 
     // 초기 리스트 업데이트
-    setTimeout(updateList, 500);
+    setTimeout(function () { updateList(); }, 300);
 
     // 카테고리 필터
     document.querySelectorAll('.category-filter').forEach(function (checkbox) {
@@ -873,13 +977,11 @@
             const checkedCategories = Array.from(document.querySelectorAll('.category-filter:checked'))
                 .map(cb => cb.value);
 
+            // addLayer 를 하나씩 부르면 그때마다 클러스터를 다시 계산한다
             markerCluster.clearLayers();
-
-            allMarkers.forEach(function (marker) {
-                if (checkedCategories.includes(marker.coordData.category)) {
-                    markerCluster.addLayer(marker);
-                }
-            });
+            markerCluster.addLayers(allMarkers.filter(function (marker) {
+                return checkedCategories.includes(marker.coordData.category);
+            }));
 
             updateList();
         });
