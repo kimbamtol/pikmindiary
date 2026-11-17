@@ -3,7 +3,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator
-from django.db.models import Q
+from django.db.models import Count, Q
 from django.http import JsonResponse
 from django.utils import timezone
 from django.utils.translation import gettext as _
@@ -14,6 +14,10 @@ from apps.interactions.models import Like, Bookmark
 from apps.rankings.utils import update_user_ranking
 from apps.core.images import prepare_upload
 from django.views.decorators.http import require_POST
+
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def coordinate_list(request):
@@ -739,6 +743,24 @@ def toggle_nerf_report(request, pk):
                 'title': coordinate.title, 'count': recent
             },
         )
+
+    # 운영자에게 메일로 알린다 (제보가 들어온 경우만, 취소는 안 보낸다).
+    # 백그라운드로 보내므로 이 응답은 기다리지 않는다.
+    if reported:
+        try:
+            from apps.core.mail import notify_nerf_report
+            kind_labels = dict(NerfReport.ChangeKind.choices)
+            counts = (
+                NerfReport.objects.filter(coordinate=coordinate)
+                .values('change_kind').annotate(n=Count('id')).order_by('-n')
+            )
+            breakdown = [(kind_labels.get(c['change_kind'], c['change_kind']), c['n'])
+                         for c in counts]
+            fresh = NerfReport.objects.filter(coordinate=coordinate).order_by('-created_at')
+            mine = existing if existing else fresh.first()
+            notify_nerf_report(mine, breakdown, changed=bool(existing))
+        except Exception:
+            logger.exception('제보 알림 메일 준비 실패 (제보는 저장됨) coord=%s', coordinate.pk)
 
     return JsonResponse({
         'reported': reported,

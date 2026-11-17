@@ -33,6 +33,7 @@ python manage.py test tests.test_upload -v 2   # 한 묶음만
 | `tests/test_brag.py` | 자랑 게시판, 주 단위 묶기, 주간 1위 | 11 |
 | `tests/test_nerf.py` | 엽서 바뀜 제보, 기준 인원·기간 | 10 |
 | `tests/test_change_reports.py` | 무엇이 달라졌나 선택, 운영자 확인·분류 수정 | 19 |
+| `tests/test_admin_mail.py` | 제보·신고 운영자 메일, 메일이 터져도 저장되는지 | 11 |
 | `tests/test_display.py` | 디자인 토글, 보기 밀도 저장 | 9 |
 | `tests/test_errors.py` | 잘못된 좌표·제목으로 글을 넣어도 500이 안 난다 | 12 |
 | `tests/test_images.py` | 업로드 형식(HEIC·CMYK·GIF 등), 용량·회전 | 20 |

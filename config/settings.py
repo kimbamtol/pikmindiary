@@ -164,6 +164,9 @@ AUTH_USER_MODEL = 'accounts.CustomUser'
 # Django Allauth 설정
 SITE_ID = 1
 
+# 운영자 알림 메일 본문에서 쓰는 절대 주소 (사진·링크)
+SITE_URL = os.getenv('SITE_URL', 'https://pikmindiary.com')
+
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
     'allauth.account.auth_backends.AuthenticationBackend',
