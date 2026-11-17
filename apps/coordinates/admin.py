@@ -5,8 +5,8 @@ from .models import NerfReport
 
 @admin.register(NerfReport)
 class NerfReportAdmin(admin.ModelAdmin):
-    list_display = ['coordinate', 'reporter', 'created_at']
-    list_filter = ['created_at']
+    list_display = ['coordinate', 'reporter', 'change_kind', 'created_at']
+    list_filter = ['change_kind', 'created_at']
     search_fields = ['coordinate__title', 'user__nickname', 'session_key']
     readonly_fields = ['coordinate', 'user', 'session_key', 'ip_address', 'created_at']
     ordering = ['-created_at']

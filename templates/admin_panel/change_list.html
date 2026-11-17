@@ -1,0 +1,194 @@
+{% extends 'base.html' %}
+
+{% block title %}엽서 변경 제보 - 관리자{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="admin-page">
+        <div class="page-header">
+            <a href="{% url 'admin_panel:dashboard' %}" class="back-link">← 대시보드</a>
+            <h1 class="page-title">🔄 엽서 변경 제보 <span class="count-chip">{{ total_rows }}</span></h1>
+            <p class="page-desc">
+                이용자가 "사진이 달라요"를 누른 글입니다. 게임에서 확인하신 뒤 아래 버튼으로 처리하세요.
+                처리하거나 <strong>확인 완료</strong>를 누르면 목록에서 사라지고, 그 뒤에 새 제보가 들어오면 다시 올라옵니다.
+            </p>
+        </div>
+
+        <div class="filter-tabs">
+            <a href="?" class="tab {% if not only %}active{% endif %}">전체</a>
+            <a href="?only=category" class="tab {% if only == 'category' %}active{% endif %}">분류가 다름</a>
+            <a href="?only=gone" class="tab {% if only == 'gone' %}active{% endif %}">없어짐</a>
+        </div>
+
+        {% if total_rows > 20 %}
+        <form method="post" action="{% url 'admin_panel:change_sweep' %}" class="sweep-form">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+            <span>오래 지난 제보는 한 번에 내릴 수 있습니다:</span>
+            <select name="days" class="form-control chg-select">
+                <option value="30">30일 지난 것</option>
+                <option value="60">60일 지난 것</option>
+                <option value="90">90일 지난 것</option>
+            </select>
+            <button type="submit" class="btn btn-outline">확인 완료로 내리기</button>
+        </form>
+        {% endif %}
+
+        {% if page_obj.object_list %}
+        <div class="item-list">
+            {% for row in page_obj %}
+            <div class="chg-item card">
+                <div class="chg-main">
+                    {% if row.first_image %}
+                    <a href="{% url 'coordinates:detail' pk=row.coord.pk %}" target="_blank" class="chg-thumb">
+                        <img src="{{ row.first_image.image.url }}" alt="">
+                    </a>
+                    {% else %}
+                    <div class="chg-thumb chg-thumb-empty">사진 없음</div>
+                    {% endif %}
+
+                    <div class="chg-body">
+                        <div class="chg-head">
+                            <span class="badge badge-primary">{{ row.coord.get_category_display }}</span>
+                            {% if row.coord.is_nerfed %}<span class="badge badge-warning">너프됨</span>{% endif %}
+                            <span class="chg-date">최근 제보 {{ row.latest|date:"m.d H:i" }}</span>
+                        </div>
+
+                        <a href="{% url 'coordinates:detail' pk=row.coord.pk %}" target="_blank" class="chg-title">
+                            #{{ row.coord.pk }} {{ row.coord.title }}
+                        </a>
+
+                        <div class="chg-sub">
+                            {{ row.coord.latitude }}, {{ row.coord.longitude }}
+                            · 작성자 {% if row.coord.author %}{{ row.coord.author.nickname }}{% else %}익명(비회원){% endif %}
+                        </div>
+
+                        <div class="chg-votes">
+                            {% for label, n in row.breakdown %}
+                            <span class="vote-chip">{{ label }} <b>{{ n }}</b></span>
+                            {% endfor %}
+                            <span class="vote-who">{{ row.voters|join:", " }}{% if row.total > 6 %} 외{% endif %}</span>
+                        </div>
+
+                        {% if row.suggested %}
+                        <div class="chg-hint">
+                            제보 {{ row.suggested.votes }}명이 <strong>{{ row.suggested.label }}</strong>로 바뀌었다고 합니다.
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <form method="post" action="{% url 'admin_panel:change_apply' pk=row.coord.pk %}" class="chg-actions">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+
+                    {% if row.suggested %}
+                    <button type="submit" name="action" value="category" class="btn btn-primary">
+                        분류를 {{ row.suggested.label }}(으)로 변경
+                    </button>
+                    <input type="hidden" name="category" value="{{ row.suggested.value }}">
+                    {% else %}
+                    <select name="category" class="form-control chg-select">
+                        <option value="">분류 직접 변경…</option>
+                        {% for value, label in categories %}
+                        {% if value != row.coord.category %}
+                        <option value="{{ value }}">{{ label }}(으)로 변경</option>
+                        {% endif %}
+                        {% endfor %}
+                    </select>
+                    <button type="submit" name="action" value="category" class="btn btn-outline">적용</button>
+                    {% endif %}
+
+                    {% if not row.coord.is_nerfed %}
+                    <button type="submit" name="action" value="nerf" class="btn btn-outline">너프 표시만</button>
+                    {% endif %}
+                    <button type="submit" name="action" value="done" class="btn btn-outline">확인 완료</button>
+                    <button type="submit" name="action" value="clear" class="btn btn-danger-text"
+                        onclick="return confirm('제보를 모두 지우고 너프 표시도 끕니다. 계속할까요?')">제보 지우기</button>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% if page_obj.has_other_pages %}
+        <nav class="pagination">
+            {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}&only={{ only }}">← 이전</a>
+            {% endif %}
+            <span>{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+            {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}&only={{ only }}">다음 →</a>
+            {% endif %}
+        </nav>
+        {% endif %}
+
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">✅</div>
+            <h2 class="empty-state-title">확인할 제보가 없습니다</h2>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    .admin-page { max-width: 980px; margin: var(--spacing-xl) auto; }
+    .back-link { display: inline-block; margin-bottom: var(--spacing-md); color: var(--text-secondary); }
+    .page-desc { color: var(--text-secondary); font-size: 0.9rem; line-height: 1.7; margin-top: 8px; }
+    .count-chip {
+        display: inline-block; background: var(--primary); color: #fff;
+        border-radius: var(--radius-full); padding: 2px 12px; font-size: 0.9rem; vertical-align: middle;
+    }
+    .filter-tabs { display: flex; gap: var(--spacing-sm); margin: var(--spacing-lg) 0; }
+    .tab {
+        padding: var(--spacing-sm) var(--spacing-lg); border-radius: var(--radius-full);
+        background: var(--bg-primary); color: var(--text-secondary); font-weight: 500;
+    }
+    .tab.active { background: var(--primary); color: #fff; }
+    .item-list { display: flex; flex-direction: column; gap: var(--spacing-lg); }
+    .chg-item { padding: var(--spacing-lg); }
+    .chg-main { display: flex; gap: var(--spacing-lg); }
+    .chg-thumb {
+        flex: 0 0 110px; width: 110px; height: 110px; border-radius: var(--radius-md);
+        overflow: hidden; background: var(--bg-secondary); display: block;
+    }
+    .chg-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .chg-thumb-empty {
+        display: flex; align-items: center; justify-content: center;
+        color: var(--text-light); font-size: 0.8rem;
+    }
+    .chg-body { flex: 1; min-width: 0; }
+    .chg-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .chg-date { margin-left: auto; font-size: 0.82rem; color: var(--text-secondary); }
+    .chg-title { display: block; font-weight: 700; margin: 6px 0 2px; color: var(--text-primary); }
+    .chg-sub { font-size: 0.85rem; color: var(--text-secondary); }
+    .chg-votes { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 10px; }
+    .vote-chip {
+        background: var(--bg-secondary); border-radius: var(--radius-full);
+        padding: 4px 10px; font-size: 0.85rem;
+    }
+    .vote-chip b { color: var(--primary-dark); }
+    .vote-who { font-size: 0.8rem; color: var(--text-light); }
+    .chg-hint {
+        margin-top: 10px; background: #FFF8E1; color: #7A5B00;
+        border-radius: var(--radius-sm); padding: 8px 12px; font-size: 0.88rem;
+    }
+    .chg-actions {
+        display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+        margin-top: var(--spacing-md); padding-top: var(--spacing-md);
+        border-top: 1px solid var(--bg-tertiary);
+    }
+    .chg-select { width: auto; min-width: 160px; }
+    .sweep-form {
+        display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+        margin-bottom: var(--spacing-lg); padding: 12px 14px;
+        background: var(--bg-secondary); border-radius: var(--radius-md);
+        font-size: 0.88rem; color: var(--text-secondary);
+    }
+    @media (max-width: 640px) {
+        .chg-main { flex-direction: column; }
+        .chg-thumb { width: 100%; height: 160px; flex: none; }
+        .chg-date { margin-left: 0; }
+    }
+</style>
+{% endblock %}

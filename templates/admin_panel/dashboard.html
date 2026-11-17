@@ -19,6 +19,11 @@
                 <span class="summary-value">{{ report_count }}</span>
                 <span class="summary-label">미처리 신고</span>
             </a>
+            <a href="{% url 'admin_panel:change_list' %}" class="summary-card card">
+                <span class="summary-icon">🔄</span>
+                <span class="summary-value">{{ change_count }}</span>
+                <span class="summary-label">엽서 변경 제보</span>
+            </a>
             {% if request.user.is_superuser %}
             <a href="{% url 'admin_panel:user_list' %}" class="summary-card card superuser-only">
                 <span class="summary-icon">👥</span>

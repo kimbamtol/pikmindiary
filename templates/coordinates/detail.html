@@ -103,10 +103,10 @@
                     {% endif %}
 
                     <button type="button" class="btn-interaction btn-nerf {% if my_nerf_report %}active{% endif %}"
-                        id="nerfBtn" onclick="toggleNerf({{ coordinate.pk }}, this)"
+                        id="nerfBtn" onclick="openNerfSheet()"
                         title="이 자리의 엽서가 사진과 달라졌다면 눌러주세요">
                         <span class="nerf-icon">🔄</span>
-                        <span class="nerf-text">{% if my_nerf_report %}엽서 바뀜 제보함{% else %}엽서 바뀜{% endif %}</span>
+                        <span class="nerf-text">{% if my_nerf_report %}제보함{% else %}사진이 달라요{% endif %}</span>
                         <span class="nerf-count">{{ nerf_recent_count }}</span>
                     </button>
 
@@ -114,6 +114,26 @@
                         class="btn-interaction btn-report">
                         🚨 신고
                     </a>
+                </div>
+
+                <!-- '사진이 달라요' 선택 시트 -->
+                <div class="nerf-sheet" id="nerfSheet" hidden>
+                    <p class="nerf-sheet-q">이 자리, 무엇이 달라졌나요?</p>
+                    <div class="nerf-sheet-opts">
+                        {% for value, label in nerf_kinds %}
+                        <button type="button"
+                            class="nerf-opt {% if my_nerf_kind == value %}chosen{% endif %}"
+                            data-kind="{{ value }}" onclick="sendNerf({{ coordinate.pk }}, '{{ value }}')">
+                            {% if value == 'PHOTO' %}🖼{% elif value == 'MUSHROOM' %}🍄{% elif value == 'BIGFLOWER' %}🌺{% elif value == 'SEEDLING' %}🌱{% else %}❌{% endif %}
+                            {{ label }}{% if my_nerf_kind == value %} · 선택함{% endif %}
+                        </button>
+                        {% endfor %}
+                    </div>
+                    <p class="nerf-sheet-note">
+                        고른 내용은 운영자에게 모여서 확인 후 글에 반영됩니다.
+                        {% if my_nerf_report %}같은 항목을 다시 누르면 제보가 취소됩니다.{% endif %}
+                    </p>
+                    <button type="button" class="nerf-sheet-close" onclick="closeNerfSheet()">닫기</button>
                 </div>
 
                 <!-- 수정/삭제 버튼 (작성자, 관리자, 또는 비회원 글) -->
@@ -568,6 +588,63 @@
         background: #FDECEA;
         color: #C0392B;
         font-weight: 700;
+    }
+
+    .nerf-sheet {
+        margin: 10px 0 4px;
+        padding: 14px;
+        background: var(--bg-secondary);
+        border: 1px solid var(--bg-tertiary);
+        border-radius: var(--radius-md);
+    }
+
+    .nerf-sheet-q {
+        margin: 0 0 10px;
+        font-weight: 700;
+        font-size: 0.95rem;
+    }
+
+    .nerf-sheet-opts {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .nerf-opt {
+        background: var(--bg-primary);
+        border: 1px solid var(--bg-tertiary);
+        border-radius: var(--radius-full);
+        padding: 9px 14px;
+        font-size: 0.9rem;
+        cursor: pointer;
+        color: var(--text-primary);
+    }
+
+    .nerf-opt:hover {
+        border-color: var(--primary);
+    }
+
+    .nerf-opt.chosen {
+        background: var(--primary-light);
+        border-color: var(--primary);
+        font-weight: 700;
+    }
+
+    .nerf-sheet-note {
+        margin: 10px 0 0;
+        font-size: 0.82rem;
+        color: var(--text-secondary);
+        line-height: 1.6;
+    }
+
+    .nerf-sheet-close {
+        margin-top: 8px;
+        background: none;
+        border: none;
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+        cursor: pointer;
+        padding: 4px 0;
     }
 
     .nerf-count {
@@ -1209,28 +1286,62 @@ function nerfCsrf() {
     return m ? decodeURIComponent(m.pop()) : '';
 }
 
-function toggleNerf(pk, btn) {
-    btn.disabled = true;
+function openNerfSheet() {
+    var sheet = document.getElementById('nerfSheet');
+    if (!sheet) return;
+    sheet.hidden = !sheet.hidden;
+    if (!sheet.hidden) sheet.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function closeNerfSheet() {
+    var sheet = document.getElementById('nerfSheet');
+    if (sheet) sheet.hidden = true;
+}
+
+function sendNerf(pk, kind) {
+    var btn = document.getElementById('nerfBtn');
+    var sheet = document.getElementById('nerfSheet');
+    var opts = sheet ? sheet.querySelectorAll('.nerf-opt') : [];
+    for (var i = 0; i < opts.length; i++) { opts[i].disabled = true; }
+
+    var body = new URLSearchParams();
+    body.append('kind', kind);
+
     fetch('/coordinates/' + pk + '/nerf/', {
         method: 'POST',
-        headers: { 'X-CSRFToken': nerfCsrf(), 'X-Requested-With': 'XMLHttpRequest' },
+        headers: {
+            'X-CSRFToken': nerfCsrf(),
+            'X-Requested-With': 'XMLHttpRequest',
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: body.toString(),
         credentials: 'same-origin'
     })
     .then(function (r) { return r.json(); })
     .then(function (d) {
-        btn.disabled = false;
+        for (var i = 0; i < opts.length; i++) { opts[i].disabled = false; }
         if (d.error) { alert(d.error); return; }
-        btn.classList.toggle('active', d.reported);
-        btn.querySelector('.nerf-text').textContent = d.reported ? '엽서 바뀜 제보함' : '엽서 바뀜';
-        btn.querySelector('.nerf-count').textContent = d.recent_count;
+
+        for (var j = 0; j < opts.length; j++) {
+            var chosen = d.reported && opts[j].dataset.kind === d.kind;
+            opts[j].classList.toggle('chosen', chosen);
+        }
+        if (btn) {
+            btn.classList.toggle('active', d.reported);
+            btn.querySelector('.nerf-text').textContent = d.reported ? '제보함' : '사진이 달라요';
+            btn.querySelector('.nerf-count').textContent = d.recent_count;
+        }
         if (typeof showFeedbackToast === 'function') {
             showFeedbackToast(d.reported
-                ? '제보했습니다. ' + d.window_days + '일 안에 ' + d.threshold + '명이 모이면 [너프됨]으로 표시됩니다. (현재 ' + d.recent_count + '명)'
+                ? '제보 고맙습니다. 운영자가 확인 후 글을 고칩니다.'
                 : '제보를 취소했습니다.');
         }
-        if (d.is_nerfed) { setTimeout(function () { location.reload(); }, 1200); }
+        if (d.reported) { setTimeout(closeNerfSheet, 600); }
+        if (d.is_nerfed) { setTimeout(function () { location.reload(); }, 1400); }
     })
-    .catch(function () { btn.disabled = false; });
+    .catch(function () {
+        for (var i = 0; i < opts.length; i++) { opts[i].disabled = false; }
+    });
 }
 
 function clearNerf(pk) {

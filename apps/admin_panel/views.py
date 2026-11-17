@@ -3,8 +3,10 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib import messages
 from django.utils import timezone
+from datetime import timedelta
 from django.core.paginator import Paginator
 from django.http import HttpResponseForbidden
+from django.db import models
 
 from apps.coordinates.models import Coordinate
 from apps.reports.models import Report
@@ -17,6 +19,12 @@ def dashboard(request):
     """관리자 대시보드"""
     pending_count = Coordinate.objects.filter(status=Coordinate.Status.PENDING).count()
     report_count = Report.objects.filter(status=Report.Status.PENDING).count()
+    # 확인 완료 이후에 들어온 '사진이 달라요' 제보가 있는 글 수
+    change_count = Coordinate.objects.filter(
+        models.Q(change_checked_at__isnull=True)
+        | models.Q(nerf_reports__created_at__gt=models.F('change_checked_at')),
+        nerf_reports__isnull=False,
+    ).distinct().count()
     
     # 최근 대기 글
     recent_pending = Coordinate.objects.filter(
@@ -31,6 +39,7 @@ def dashboard(request):
     context = {
         'pending_count': pending_count,
         'report_count': report_count,
+        'change_count': change_count,
         'recent_pending': recent_pending,
         'recent_reports': recent_reports,
     }
@@ -356,3 +365,190 @@ def unban_user(request, pk):
         messages.success(request, f'{target}의 정지가 해제되었습니다.')
     
     return redirect('admin_panel:ban_list')
+
+
+# ===== 엽서 변경 제보 모아보기 =====
+
+@staff_member_required
+def change_list(request):
+    """이용자들이 올린 '사진이 달라요' 제보를 글 단위로 모아 보여준다.
+
+    신고 큐와 따로 둔다. 신고는 사람을 문제 삼는 창구이고 이쪽은 사실관계
+    정정이라, 섞어두면 제보자가 신고 누르기를 망설인다 (건의 #28).
+    """
+    from apps.coordinates.models import NerfReport
+
+    only = request.GET.get('only', '')
+
+    reports = NerfReport.objects.select_related(
+        'coordinate', 'coordinate__author'
+    ).order_by('-created_at')
+
+    buckets = {}
+    for r in reports:
+        coord = r.coordinate
+        # 확인 완료 이후에 들어온 제보만 (운영자가 이미 본 건 다시 안 띄운다)
+        if coord.change_checked_at and r.created_at <= coord.change_checked_at:
+            continue
+        b = buckets.get(coord.pk)
+        if b is None:
+            b = buckets[coord.pk] = {
+                'coord': coord,
+                'counts': {},
+                'total': 0,
+                'latest': r.created_at,
+                'voters': [],
+            }
+        b['counts'][r.change_kind] = b['counts'].get(r.change_kind, 0) + 1
+        b['total'] += 1
+        b['latest'] = max(b['latest'], r.created_at)
+        if len(b['voters']) < 6:
+            b['voters'].append(r.user.nickname if r.user else '비회원')
+
+    kind_labels = dict(NerfReport.ChangeKind.choices)
+    rows = []
+    for b in buckets.values():
+        # 분류 정정 제보 중 표를 가장 많이 받은 것
+        cat_votes = {
+            k: n for k, n in b['counts'].items()
+            if k in NerfReport.CATEGORY_FOR_KIND
+        }
+        suggested = None
+        if cat_votes:
+            top = max(cat_votes.items(), key=lambda kv: kv[1])[0]
+            if NerfReport.CATEGORY_FOR_KIND[top] != b['coord'].category:
+                suggested = {
+                    'value': NerfReport.CATEGORY_FOR_KIND[top],
+                    'label': dict(Coordinate.Category.choices)[
+                        NerfReport.CATEGORY_FOR_KIND[top]
+                    ],
+                    'votes': cat_votes[top],
+                }
+        rows.append({
+            **b,
+            'breakdown': [
+                (kind_labels[k], n) for k, n in sorted(
+                    b['counts'].items(), key=lambda kv: -kv[1]
+                )
+            ],
+            'suggested': suggested,
+            'gone_votes': b['counts'].get(NerfReport.ChangeKind.GONE, 0),
+            'first_image': b['coord'].images.first(),
+        })
+
+    if only == 'category':
+        rows = [r for r in rows if r['suggested']]
+    elif only == 'gone':
+        rows = [r for r in rows if r['gone_votes']]
+
+    rows.sort(key=lambda r: r['latest'], reverse=True)
+
+    paginator = Paginator(rows, 20)
+    page_obj = paginator.get_page(request.GET.get('page'))
+
+    return render(request, 'admin_panel/change_list.html', {
+        'page_obj': page_obj,
+        'total_rows': len(rows),
+        'only': only,
+        'categories': Coordinate.Category.choices,
+    })
+
+
+@staff_member_required
+def change_sweep(request):
+    """오래된 제보를 한 번에 '확인 완료'로 내린다.
+
+    기능을 켠 날 기준으로 이미 몇 달 지난 제보가 104건 쌓여 있어서,
+    목록을 처음 열면 옛날 것부터 다 뜬다. 그걸 손으로 하나씩 누르게 두면
+    목록을 아예 안 보게 된다.
+    """
+    if request.method != 'POST':
+        return redirect('admin_panel:change_list')
+
+    try:
+        days = int(request.POST.get('days', 30))
+    except (TypeError, ValueError):
+        days = 30
+    days = max(1, min(days, 3650))
+
+    cutoff = timezone.now() - timedelta(days=days)
+    # 가장 최근 제보가 cutoff 보다 오래된 글만
+    stale = Coordinate.objects.filter(
+        nerf_reports__isnull=False
+    ).annotate(
+        last_report=models.Max('nerf_reports__created_at')
+    ).filter(last_report__lt=cutoff).exclude(
+        change_checked_at__gte=models.F('last_report')
+    )
+    ids = list(stale.values_list('pk', flat=True))
+    Coordinate.objects.filter(pk__in=ids).update(change_checked_at=timezone.now())
+    messages.success(request, f'{days}일 지난 제보 {len(ids)}건을 확인 완료로 내렸습니다.')
+    return redirect(request.POST.get('next') or 'admin_panel:change_list')
+
+
+@staff_member_required
+def change_apply(request, pk):
+    """제보 목록에서 누른 조치를 반영한다"""
+    from apps.coordinates.models import NerfReport
+    from apps.interactions.models import Notification
+
+    if request.method != 'POST':
+        return redirect('admin_panel:change_list')
+
+    coordinate = get_object_or_404(Coordinate, pk=pk)
+    action = request.POST.get('action', '')
+    now = timezone.now()
+
+    if action == 'category':
+        new_category = request.POST.get('category', '')
+        valid = dict(Coordinate.Category.choices)
+        if new_category not in valid:
+            messages.error(request, '분류 값이 잘못되었습니다.')
+            return redirect(request.POST.get('next') or 'admin_panel:change_list')
+        if new_category == coordinate.category:
+            messages.info(request, '이미 그 분류입니다.')
+            return redirect(request.POST.get('next') or 'admin_panel:change_list')
+
+        old_label = coordinate.get_category_display()
+        # 분류가 바뀌었다는 건 사진도 낡았다는 뜻이라 [너프됨]을 같이 켠다.
+        # 작성자가 사진을 새로 올리면 상세 화면에서 직접 끌 수 있다.
+        Coordinate.objects.filter(pk=pk).update(
+            category=new_category,
+            is_nerfed=True,
+            nerfed_at=coordinate.nerfed_at or now,
+            change_checked_at=now,
+        )
+        if coordinate.author:
+            Notification.objects.create(
+                recipient=coordinate.author,
+                actor=request.user,
+                notification_type=Notification.NotificationType.NERF,
+                coordinate=coordinate,
+                message=f"'{coordinate.title}'의 분류를 {old_label} → {valid[new_category]}(으)로 "
+                        f"수정했어요. 제보를 확인한 결과입니다.",
+            )
+        messages.success(request, f'#{pk} 분류를 {old_label} → {valid[new_category]} 로 바꿨습니다.')
+
+    elif action == 'nerf':
+        Coordinate.objects.filter(pk=pk).update(
+            is_nerfed=True,
+            nerfed_at=coordinate.nerfed_at or now,
+            change_checked_at=now,
+        )
+        messages.success(request, f'#{pk} [너프됨] 표시를 켰습니다.')
+
+    elif action == 'clear':
+        NerfReport.objects.filter(coordinate=coordinate).delete()
+        Coordinate.objects.filter(pk=pk).update(
+            nerf_report_count=0, is_nerfed=False, nerfed_at=None, change_checked_at=now,
+        )
+        messages.success(request, f'#{pk} 제보를 지우고 표시를 껐습니다.')
+
+    elif action == 'done':
+        Coordinate.objects.filter(pk=pk).update(change_checked_at=now)
+        messages.success(request, f'#{pk} 확인 완료로 넘겼습니다.')
+
+    else:
+        messages.error(request, '알 수 없는 조치입니다.')
+
+    return redirect(request.POST.get('next') or 'admin_panel:change_list')

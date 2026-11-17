@@ -84,6 +84,9 @@ class Coordinate(models.Model):
     nerf_report_count = models.PositiveIntegerField(_('엽서 변경 제보 수'), default=0)
     is_nerfed = models.BooleanField(_('엽서 변경됨'), default=False)
     nerfed_at = models.DateTimeField(_('변경 표시일'), null=True, blank=True)
+    # 운영자가 제보 목록에서 '확인 완료'를 누른 시각.
+    # 이 시각 이후에 들어온 제보만 관리자 화면에 다시 뜬다.
+    change_checked_at = models.DateTimeField(_('제보 확인일'), null=True, blank=True)
     
     # 타임스탬프
     created_at = models.DateTimeField(_('작성일'), auto_now_add=True)
@@ -287,7 +290,26 @@ class CoordinateImage(models.Model):
 
 
 class NerfReport(models.Model):
-    """엽서가 바뀌었다는 제보 - 비회원 포함 1인 1표"""
+    """엽서가 바뀌었다는 제보 - 비회원 포함 1인 1표
+
+    무엇이 달라졌는지(`change_kind`)까지 같이 받는다. 제보자는 현장에서 보고
+    누르는 사람이라 이미 답을 알고 있고, 그 한 줄이 있으면 운영자가 글마다
+    게임을 켜보지 않아도 된다. 2026-11 기준 댓글로만 들어오던 정보다.
+    """
+
+    class ChangeKind(models.TextChoices):
+        PHOTO = 'PHOTO', _('사진이 달라요')
+        MUSHROOM = 'MUSHROOM', _('버섯이 됐어요')
+        BIGFLOWER = 'BIGFLOWER', _('빅플라워가 됐어요')
+        SEEDLING = 'SEEDLING', _('모종이 됐어요')
+        GONE = 'GONE', _('아예 없어졌어요')
+
+    # 분류 정정으로 이어지는 제보만 매핑한다 (PHOTO/GONE 은 분류를 바꾸지 않는다)
+    CATEGORY_FOR_KIND = {
+        ChangeKind.MUSHROOM: Coordinate.Category.MUSHROOM,
+        ChangeKind.BIGFLOWER: Coordinate.Category.BIGFLOWER,
+        ChangeKind.SEEDLING: Coordinate.Category.SEEDLING,
+    }
 
     coordinate = models.ForeignKey(
         Coordinate,
@@ -301,6 +323,12 @@ class NerfReport(models.Model):
         null=True, blank=True,
         related_name='nerf_reports',
         verbose_name=_('회원')
+    )
+    change_kind = models.CharField(
+        _('무엇이 달라졌나'),
+        max_length=16,
+        choices=ChangeKind.choices,
+        default=ChangeKind.PHOTO,
     )
     session_key = models.CharField(_('세션 키'), max_length=40, blank=True, db_index=True)
     ip_address = models.GenericIPAddressField(_('IP'), null=True, blank=True)
@@ -325,4 +353,9 @@ class NerfReport(models.Model):
 
     def __str__(self):
         who = self.user.nickname if self.user else f'비회원({self.session_key[:6]})'
-        return f'{who} -> {self.coordinate.title}'
+        return f'{who} -> {self.coordinate.title} ({self.get_change_kind_display()})'
+
+    @property
+    def suggested_category(self):
+        """이 제보가 가리키는 분류. 분류와 무관한 제보면 None"""
+        return self.CATEGORY_FOR_KIND.get(self.change_kind)

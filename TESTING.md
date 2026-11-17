@@ -32,7 +32,11 @@ python manage.py test tests.test_upload -v 2   # 한 묶음만
 | `tests/test_interactions.py` | 좋아요·북마크·좌표 복사·댓글 | 11 |
 | `tests/test_brag.py` | 자랑 게시판, 주 단위 묶기, 주간 1위 | 11 |
 | `tests/test_nerf.py` | 엽서 바뀜 제보, 기준 인원·기간 | 10 |
+| `tests/test_change_reports.py` | 무엇이 달라졌나 선택, 운영자 확인·분류 수정 | 18 |
 | `tests/test_display.py` | 디자인 토글, 보기 밀도 저장 | 9 |
+| `tests/test_errors.py` | 잘못된 좌표·제목으로 글을 넣어도 500이 안 난다 | 12 |
+| `tests/test_images.py` | 업로드 형식(HEIC·CMYK·GIF 등), 용량·회전 | 20 |
+| `tests/test_pikmin.py` | 피크민 자동 배정, 머리 등급, 마릿수 | 23 |
 
 공통 바탕은 `tests/base.py`에 있다. `make_user()`, `make_coord()`, `make_image()`로
 재료를 만들고, `login()`으로 로그인한다.

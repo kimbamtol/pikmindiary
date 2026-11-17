@@ -11,6 +11,11 @@ urlpatterns = [
     path('reject/<int:pk>/', views.reject_coordinate, name='reject'),
     path('reports/', views.report_list, name='report_list'),
     path('reports/<int:pk>/resolve/', views.resolve_report, name='resolve_report'),
+
+    # 엽서 변경 제보 모아보기
+    path('changes/', views.change_list, name='change_list'),
+    path('changes/<int:pk>/apply/', views.change_apply, name='change_apply'),
+    path('changes/sweep/', views.change_sweep, name='change_sweep'),
     
     # 관리자 관리 (슈퍼유저만)
     path('users/', views.user_list, name='user_list'),

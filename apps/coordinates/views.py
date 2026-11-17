@@ -237,12 +237,13 @@ def coordinate_detail(request, pk):
     nerf_recent = NerfReport.objects.filter(coordinate=coordinate, created_at__gte=nerf_since).count()
 
     if request.user.is_authenticated:
-        my_nerf = NerfReport.objects.filter(coordinate=coordinate, user=request.user).exists()
+        mine = NerfReport.objects.filter(coordinate=coordinate, user=request.user).first()
     else:
         key = request.session.session_key
-        my_nerf = bool(key) and NerfReport.objects.filter(
+        mine = NerfReport.objects.filter(
             coordinate=coordinate, user__isnull=True, session_key=key
-        ).exists()
+        ).first() if key else None
+    my_nerf = mine is not None
 
     context = {
         'coordinate': coordinate,
@@ -256,6 +257,8 @@ def coordinate_detail(request, pk):
         'nerf_threshold': max(1, nerf_settings.nerf_threshold),
         'nerf_window_days': nerf_window,
         'my_nerf_report': my_nerf,
+        'my_nerf_kind': mine.change_kind if mine else '',
+        'nerf_kinds': NerfReport.ChangeKind.choices,
         'is_nerf_owner': bool(
             request.user.is_authenticated
             and (coordinate.author_id == request.user.pk or request.user.is_staff)
@@ -675,6 +678,11 @@ def toggle_nerf_report(request, pk):
     ip = request.META.get('HTTP_X_FORWARDED_FOR', '').split(',')[0].strip() \
         or request.META.get('REMOTE_ADDR')
 
+    valid_kinds = {code for code, _label in NerfReport.ChangeKind.choices}
+    kind = (request.POST.get('kind') or '').strip().upper()
+    if kind not in valid_kinds:
+        kind = NerfReport.ChangeKind.PHOTO
+
     if request.user.is_authenticated:
         existing = NerfReport.objects.filter(coordinate=coordinate, user=request.user).first()
     else:
@@ -684,15 +692,22 @@ def toggle_nerf_report(request, pk):
             coordinate=coordinate, user__isnull=True, session_key=request.session.session_key
         ).first()
 
-    if existing:
+    if existing and existing.change_kind == kind:
+        # 같은 걸 또 누르면 제보 취소
         existing.delete()
         reported = False
+    elif existing:
+        # 다른 걸 골랐으면 제보 내용만 바꾼다 (표는 그대로 1개)
+        existing.change_kind = kind
+        existing.save(update_fields=['change_kind'])
+        reported = True
     else:
         NerfReport.objects.create(
             coordinate=coordinate,
             user=request.user if request.user.is_authenticated else None,
             session_key='' if request.user.is_authenticated else request.session.session_key,
             ip_address=ip,
+            change_kind=kind,
         )
         reported = True
 
@@ -727,6 +742,7 @@ def toggle_nerf_report(request, pk):
 
     return JsonResponse({
         'reported': reported,
+        'kind': kind if reported else '',
         'recent_count': recent,
         'total_count': total,
         'is_nerfed': is_nerfed,
