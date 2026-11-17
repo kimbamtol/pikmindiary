@@ -1,7 +1,9 @@
 """Accounts views - 마이페이지"""
 from django.shortcuts import render, get_object_or_404
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
+from django.utils import timezone
 from django.utils.translation import gettext as _
 
 from .models import CustomUser
@@ -97,8 +99,31 @@ def my_settings(request):
         user.nickname = request.POST.get('nickname', user.nickname)
         user.bio = request.POST.get('bio', user.bio)
 
+        # 프로필 사진.
+        # 2026-11-17 까지 여기엔 검사가 **아무것도** 없었다 — 올라온 파일을
+        # 그대로 모델에 꽂았다. 그래서 아이폰 HEIC 가 깨진 채로 저장되고,
+        # 세워 찍은 사진이 눕고, 용량 제한도 안 걸렸다 (평균 708KB).
+        # 이름 옆 동그라미로 쓰이는 사진이라 512px 로 줄인다.
+        profile_origin = (None, '')
         if 'profile_image' in request.FILES:
-            user.profile_image = request.FILES['profile_image']
+            from django.conf import settings as dj_settings
+
+            from apps.core.images import (name_as, prepare_upload,
+                                          stash_original)
+
+            raw_file = request.FILES['profile_image']
+            profile_origin = stash_original(raw_file)
+            ready, img_err = prepare_upload(
+                raw_file, max_px=dj_settings.PROFILE_MAX_PX, prefer_jpeg=True
+            )
+            if img_err:
+                # 사진만 건너뛴다. 닉네임·소개까지 날리면 억울하다.
+                messages.error(request, img_err)
+                profile_origin = (None, '')
+            elif ready:
+                stem = '%s_%s' % (
+                    timezone.localtime().strftime('%Y_%m_%d_%H_%M_%S'), user.pk)
+                user.profile_image = name_as(ready, stem)
 
         # 이모지 설정 (랭킹 등록 사용자만)
         if user.has_ranking():
@@ -148,6 +173,13 @@ def my_settings(request):
         user.pikmin_mount = mount if mount in user.get_available_mounts() else ''
 
         user.save()
+
+        # 원본은 media 바깥에 보관한다 (실패해도 설정은 저장돼야 한다)
+        raw, orig_name = profile_origin
+        if raw and user.profile_image:
+            from apps.core.images import archive_original, stem_of
+            archive_original(raw, orig_name, 'profiles',
+                             stem_of(user.profile_image.name))
 
     # 선택 가능한 칭호 목록
     available_titles = request.user.get_available_titles()

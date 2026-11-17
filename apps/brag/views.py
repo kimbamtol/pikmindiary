@@ -5,6 +5,7 @@ from django.core.paginator import Paginator
 from django.db.models import Count
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
@@ -148,15 +149,26 @@ def brag_create(request):
     if request.method != 'POST':
         return render(request, 'brag/create.html')
 
+    from django.conf import settings as dj_settings
+
+    from apps.core.images import (archive_original, name_as, prepare_upload,
+                                  stash_original, stem_of)
+
     image = request.FILES.get('image')
     error = _validate_image(image)
+    origin = (None, '')
     if not error:
-        # HEIC 변환 + 눕힌 사진 세우기
-        from apps.core.images import prepare_upload
-        image, error = prepare_upload(image, max_px=2560)
+        # HEIC 변환 + 눕힌 사진 세우기 + 좌표 글과 같은 규격으로 가볍게
+        origin = stash_original(image)
+        image, error = prepare_upload(
+            image, max_px=dj_settings.IMAGE_MAX_PX, prefer_jpeg=True
+        )
     if error:
         messages.error(request, error)
         return render(request, 'brag/create.html', {'caption': request.POST.get('caption', '')})
+
+    # 올린 시각으로 이름을 정해둔다. 카톡·아이폰이 보내는 이름은 나중에 못 찾는다.
+    name_as(image, timezone.localtime().strftime('%Y_%m_%d_%H_%M_%S'))
 
     caption = request.POST.get('caption', '').strip()[:200]
     watermark = request.POST.get('watermark') == 'on'
@@ -175,6 +187,13 @@ def brag_create(request):
         post.guest_password = make_password(password)
 
     post.save()
+
+    # 워터마크가 파일을 덮어쓰기 전의 원본을 media 바깥에 보관한다.
+    # 보관에 실패해도 글은 올라가야 한다.
+    raw, orig_name = origin
+    if raw and post.image:
+        archive_original(raw, orig_name, 'brag', stem_of(post.image.name))
+
     messages.success(request, _('자랑 글이 올라갔습니다!'))
     return redirect('brag:detail', pk=post.pk)
 
@@ -266,7 +285,7 @@ def brag_comment(request, pk):
         messages.error(request, _('댓글 내용이나 사진 중 하나는 입력해주세요.'))
         return redirect('brag:detail', pk=pk)
 
-    photo, photo_error = _validate_photo(photo)
+    photo, photo_error, photo_origin = _validate_photo(photo)
     if photo_error:
         messages.error(request, photo_error)
         return redirect('brag:detail', pk=pk)
@@ -277,7 +296,8 @@ def brag_comment(request, pk):
         parent = Comment.objects.filter(pk=parent_id, brag_post=post).first()
 
     comment, actor_name, actor = _create_comment(
-        request, content, photo=photo, parent=parent, brag_post=post
+        request, content, photo=photo, parent=parent, brag_post=post,
+        origin=photo_origin
     )
     if comment is None:
         messages.error(request, actor_name)

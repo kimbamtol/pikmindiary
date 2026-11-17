@@ -1,10 +1,13 @@
 """Comments views - 댓글"""
+import logging
+
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib import messages
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST, require_GET
 from django.utils.translation import gettext as _
 from django.contrib.auth.hashers import make_password, check_password
+from django.utils import timezone
 
 from .models import Comment
 from apps.coordinates.models import Coordinate
@@ -14,22 +17,50 @@ from apps.interactions.models import Notification, CommentLike
 # ===== 헬퍼 함수 =====
 
 def _validate_photo(photo):
-    """사진 검사 + 손질. (쓸 파일, 오류메시지) 를 돌려준다.
+    """사진 검사 + 손질. (쓸 파일, 오류메시지, 원본) 을 돌려준다.
 
     예전에는 content_type 만 봤는데 그건 브라우저가 적어 보내는 값이라
     아이폰 HEIC 가 application/octet-stream 으로 와서 막혔다.
     이제 공용 모듈이 PIL 로 직접 열어보고, HEIC 는 JPEG 로 바꾸고
     눕힌 사진은 세워서 돌려준다.
+
+    좌표 글과 같은 규격을 쓴다 — 1280px, 품질 82, 비치지 않는 PNG 는 JPEG.
+    카톡 스크린샷이 PNG 로 올라와서 댓글 사진 평균이 882KB 였다.
     """
-    from apps.core.images import prepare_upload
-    return prepare_upload(photo, max_px=1920)
+    from django.conf import settings as dj_settings
+
+    from apps.core.images import prepare_upload, stash_original
+
+    origin = stash_original(photo)
+    ready, err = prepare_upload(
+        photo, max_px=dj_settings.IMAGE_MAX_PX, prefer_jpeg=True
+    )
+    return ready, err, origin
 
 
-def _create_comment(request, content, photo=None, parent=None, coordinate=None, farming_journal=None, brag_post=None):
+def _attach_photo(comment, photo, origin=None):
+    """사진을 '작성시각_댓글번호' 이름으로 붙이고 원본은 media 바깥에 보관한다.
+
+    댓글을 먼저 만들고 사진을 나중에 붙이는 이유는 번호(pk)가 필요해서다.
+    여기서 터져도 댓글 본문은 이미 남아 있다 — 사진만 빠진다.
+    """
+    from apps.core.images import archive_original, name_as, stem_of
+
+    made = timezone.localtime(comment.created_at)
+    stem = '%s_%s' % (made.strftime('%Y_%m_%d_%H_%M_%S'), comment.pk)
+    comment.photo = name_as(photo, stem)
+    comment.save(update_fields=['photo'])
+
+    raw, orig_name = origin or (None, '')
+    if raw:
+        archive_original(raw, orig_name, 'comments', stem_of(comment.photo.name))
+
+
+def _create_comment(request, content, photo=None, parent=None, coordinate=None,
+                    farming_journal=None, brag_post=None, origin=None):
     """회원/비회원 댓글 생성 공통 로직. (comment, actor_name, actor) 튜플 반환. 실패 시 (None, error_msg, None)"""
     kwargs = {
         'content': content,
-        'photo': photo,
         'parent': parent,
         'coordinate': coordinate,
         'farming_journal': farming_journal,
@@ -39,7 +70,7 @@ def _create_comment(request, content, photo=None, parent=None, coordinate=None, 
     if request.user.is_authenticated:
         kwargs['author'] = request.user
         comment = Comment.objects.create(**kwargs)
-        return comment, request.user.nickname, request.user
+        actor_name, actor = request.user.nickname, request.user
     else:
         guest_nickname = request.POST.get('guest_nickname', '익명')
         guest_password = request.POST.get('guest_password', '')
@@ -48,7 +79,16 @@ def _create_comment(request, content, photo=None, parent=None, coordinate=None, 
         kwargs['guest_nickname'] = guest_nickname
         kwargs['guest_password'] = make_password(guest_password)
         comment = Comment.objects.create(**kwargs)
-        return comment, guest_nickname, None
+        actor_name, actor = guest_nickname, None
+
+    if photo:
+        try:
+            _attach_photo(comment, photo, origin)
+        except Exception as e:
+            logging.getLogger(__name__).warning(
+                '댓글 사진 붙이기 실패 (댓글은 저장됨) pk=%s: %s', comment.pk, e)
+
+    return comment, actor_name, actor
 
 
 def _update_comment_count(coordinate=None, farming_journal=None):
@@ -78,13 +118,13 @@ def comment_create(request, coordinate_id):
         messages.error(request, _('댓글 내용이나 사진 중 하나는 입력해주세요.'))
         return redirect('coordinates:detail', pk=coordinate_id)
 
-    photo, photo_error = _validate_photo(photo)
+    photo, photo_error, photo_origin = _validate_photo(photo)
     if photo_error:
         messages.error(request, photo_error)
         return redirect('coordinates:detail', pk=coordinate_id)
 
     comment, actor_name, actor = _create_comment(
-        request, content, photo=photo, coordinate=coordinate
+        request, content, photo=photo, coordinate=coordinate, origin=photo_origin
     )
     if comment is None:
         messages.error(request, actor_name)  # actor_name은 에러 메시지
@@ -195,13 +235,14 @@ def comment_reply(request, pk):
         messages.error(request, _('댓글 내용이나 사진 중 하나는 입력해주세요.'))
         return redirect('coordinates:detail', pk=coordinate.pk)
 
-    photo, photo_error = _validate_photo(photo)
+    photo, photo_error, photo_origin = _validate_photo(photo)
     if photo_error:
         messages.error(request, photo_error)
         return redirect('coordinates:detail', pk=coordinate.pk)
 
     comment, actor_name, actor = _create_comment(
-        request, content, photo=photo, parent=parent, coordinate=coordinate
+        request, content, photo=photo, parent=parent, coordinate=coordinate,
+        origin=photo_origin
     )
     if comment is None:
         messages.error(request, actor_name)

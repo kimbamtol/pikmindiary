@@ -85,7 +85,13 @@ class BaseTest(TestCase):
     @classmethod
     def setUpClass(cls):
         cls._media = tempfile.mkdtemp(prefix='pd-test-media-')
-        cls._override = override_settings(MEDIA_ROOT=cls._media)
+        # 원본 보관 폴더도 같이 돌려야 한다. 안 그러면 테스트가 운영 보관함에
+        # 가짜 파일을 남긴다 - 2026-11-17 에 실제로 9바이트짜리 2개가 쌓였다.
+        cls._originals = tempfile.mkdtemp(prefix='pd-test-originals-')
+        cls._override = override_settings(
+            MEDIA_ROOT=cls._media,
+            IMAGE_ORIGINALS_ROOT=cls._originals,
+        )
         cls._override.enable()
         super().setUpClass()
 
@@ -94,6 +100,7 @@ class BaseTest(TestCase):
         super().tearDownClass()
         cls._override.disable()
         shutil.rmtree(cls._media, ignore_errors=True)
+        shutil.rmtree(cls._originals, ignore_errors=True)
 
     def setUp(self):
         # 지역 자동 감지(Nominatim) 차단

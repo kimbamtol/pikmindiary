@@ -88,16 +88,34 @@ def journal_create(request):
             journal.latitude = lat
             journal.longitude = lng
 
-        # 이미지 처리 — HEIC 변환 + 눕힌 사진 세우기
+        # 이미지 처리 — HEIC 변환 + 눕힌 사진 세우기 + 좌표 글과 같은 규격
+        origin = (None, '')
         if 'image' in request.FILES:
-            from apps.core.images import prepare_upload
-            ready, img_err = prepare_upload(request.FILES['image'], max_px=2560)
+            from django.conf import settings as dj_settings
+
+            from apps.core.images import (name_as, prepare_upload,
+                                          stash_original)
+
+            origin = stash_original(request.FILES['image'])
+            ready, img_err = prepare_upload(
+                request.FILES['image'],
+                max_px=dj_settings.IMAGE_MAX_PX, prefer_jpeg=True,
+            )
             if img_err:
                 messages.error(request, img_err)
+                origin = (None, '')
             elif ready:
-                journal.image = ready
+                journal.image = name_as(
+                    ready, timezone.localtime().strftime('%Y_%m_%d_%H_%M_%S'))
 
         journal.save()
+
+        # 원본은 media 바깥에 보관한다 (실패해도 일지는 올라가야 한다)
+        raw, orig_name = origin
+        if raw and journal.image:
+            from apps.core.images import archive_original, stem_of
+            archive_original(raw, orig_name, 'farming',
+                             stem_of(journal.image.name))
 
         messages.success(request, _('농사 일지가 등록되었습니다!'))
         return redirect('farming:journal_detail', pk=journal.pk)

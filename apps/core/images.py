@@ -78,6 +78,49 @@ def archive_original(raw, original_name, subdir, stem):
         return None
 
 
+def stash_original(f):
+    """원본 바이트를 미리 떠 둔다. prepare_upload 가 파일을 바꿔버린다.
+
+    반환: (바이트, 원래이름). archive_original 에 그대로 넘기면 된다.
+    """
+    if not f:
+        return None, ''
+    name = getattr(f, 'name', '') or ''
+    try:
+        f.seek(0)
+        raw = f.read()
+        f.seek(0)
+        return raw, name
+    except Exception as e:
+        logger.info('원본 바이트를 못 읽음: %s (%s)', name, e)
+        return None, name
+
+
+def name_as(f, stem):
+    """저장될 파일 이름을 stem 으로 바꾼다. 확장자는 그대로 둔다.
+
+    카톡·아이폰이 보내는 이름(KakaoTalk_Photo_2026-02-15-17-34-03_001.png)이
+    그대로 쌓이면 나중에 아무것도 찾을 수 없다.
+    """
+    if not f:
+        return f
+    ext = os.path.splitext(getattr(f, 'name', '') or '')[1].lower() or '.jpg'
+    try:
+        f.name = '%s%s' % (stem, ext)
+    except Exception:
+        pass
+    return f
+
+
+def stem_of(name):
+    """저장된 파일 이름에서 확장자와 폴더를 뗀 부분.
+
+    **실제로 저장된 이름**에서 뽑아야 한다. 같은 이름이 이미 있으면 Django 가
+    뒤에 무작위 글자를 붙이는데, 미리 정한 이름으로 보관하면 짝이 어긋난다.
+    """
+    return os.path.splitext(os.path.basename(name or ''))[0]
+
+
 def prepare_upload(f, *, max_px=None, quality=None, prefer_jpeg=False):
     """업로드 파일을 검사하고 필요하면 바꿔서 돌려준다.
 

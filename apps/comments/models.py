@@ -53,7 +53,7 @@ class Comment(models.Model):
     # 사진 첨부
     photo = models.ImageField(
         _('사진'),
-        upload_to='comment_photos/%Y/%m/%d/',
+        upload_to='comment_photos/',
         blank=True,
         null=True,
         help_text=_('댓글에 첨부할 사진 (최대 5MB, JPG/PNG/WEBP)')

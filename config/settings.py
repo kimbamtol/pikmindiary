@@ -176,6 +176,10 @@ IMAGE_ORIGINALS_ROOT = BASE_DIR / 'image_originals'
 IMAGE_MAX_PX = int(os.getenv('IMAGE_MAX_PX', '1280'))
 IMAGE_QUALITY = int(os.getenv('IMAGE_QUALITY', '82'))
 
+# 프로필 사진은 이름 옆 동그라미로 쓰인다. 제일 크게 나오는 곳이 프로필 화면의
+# 160px 정도라 512 면 고해상도 화면에서도 남는다. 1280 으로 두면 장당 4배를 받는다.
+PROFILE_MAX_PX = int(os.getenv('PROFILE_MAX_PX', '512'))
+
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
     'allauth.account.auth_backends.AuthenticationBackend',

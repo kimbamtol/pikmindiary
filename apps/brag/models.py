@@ -1,4 +1,5 @@
 """Brag models - 피크민 자랑 (엽서·피크민 사진 자랑 게시판)"""
+import os
 from datetime import datetime, time, timedelta
 
 from django.conf import settings
@@ -20,7 +21,7 @@ class BragPost(models.Model):
     guest_nickname = models.CharField(_('비회원 닉네임'), max_length=30, blank=True)
     guest_password = models.CharField(_('비회원 비밀번호'), max_length=128, blank=True)
 
-    image = models.ImageField(_('사진'), upload_to='brag/%Y/%m/')
+    image = models.ImageField(_('사진'), upload_to='brag/')
     caption = models.CharField(_('한마디'), max_length=200, blank=True)
 
     watermark_enabled = models.BooleanField(
@@ -99,7 +100,15 @@ class BragPost(models.Model):
             draw.text((x, y), text, font=font, fill=(255, 255, 255, 190))
 
             out = Image.alpha_composite(img, layer).convert('RGB')
-            out.save(path, quality=92)
+
+            # quality 는 JPEG 에만 먹는다. 파일이 .png 면 그냥 무시돼서
+            # 워터마크를 넣은 뒤에도 장당 800KB 짜리 PNG 로 다시 저장됐다.
+            if os.path.splitext(path)[1].lower() in ('.jpg', '.jpeg'):
+                out.save(path, 'JPEG',
+                         quality=getattr(settings, 'IMAGE_QUALITY', 82),
+                         optimize=True, progressive=True)
+            else:
+                out.save(path, optimize=True)
         except Exception:
             # 워터마크 실패가 업로드 자체를 막지 않도록 한다
             pass
