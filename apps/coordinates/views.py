@@ -12,7 +12,9 @@ from django.contrib.auth.hashers import make_password, check_password
 from .models import Coordinate, CoordinateImage
 from apps.interactions.models import Like, Bookmark
 from apps.rankings.utils import update_user_ranking
-from apps.core.images import prepare_upload
+from apps.core.images import archive_original, prepare_upload
+from django.conf import settings as django_settings
+import os
 from django.views.decorators.http import require_POST
 
 import logging
@@ -398,12 +400,23 @@ def coordinate_create(request):
         # 글을 만들기 전에 한다. 뒤에서 걸러내면 사진 없는 빈 글만 남는다.
         # 여기서 HEIC 는 JPEG 로 바뀌고, 눕힌 폰 사진은 세워진다.
         prepared = []
+        raw_originals = []
         for image in request.FILES.getlist('images')[:5]:   # 최대 5장
-            ready, err = prepare_upload(image, max_px=2560)
+            # 원본 바이트를 먼저 들고 있는다. prepare_upload 가 파일을 바꿔버린다.
+            try:
+                image.seek(0)
+                raw = image.read()
+                image.seek(0)
+            except Exception:
+                raw = None
+            ready, err = prepare_upload(
+                image, max_px=django_settings.IMAGE_MAX_PX, prefer_jpeg=True
+            )
             if err:
                 return back_to_form('%s (%s)' % (err, image.name))
             if ready:
                 prepared.append(ready)
+                raw_originals.append((raw, image.name))
         # ===== 사진 검사 끝 =====
 
         coordinate = Coordinate.objects.create(
@@ -427,10 +440,21 @@ def coordinate_create(request):
             current_count = request.session.get(upload_key, 0)
             request.session[upload_key] = current_count + 1
         
+        # 사진 이름은 글 작성시각 _ 글번호 _ 순서. 보관 원본과 같은 이름이라 짝이 맞는다.
+        made = timezone.localtime(coordinate.created_at)
         for i, ready in enumerate(prepared):
+            stem = '%s_%s_%s' % (made.strftime('%Y_%m_%d_%H_%M_%S'), coordinate.pk, i + 1)
+            ext = os.path.splitext(getattr(ready, 'name', '') or '')[1].lower() or '.jpg'
+            try:
+                ready.name = stem + ext
+            except Exception:
+                pass
             CoordinateImage.objects.create(
                 coordinate=coordinate, image=ready, order=i
             )
+            raw, orig_name = raw_originals[i] if i < len(raw_originals) else (None, '')
+            if raw:
+                archive_original(raw, orig_name, 'coordinates', stem)
 
         # 랭킹 갱신 (회원인 경우)
         if author:

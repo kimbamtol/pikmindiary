@@ -167,6 +167,15 @@ SITE_ID = 1
 # 운영자 알림 메일 본문에서 쓰는 절대 주소 (사진·링크)
 SITE_URL = os.getenv('SITE_URL', 'https://pikmindiary.com')
 
+# 업로드된 사진의 원본 보관 폴더.
+# media/ 안에 두면 nginx 가 /media/ 를 통째로 열어두고 있어서 누구나 받아갈 수 있다.
+# 원본에는 촬영 위치(EXIF)가 남아 있을 수 있으므로 반드시 media 바깥에 둔다.
+IMAGE_ORIGINALS_ROOT = BASE_DIR / 'image_originals'
+
+# 사이트가 내보내는 사진 규격
+IMAGE_MAX_PX = int(os.getenv('IMAGE_MAX_PX', '1280'))
+IMAGE_QUALITY = int(os.getenv('IMAGE_QUALITY', '82'))
+
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
     'allauth.account.auth_backends.AuthenticationBackend',

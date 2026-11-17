@@ -6,6 +6,7 @@
 3. 세워 찍은 폰 사진이 눕혀서 올라갔다
 """
 import io
+import os
 
 from PIL import Image
 from django.urls import reverse
@@ -148,10 +149,18 @@ class CoordinateUploadTest(BaseTest):
         self.assertEqual(r.status_code, 200)
         self.assertEqual(Coordinate.objects.count(), 0)
 
-    def test_아주_큰_사진은_2560으로_줄어든다(self):
+    def test_아주_큰_사진은_1280으로_줄어든다(self):
+        from django.conf import settings as dj
         self._post(images=make_image('huge.jpg', size=(4000, 3000)))
         img = CoordinateImage.objects.get()
-        self.assertLessEqual(max(Image.open(img.image.path).size), 2560)
+        self.assertLessEqual(max(Image.open(img.image.path).size), dj.IMAGE_MAX_PX)
+
+    def test_올린_사진_이름이_글번호와_순서로_바뀐다(self):
+        self._post(images=make_image('KakaoTalk_Photo_2026.jpg'))
+        img = CoordinateImage.objects.get()
+        name = os.path.basename(img.image.name)
+        self.assertNotIn('KakaoTalk', name)
+        self.assertIn('_%d_1' % img.coordinate_id, name)
 
 
 class CommentUploadTest(BaseTest):
@@ -178,3 +187,75 @@ class CommentUploadTest(BaseTest):
     def test_이미지가_아니면_댓글이_안_달린다(self):
         self._comment(make_junk())
         self.assertEqual(Comment.objects.count(), 0)
+
+
+class UploadSizeTest(BaseTest):
+    """올라온 사진을 가볍게 바꾸고 원본은 따로 보관한다
+
+    PNG 가 그대로 통과하던 때 장당 평균 901KB 였다 (JPEG 는 395KB).
+    1,010장이 쌓여 목록 한 페이지가 8.4MB 였다. 여기가 뚫리면 그게 다시 쌓인다.
+    """
+
+    def test_비치지_않는_png는_jpeg로_바뀐다(self):
+        from apps.core.images import prepare_upload
+        f = make_image('shot.png', size=(900, 600), fmt='PNG')
+        ready, err = prepare_upload(f, max_px=1280, prefer_jpeg=True)
+
+        self.assertIsNone(err)
+        self.assertTrue(ready.name.endswith('.jpg'))
+
+    def test_비치는_png는_png로_남는다(self):
+        from io import BytesIO
+        from PIL import Image
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        from apps.core.images import prepare_upload
+
+        img = Image.new('RGBA', (300, 200), (255, 0, 0, 0))     # 완전 투명
+        buf = BytesIO(); img.save(buf, 'PNG')
+        f = SimpleUploadedFile('clear.png', buf.getvalue(), content_type='image/png')
+
+        ready, err = prepare_upload(f, max_px=1280, prefer_jpeg=True)
+        self.assertIsNone(err)
+        self.assertTrue(ready.name.endswith('.png'))
+
+    def test_prefer_jpeg를_안_켜면_png_그대로(self):
+        from apps.core.images import prepare_upload
+        f = make_image('shot.png', size=(900, 600), fmt='PNG')
+        ready, err = prepare_upload(f, max_px=1280)
+        self.assertTrue(ready.name.endswith('.png'))
+
+    def test_움직이는_gif는_여전히_그대로_통과한다(self):
+        from io import BytesIO
+        from PIL import Image
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        from apps.core.images import prepare_upload
+
+        frames = [Image.new('P', (60, 40), i) for i in (1, 2, 3)]
+        buf = BytesIO()
+        frames[0].save(buf, 'GIF', save_all=True, append_images=frames[1:], duration=80, loop=0)
+        raw = buf.getvalue()
+        f = SimpleUploadedFile('anim.gif', raw, content_type='image/gif')
+
+        ready, err = prepare_upload(f, max_px=1280, prefer_jpeg=True)
+        self.assertIsNone(err)
+        ready.seek(0)
+        self.assertEqual(ready.read(), raw)
+
+    def test_원본은_media_바깥에_보관된다(self):
+        import os
+        from django.conf import settings
+        from apps.core.images import archive_original
+
+        path = archive_original(b'\x89PNG fake', 'phone.png', 'coordinates', '2026_11_17_01_02_03_7_1')
+        self.assertIsNotNone(path)
+        self.assertTrue(os.path.exists(path))
+        self.assertTrue(path.endswith('2026_11_17_01_02_03_7_1.png'))
+        # media 안에 있으면 nginx 가 열어버린다
+        self.assertNotIn(str(settings.MEDIA_ROOT), path)
+
+    def test_같은_이름으로_두_번_보관해도_원본을_안_덮는다(self):
+        from apps.core.images import archive_original
+        p1 = archive_original(b'first', 'a.png', 'coordinates', '2026_11_17_01_02_03_8_1')
+        archive_original(b'second', 'a.png', 'coordinates', '2026_11_17_01_02_03_8_1')
+        with open(p1, 'rb') as fh:
+            self.assertEqual(fh.read(), b'first')

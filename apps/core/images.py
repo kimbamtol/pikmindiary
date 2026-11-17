@@ -10,6 +10,7 @@ PIL 로 실제로 열어본다. 못 열면 이미지가 아니다.
 import io
 import logging
 import os
+from pathlib import Path
 
 from django.conf import settings
 from django.core.files.base import ContentFile
@@ -43,13 +44,50 @@ def _orientation_of(img):
         return 1
 
 
-def prepare_upload(f, *, max_px=None):
+def has_transparency(img):
+    """실제로 비치는 부분이 있는지. 알파 채널만 달려 있고 꽉 찬 경우가 많다"""
+    try:
+        if img.mode == 'P' and 'transparency' in img.info:
+            return True
+        if img.mode in ('RGBA', 'LA'):
+            return img.convert('RGBA').getchannel('A').getextrema()[0] < 250
+    except Exception:
+        return True          # 모르겠으면 투명한 것으로 보고 PNG 를 지킨다
+    return False
+
+
+def archive_original(raw, original_name, subdir, stem):
+    """업로드된 원본을 media 바깥에 보관한다.
+
+    media/ 는 nginx 가 통째로 열어두고 있어서 원본을 거기 두면 누구나 받아간다.
+    원본에는 촬영 위치(EXIF)가 남아 있을 수 있다.
+    변환본과 이름(stem)이 같아서 짝이 저절로 맞는다 - 그래서 변환 기록표가 따로 없다.
+    """
+    try:
+        ext = os.path.splitext(original_name or '')[1].lower() or '.jpg'
+        root = Path(settings.IMAGE_ORIGINALS_ROOT) / subdir
+        root.mkdir(parents=True, exist_ok=True)
+        path = root / f'{stem}{ext}'
+        if path.exists():
+            return str(path)
+        path.write_bytes(raw)
+        return str(path)
+    except Exception as e:
+        # 보관에 실패해도 글은 올라가야 한다
+        logger.warning('원본 보관 실패 %s: %s', original_name, e)
+        return None
+
+
+def prepare_upload(f, *, max_px=None, quality=None, prefer_jpeg=False):
     """업로드 파일을 검사하고 필요하면 바꿔서 돌려준다.
 
     반환: (파일, 오류메시지). 둘 중 하나는 항상 None 이다.
     - 용량 초과 / 이미지 아님 -> (None, 메시지)
     - 손댈 것 없음            -> (원본 그대로, None)
     - HEIC·회전·큰 사진       -> (새로 만든 JPEG, None)
+
+    prefer_jpeg=True 면 비치는 부분이 없는 PNG 도 JPEG 로 바꾼다.
+    카톡 사진·휴대폰 스크린샷이 PNG 로 올라와서 장당 평균 901KB 였다 (JPEG 는 395KB).
     """
     if not f:
         return None, None
@@ -69,10 +107,12 @@ def prepare_upload(f, *, max_px=None):
     fmt = (img.format or '').upper()
     rotated = _orientation_of(img) != 1
     too_big = bool(max_px) and (img.width > max_px or img.height > max_px)
+    heavy_png = prefer_jpeg and fmt == 'PNG' and not has_transparency(img)
 
     # 손댈 게 없으면 원본을 그대로 쓴다. 괜히 다시 압축하면 화질만 깎인다.
     # (움직이는 GIF 도 여기로 빠져서 원본 그대로 남는다)
-    if fmt in WEB_FORMATS and img.mode in WEB_MODES and not rotated and not too_big:
+    if (fmt in WEB_FORMATS and img.mode in WEB_MODES
+            and not rotated and not too_big and not heavy_png):
         f.seek(0)
         return f, None
 
@@ -81,7 +121,7 @@ def prepare_upload(f, *, max_px=None):
         if too_big:
             img.thumbnail((max_px, max_px), Image.LANCZOS)
 
-        keep_png = (fmt == 'PNG' and img.mode in WEB_MODES)
+        keep_png = (fmt == 'PNG' and img.mode in WEB_MODES and not heavy_png)
         if not keep_png and img.mode not in ('RGB', 'L'):
             # JPEG 는 알파를 못 담고, CMYK 는 브라우저가 색을 뒤집는다
             img = img.convert('RGB')
@@ -91,7 +131,9 @@ def prepare_upload(f, *, max_px=None):
             img.save(buf, 'PNG', optimize=True)
             ext = '.png'
         else:
-            img.save(buf, 'JPEG', quality=90, optimize=True)
+            img.save(buf, 'JPEG',
+                     quality=quality or getattr(settings, 'IMAGE_QUALITY', 82),
+                     optimize=True, progressive=True)
             ext = '.jpg'
 
         base = os.path.splitext(os.path.basename(getattr(f, 'name', 'photo')))[0]

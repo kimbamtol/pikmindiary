@@ -183,7 +183,7 @@ class CoordinateImage(models.Model):
     )
     image = models.ImageField(
         _('이미지'),
-        upload_to='coordinates/%Y/%m/'
+        upload_to='coordinates/'
     )
     order = models.PositiveSmallIntegerField(_('순서'), default=0)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -281,7 +281,12 @@ class CoordinateImage(models.Model):
 
             # RGB로 변환 후 저장 (JPEG 호환)
             watermarked = watermarked.convert('RGB')
-            watermarked.save(img_path, quality=90, optimize=True)
+            from django.conf import settings as dj_settings
+            watermarked.save(
+                img_path,
+                quality=getattr(dj_settings, 'IMAGE_QUALITY', 82),
+                optimize=True, progressive=True,
+            )
 
         except Exception as e:
             # 워터마크 실패해도 이미지는 유지
