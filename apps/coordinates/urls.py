@@ -8,6 +8,8 @@ urlpatterns = [
     path('', views.coordinate_list, name='list'),
     path('map/', views.map_view, name='map'),
     path('new/', views.coordinate_create, name='create'),
+    # 글 올리기 화면에서 '이 근처에 올라온 글' 을 불러온다 (중복 막기)
+    path('nearby/', views.nearby_coordinates, name='nearby'),
     path('<int:pk>/', views.coordinate_detail, name='detail'),
     path('<int:pk>/edit/', views.coordinate_edit, name='edit'),
     path('<int:pk>/delete/', views.coordinate_delete, name='delete'),

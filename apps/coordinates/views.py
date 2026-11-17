@@ -15,7 +15,7 @@ from apps.rankings.utils import update_user_ranking
 from apps.core.images import archive_original, prepare_upload
 from django.conf import settings as django_settings
 import os
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_GET, require_POST
 
 import logging
 
@@ -467,6 +467,120 @@ def coordinate_create(request):
         'categories': Coordinate.Category.choices,
     }
     return render(request, 'coordinates/create.html', context)
+
+
+# ===== 중복 글 막기 =====
+#
+# 중복 글이 꽤 많다. 같은 엽서를 모르고 또 올리는 경우다.
+# 막지는 않는다 - 같은 자리에 엽서가 **여러 장** 있는 곳이 실제로 있어서
+# (시부야 치이카와·K-BOOKS 는 0.0m 거리에 서로 다른 엽서가 3장이다)
+# 좌표만으로는 중복인지 알 수 없다. 그래서 '보여주기만' 한다.
+#
+# 올리는 사람이 사진을 보고 직접 판단하는 게 지금 할 수 있는 가장 정확한 방법이다.
+
+NEARBY_RADIUS_M = 300          # 기본 반경
+NEARBY_MAX_RADIUS_M = 500      # '더 보기' 로 넓힐 수 있는 한계
+NEARBY_LIMIT = 8               # 보여줄 글 수
+NEARBY_SCAN_CAP = 60           # 거리를 재볼 후보 수 (늘려도 느려지기만 한다)
+
+_M_PER_DEG_LAT = 111_320.0
+
+
+def _haversine_m(lat1, lng1, lat2, lng2):
+    """두 점 사이 거리(m). 지구를 공으로 보고 잰다 - 수백 m 에서는 오차가 무의미하다."""
+    import math
+
+    r = 6_371_000.0
+    p1, p2 = math.radians(lat1), math.radians(lat2)
+    dp = p2 - p1
+    dl = math.radians(lng2 - lng1)
+    a = (math.sin(dp / 2) ** 2
+         + math.cos(p1) * math.cos(p2) * math.sin(dl / 2) ** 2)
+    return 2 * r * math.asin(min(1.0, math.sqrt(a)))
+
+
+@require_GET
+def nearby_coordinates(request):
+    """글 올리기 화면에서 '이 근처에 이미 올라온 글' 을 돌려준다.
+
+    좌표 두 칸이 채워지면 화면이 조용히 불러서 사진을 보여준다.
+    **아무것도 막지 않는다.** 경고도 아니다 - 올리는 사람이 보고 판단할 재료다.
+
+    빠르게 유지하는 방법:
+      1) 먼저 네모(위·경도 범위)로 DB 에서 걸러낸다. 인덱스가 걸려 있다.
+      2) 네모 안의 후보 60개만 파이썬에서 거리를 재서 가까운 순으로 8개를 고른다.
+    잘못된 입력에는 빈 목록을 돌려준다 - 글 쓰는 화면이 500 을 보면 안 된다.
+    """
+    import math
+
+    try:
+        lat = float(request.GET.get('lat', ''))
+        lng = float(request.GET.get('lng', ''))
+    except (TypeError, ValueError):
+        return JsonResponse({'items': [], 'radius_m': NEARBY_RADIUS_M,
+                             'can_widen': False})
+
+    if not (-90 <= lat <= 90 and -180 <= lng <= 180) or math.isnan(lat) or math.isnan(lng):
+        return JsonResponse({'items': [], 'radius_m': NEARBY_RADIUS_M,
+                             'can_widen': False})
+
+    try:
+        radius = int(request.GET.get('r', NEARBY_RADIUS_M))
+    except (TypeError, ValueError):
+        radius = NEARBY_RADIUS_M
+    radius = max(50, min(radius, NEARBY_MAX_RADIUS_M))
+
+    # 네모 범위. 극지방에서는 cos 가 0 에 가까워져 경도 폭이 터지므로 막아둔다.
+    d_lat = radius / _M_PER_DEG_LAT
+    cos_lat = max(0.01, math.cos(math.radians(lat)))
+    d_lng = radius / (_M_PER_DEG_LAT * cos_lat)
+
+    candidates = (Coordinate.objects
+                  .filter(status=Coordinate.Status.APPROVED,
+                          latitude__gte=lat - d_lat, latitude__lte=lat + d_lat,
+                          longitude__gte=lng - d_lng, longitude__lte=lng + d_lng)
+                  .only('id', 'title', 'postcard_name', 'category', 'latitude',
+                        'longitude', 'is_nerfed', 'created_at')
+                  .prefetch_related('images')
+                  .order_by('-created_at')[:NEARBY_SCAN_CAP])
+
+    labels = dict(Coordinate.Category.choices)
+    found = []
+    for c in candidates:
+        try:
+            dist = _haversine_m(lat, lng, float(c.latitude), float(c.longitude))
+        except (TypeError, ValueError):
+            continue
+        if dist > radius:
+            continue
+        found.append((dist, c))
+
+    found.sort(key=lambda pair: pair[0])
+
+    items = []
+    for dist, c in found[:NEARBY_LIMIT]:
+        thumb = ''
+        for im in c.images.all():            # prefetch 된 것을 쓴다 (쿼리 안 늘어난다)
+            if im.image:
+                thumb = im.image.url
+                break
+        items.append({
+            'pk': c.pk,
+            'title': c.postcard_name or c.title,
+            'category': labels.get(c.category, c.category),
+            'distance_m': round(dist),
+            'thumb': thumb,
+            'url': '/coordinates/%d/' % c.pk,
+            'date': timezone.localtime(c.created_at).strftime('%y.%m.%d'),
+            'is_nerfed': bool(c.is_nerfed),
+        })
+
+    return JsonResponse({
+        'items': items,
+        'radius_m': radius,
+        'total': len(found),
+        'can_widen': radius < NEARBY_MAX_RADIUS_M,
+    })
 
 
 def coordinate_edit(request, pk):

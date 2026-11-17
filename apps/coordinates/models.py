@@ -122,6 +122,9 @@ class Coordinate(models.Model):
             models.Index(fields=['category', 'status']),
             models.Index(fields=['-like_count']),
             models.Index(fields=['author', 'status']),
+            # 글 올릴 때 '근처에 이미 올라온 글' 을 네모 범위로 찾는다.
+            # 이게 없으면 전체를 훑는다.
+            models.Index(fields=['status', 'latitude', 'longitude']),
         ]
     
     def __str__(self):
