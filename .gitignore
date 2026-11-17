@@ -50,3 +50,4 @@ PROJECT_CONTEXT.md
 # Utility scripts (one-off)
 compare_regions.py
 update_all_regions.py
+image_originals/
