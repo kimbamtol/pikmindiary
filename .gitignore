@@ -51,3 +51,6 @@ PROJECT_CONTEXT.md
 compare_regions.py
 update_all_regions.py
 image_originals/
+
+# 제보 처리 되돌릴 기록 (운영 기록, 공개 저장소에 안 올린다)
+ops_records/

@@ -904,7 +904,15 @@ def toggle_nerf_report(request, pk):
     total = NerfReport.objects.filter(coordinate=coordinate).count()
 
     was_nerfed = coordinate.is_nerfed
-    is_nerfed = recent >= threshold
+    # 자동 계산은 **켜기만** 한다. 끄지 않는다.
+    # 예전에는 recent >= threshold 를 그대로 덮어썼다. 그래서 운영자가 제보를
+    # 보고 손으로 켜둔 표시가, 그 뒤에 들어온 제보 한 건 때문에 도로 꺼졌다.
+    # 기준이 "최근 7일 안에 3건" 이라 제보가 날짜별로 흩어져 있으면 창 안에는
+    # 1건뿐이기 때문이다 — 제보가 늘었는데 표시가 사라지는 거꾸로 된 동작이다.
+    # 2026-11-17 에 93개를 켰는데 #1606(멘카우레 피라미드) 하나가 이렇게 꺼졌다.
+    # [너프됨]은 "사진이 바뀌었다" 는 사실이라 시간이 지난다고 되돌아가지 않는다.
+    # 끄는 것은 관리자 화면의 「제보 지우고 표시 끄기」(change_apply 의 clear)가 한다.
+    is_nerfed = was_nerfed or (recent >= threshold)
 
     Coordinate.objects.filter(pk=coordinate.pk).update(
         nerf_report_count=total,
