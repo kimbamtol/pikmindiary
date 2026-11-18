@@ -1,12 +1,17 @@
 """피크민 표식과 복사 효과
 
-지켜야 할 규칙은 네 가지다.
+지켜야 할 규칙은 여섯 가지다.
 
 1. 아무것도 안 고른 사람도 피크민이 있어야 한다. 비어 보이면 안 된다.
 2. 머리와 마릿수는 고를 수 없다. 받은 복사 수만이 정한다.
 3. 복사하면 글쓴이의 copy_total 이 올라야 한다. 안 오르면 머리가 영영 안 핀다.
 4. 전용 탈것은 허락받은 사람만 쓴다. POST 로 밀어넣어도 안 먹혀야 한다.
+5. 걷기 진폭에 상한이 있다. 넘으면 파츠가 따로 노는 것처럼 보인다.
+6. 「꽃 색」칸에는 꽃이 보여야 한다. 고르는 게 뭔지 그림으로 알 수 있어야 한다.
 """
+import re
+
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 
@@ -220,3 +225,131 @@ class MarkRenderTest(BaseTest):
         self.assertEqual(body.count('name="pikmin_color"'), 8)
         self.assertEqual(body.count('name="pikmin_flower"'), 5)
         self.assertEqual(body.count('name="pikmin_mount"'), 0)   # 허락 없으면 안 보인다
+
+
+class WalkAmplitudeTest(BaseTest):
+    """5. 걷기 진폭 상한 — 2026-11-18 (건의 #29)
+
+    "가만히 보고 있으면 점점 분리되면서 파츠가 좌우로 엄청 춤춰요" 라는 제보를
+    받았다. 재보니 애니메이션이 어긋나는 게 아니었다 — 5분 + 스크롤 왕복 뒤에도
+    한 마리 안의 여섯 파트 위상은 소수점 네 자리까지 같았다. 진폭이 문제였다.
+
+    한 걸음(0.74초)마다 머리가 제 너비(8.4)의 48% 인 4.0 을 움직였고, 몸통은
+    제 너비(13.8)의 20% 인 2.8 만큼 발에서 어긋났다. 다리는 bod 바깥에 있어서
+    (발은 땅에 남겨야 한다) 몸이 미끄러져도 안 따라오기 때문이다.
+
+    이름 옆 표식은 19px 이라 티가 안 났지만, 설정 화면의 큰 미리보기는 44px —
+    2.3배다. 그리고 거기가 피크민을 크게, 오래 보는 유일한 화면이다.
+
+    키프레임 숫자는 viewBox 유닛이라 **크기와 무관한 설계값**이다. 여기를 다시
+    올리면 모든 화면에서 같이 커진다.
+    """
+
+    CSS = None
+
+    def _css(self):
+        if WalkAmplitudeTest.CSS is None:
+            path = settings.BASE_DIR / 'static' / 'css' / 'pikmin.css'
+            WalkAmplitudeTest.CSS = path.read_text(encoding='utf-8')
+        return WalkAmplitudeTest.CSS
+
+    def _frames(self, name):
+        """@keyframes <name>{...} 안의 본문을 꺼낸다.
+
+        안에 또 중괄호가 있어서(0%{...}) 정규식만으로는 끝을 못 찾는다.
+        여는 괄호부터 세면서 짝이 맞는 자리까지 잘라낸다.
+        """
+        css = self._css()
+        m = re.search(r'@keyframes\s+' + name + r'\s*\{', css)
+        self.assertIsNotNone(m, '@keyframes %s 를 못 찾았다' % name)
+        depth, i = 1, m.end()
+        while i < len(css) and depth:
+            depth += {'{': 1, '}': -1}.get(css[i], 0)
+            i += 1
+        self.assertEqual(depth, 0, '@keyframes %s 의 끝을 못 찾았다' % name)
+        return css[m.end():i - 1]
+
+    def _max(self, body, func):
+        vals = [abs(float(v)) for v in
+                re.findall(r'%s\(\s*(-?[\d.]+)' % func, body)]
+        self.assertTrue(vals, '%s() 가 하나도 없다' % func)
+        return max(vals)
+
+    def test_머리_흔들림은_8도를_넘지_않는다(self):
+        """13도였다. 13도면 머리가 제 너비의 절반을 움직인다."""
+        deg = self._max(self._frames('sway'), 'rotate')
+        self.assertLessEqual(deg, 8, '잎·꽃이 %.1f도 흔들린다' % deg)
+
+    def test_몸통_흔들림은_2_5도를_넘지_않는다(self):
+        deg = self._max(self._frames('waddle'), 'rotate')
+        self.assertLessEqual(deg, 2.5, '몸통이 %.1f도 흔들린다' % deg)
+
+    def test_몸통_좌우_미끄러짐은_0_5를_넘지_않는다(self):
+        """다리가 안 따라오는 양이다. 여기가 커지면 몸과 다리가 떨어져 보인다."""
+        px = self._max(self._frames('waddle'), 'translateX')
+        self.assertLessEqual(px, 0.5, '몸통이 %.2f 미끄러진다' % px)
+
+    def test_걸음_박자는_그대로다(self):
+        """진폭만 줄였다. 박자까지 건드리면 걷는 느낌이 사라진다."""
+        self.assertIn('--P:.74s', self._css())
+
+    def test_다리와_몸_끄덕임은_그대로다(self):
+        """step 과 bob 은 '걷는다' 는 신호다. 줄이면 미끄러지는 것처럼 보인다."""
+        self.assertGreaterEqual(self._max(self._frames('step'), 'rotate'), 10)
+        self.assertGreaterEqual(self._max(self._frames('bob'), 'translateY'), 2.5)
+
+
+class FlowerChipTest(BaseTest):
+    """6. 「꽃 색」칸에 꽃이 보인다 — 2026-11-18 (건의 #29)
+
+    "마이페이지에서 머리 위 꽃도 안 보이는것 같아요" 라는 제보를 받았다.
+    제보한 분은 받은 복사 8회라 머리가 잎인 게 맞다. 그런데 칩까지 본인 단계로
+    그려서, 분홍꽃·흰꽃·노란꽃 라벨 아래에 초록 잎만 다섯 개 있었다.
+    게다가 그분이 고른 분홍꽃은 자동 배정값과 같아서 눌러도 아무것도 안 바뀌었다.
+
+    칩은 단계와 상관없이 늘 꽃으로 그린다. 미리보기는 실제 단계 그대로 둔다 —
+    거기까지 꽃으로 그리면 아직 안 핀 꽃을 폈다고 거짓말하는 셈이다.
+    """
+
+    def _chips(self, body):
+        m = re.search(r'id="pk-flowers"(.*?)</div>', body, re.S)
+        self.assertIsNotNone(m, '꽃 색 칸을 못 찾았다')
+        return m.group(1)
+
+    def test_잎_단계여도_칩은_꽃으로_그린다(self):
+        u = self.login()
+        self.assertEqual(u.pikmin_tier, 'leaf')
+        chips = self._chips(self.client.get(reverse('accounts:my_settings')).content.decode())
+        self.assertEqual(chips.count('data-pk-t="flower"'), 5,
+                         '「꽃 색」칸에 꽃이 다섯 개가 아니다')
+        self.assertNotIn('data-pk-t="leaf"', chips)
+
+    def test_미리보기는_실제_단계_그대로다(self):
+        """칩은 꽃이어도 본인 머리는 사실대로 보여준다"""
+        self.login()
+        body = self.client.get(reverse('accounts:my_settings')).content.decode()
+        m = re.search(r'id="pk-preview"(.*?)></span>', body, re.S)
+        self.assertIsNotNone(m)
+        self.assertIn('data-pk-t="leaf"', m.group(1))
+
+    def test_꽃이_핀_사람도_칩은_그대로_다섯_개다(self):
+        u = self.login()
+        u.copy_total = 20000
+        u.save(update_fields=['copy_total'])
+        body = self.client.get(reverse('accounts:my_settings')).content.decode()
+        self.assertEqual(self._chips(body).count('data-pk-t="flower"'), 5)
+        m = re.search(r'id="pk-preview"(.*?)></span>', body, re.S)
+        self.assertIn('data-pk-t="flower"', m.group(1))
+
+    def test_도움말이_칩보다_위에_있다(self):
+        """아래에 두면 칩을 다 눌러본 뒤에야 읽는다"""
+        self.login()
+        body = self.client.get(reverse('accounts:my_settings')).content.decode()
+        self.assertIn('pk-help-top', body)
+        self.assertLess(body.index('pk-help-top'), body.index('id="pk-flowers"'))
+
+    def test_잎_단계에는_언제_피는지_알려준다(self):
+        self.login()
+        body = self.client.get(reverse('accounts:my_settings')).content.decode()
+        self.assertIn('1,000', body)
+        self.assertIn('봉오리', body)
