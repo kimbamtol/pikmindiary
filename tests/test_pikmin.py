@@ -8,6 +8,9 @@
 4. 전용 탈것은 허락받은 사람만 쓴다. POST 로 밀어넣어도 안 먹혀야 한다.
 5. 걷기 진폭에 상한이 있다. 넘으면 파츠가 따로 노는 것처럼 보인다.
 6. 「꽃 색」칸에는 꽃이 보여야 한다. 고르는 게 뭔지 그림으로 알 수 있어야 한다.
+7. 피크민이 쓰는 클래스 이름을 **다른 스타일시트가 홑 선택자로 잡으면 안 된다.**
+   이름만 보고 잡는 규칙은 남의 그림에 올라탄다.
+8. 복사 효과는 카드가 감당할 만큼만 내보내고, 마지막 한 마리가 도착한 뒤에 치운다.
 """
 import re
 
@@ -230,9 +233,12 @@ class MarkRenderTest(BaseTest):
 class WalkAmplitudeTest(BaseTest):
     """5. 걷기 진폭 상한 — 2026-11-18 (건의 #29)
 
-    "가만히 보고 있으면 점점 분리되면서 파츠가 좌우로 엄청 춤춰요" 라는 제보를
-    받았다. 재보니 애니메이션이 어긋나는 게 아니었다 — 5분 + 스크롤 왕복 뒤에도
-    한 마리 안의 여섯 파트 위상은 소수점 네 자리까지 같았다. 진폭이 문제였다.
+    **먼저 밝혀둔다. 이 상한은 건의 #29 의 답이 아니다.** 진짜 원인은 seasons.css
+    의 `.leaf` 였고 ClassNameCollisionTest 가 지킨다. 진폭을 줄인 것은 번지는
+    속도만 늦춘 오진이었다. 상한 자체는 그대로 쓸모가 있어서 남겨둔다.
+
+    당시 기록: 애니메이션이 어긋나는 게 아니었다 — 5분 + 스크롤 왕복 뒤에도
+    한 마리 안의 여섯 파트 위상은 소수점 네 자리까지 같았다.
 
     한 걸음(0.74초)마다 머리가 제 너비(8.4)의 48% 인 4.0 을 움직였고, 몸통은
     제 너비(13.8)의 20% 인 2.8 만큼 발에서 어긋났다. 다리는 bod 바깥에 있어서
@@ -353,3 +359,136 @@ class FlowerChipTest(BaseTest):
         body = self.client.get(reverse('accounts:my_settings')).content.decode()
         self.assertIn('1,000', body)
         self.assertIn('봉오리', body)
+
+
+class ClassNameCollisionTest(BaseTest):
+    """7. 피크민 클래스 이름을 남이 홑 선택자로 잡으면 안 된다 — 2026-11-18
+
+    건의 #29 의 진짜 원인이다. seasons.css 의 가을 낙엽 효과가 이랬다.
+
+        .leaf { position:absolute; animation: leaffall linear infinite }
+
+    피크민은 머리 위 잎을 class="leaf lf1" 로 그린다. 그래서 표식의 잎이
+    낙엽이 되어 translateY(100vh) 로 떠내려가고 opacity 0 으로 사라졌다.
+
+    거기서 끝이 아니다. .stem 과 .tilt 는 transform-box:fill-box 라 바깥 상자가
+    자식을 따라 커진다. 떠내려간 잎이 상자를 10.7 에서 167.3 까지 끌고 갔고,
+    transform-origin:bottom center 가 그만큼 아래로 내려갔다. sway 와 waddle 이
+    저 멀리 있는 점을 축으로 돌면서 몸통이 좌우로 춤췄다. 27px 짜리 표식 안에서
+    몸통 그룹이 8.5초 만에 385px 까지 자랐다.
+
+    피크민은 body·face·shadow·arm·stem 처럼 흔한 이름을 쓴다. 지금은 .leaf
+    하나만 겹쳤지만 누가 `.shadow {}` 를 쓰면 똑같이 터진다. 그래서 이름 하나가
+    아니라 **규칙**을 지킨다.
+    """
+
+    #: pikmin.js 가 만들지만 class="..." 안에는 안 보이는 것들
+    EXTRA = {'walk', 'fly', 'go', 'pk-mark', 'pk-runners', 'pk-on',
+             'pk-big', 'pk-hidden', 'pk-chip-art'}
+
+    def _names(self):
+        """pikmin.js 가 실제로 붙이는 클래스 이름을 긁어온다.
+
+        손으로 적어두면 새 파츠를 넣을 때 아무도 안 고친다.
+        """
+        js = (settings.BASE_DIR / 'static' / 'js' / 'pikmin.js').read_text(encoding='utf-8')
+        names = set()
+        for m in re.finditer(r'class="([^"]*)"', js):
+            # ${...} 는 색·등급처럼 값이 들어가는 자리다
+            for tok in re.sub(r'\$\{[^}]*\}', ' ', m.group(1)).split():
+                if re.fullmatch(r'[A-Za-z][A-Za-z0-9_-]*', tok):
+                    names.add(tok)
+        return names | self.EXTRA
+
+    def _selectors(self, css):
+        """여는 중괄호 앞에 오는 선택자 목록만 뽑는다"""
+        css = re.sub(r'/\*.*?\*/', ' ', css, flags=re.S)
+        out = []
+        for m in re.finditer(r'(?:^|[}])([^{}]*)\{', css, flags=re.S):
+            head = m.group(1).strip()
+            if not head or head.startswith('@'):
+                continue
+            out.extend(p.strip() for p in head.split(','))
+        return [p for p in out if p]
+
+    def test_피크민_이름을_긁어온다(self):
+        """이 테스트가 헛돌고 있지 않은지부터 본다"""
+        names = self._names()
+        for must in ('leaf', 'stem', 'tilt', 'bod', 'shadow', 'body', 'face'):
+            self.assertIn(must, names, '%s 를 못 긁었다 - 긁는 방식이 깨졌다' % must)
+
+    def test_다른_스타일시트가_홑_선택자로_안_잡는다(self):
+        names = self._names()
+        css_dir = settings.BASE_DIR / 'static' / 'css'
+        bad = []
+        for path in sorted(css_dir.glob('*.css')):
+            if path.name == 'pikmin.css':
+                continue            # 제 그림은 제가 잡아도 된다
+            for sel in self._selectors(path.read_text(encoding='utf-8')):
+                if sel.startswith('.') and sel[1:] in names:
+                    bad.append('%s 의 `%s`' % (path.name, sel))
+        self.assertEqual(
+            bad, [],
+            '피크민 클래스 이름을 홑 선택자로 잡는 규칙이 있다. '
+            '`.leaves .leaf` 처럼 제 자리 안으로 한정해라: ' + ', '.join(bad))
+
+    def test_낙엽은_제_자리_안에서만_떨어진다(self):
+        css = (settings.BASE_DIR / 'static' / 'css' / 'seasons.css').read_text(encoding='utf-8')
+        self.assertTrue('.leaves .leaf' in css,
+                        '낙엽 규칙이 .leaves 안으로 한정돼 있어야 한다')
+        for sel in self._selectors(css):
+            self.assertFalse(
+                sel == '.leaf' or sel.startswith('.leaf:'),
+                '`%s` 가 남아 있다. 피크민 머리의 잎까지 떨어뜨린다' % sel)
+
+
+class ParadeTest(BaseTest):
+    """8. 복사 효과 — 2026-11-18
+
+    두 가지를 쟀다.
+
+    하나. 218px 짜리 폰 카드에 12마리를 내보내면 이웃 간격이 23px 이 된다.
+    한 마리 폭이 24px 이라 줄지어 가는 게 아니라 겹친 벽이 되어 지나간다.
+    승인된 글 2,607개 중 74.1% 가 9마리 이상인 작성자의 글이다.
+
+    둘. 상자를 1900ms 에 통째로 비웠는데 마지막 주자는 935ms 늦게 떠나
+    2435ms 에 끝난다. 카드 한복판에서 투명도 1인 채로 여덟 마리가 한꺼번에
+    사라졌다. 걸어 나가는 게 아니라 끊겼다.
+    """
+
+    def _js(self):
+        return (settings.BASE_DIR / 'static' / 'js' / 'pikmin.js').read_text(encoding='utf-8')
+
+    def _code(self):
+        """주석을 뺀 알맹이. 옛 숫자는 주석에 사연으로 남아 있다"""
+        js = re.sub(r'/\*.*?\*/', ' ', self._js(), flags=re.S)
+        return re.sub(r'//[^\n]*', ' ', js)
+
+    def _has(self, pattern):
+        """통째로 쏟아내지 않는다. 실패 메시지는 짧아야 읽는다"""
+        return re.search(pattern, self._code()) is not None
+
+    def test_치우는_시각을_박아두지_않는다(self):
+        self.assertNotIn('1900', self._code(),
+                         '치우는 시각을 숫자로 박아두면 마릿수가 바뀔 때 또 끊긴다')
+        self.assertTrue(
+            self._has(r'setTimeout\([\s\S]*?DASH \+ GAP \* \(n - 1\)'),
+            '마지막 주자가 도착한 뒤에 치워야 한다 '
+            '(setTimeout 의 시각이 DASH + GAP * (n - 1) 이어야 한다)')
+
+    def test_마릿수를_카드_폭에_맞춘다(self):
+        self.assertTrue(
+            self._has(r'Math\.min\(k\.h, Math\.round\(wide / 36\)\)'),
+            '카드가 감당할 만큼만 내보내야 한다')
+        self.assertTrue(
+            self._has(r'for \(let i = 0; i < n; i\+\+\)'),
+            '무리 전체(k.h)가 아니라 추린 수(n)만큼 돌아야 한다')
+
+    def test_박자_값은_CSS_와_같다(self):
+        """JS 의 DASH·GAP 이 CSS 의 dash 길이와 어긋나면 또 끊긴다"""
+        js = self._js()
+        css = (settings.BASE_DIR / 'static' / 'css' / 'pikmin.css').read_text(encoding='utf-8')
+        m = re.search(r'animation:\s*dash\s+([\d.]+)s', css)
+        self.assertIsNotNone(m, 'CSS 에서 dash 길이를 못 찾았다')
+        self.assertIn('const DASH = %s;' % m.group(1), js,
+                      'JS 의 DASH 가 CSS 의 dash 길이와 달라졌다')

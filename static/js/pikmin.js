@@ -208,6 +208,10 @@ function drawMarks(root){
 }
 
 /* ── 복사하면 무리가 지나간다 ─────────────────────────── */
+/* CSS 의 @keyframes dash 와 .runner 설정에 맞춘 값이다. 한쪽만 바꾸면 어긋난다 */
+const DASH = 1.5;     // 한 마리가 카드를 건너는 데 걸리는 시간(초)
+const GAP  = 0.085;   // 한 마리씩 늦게 떠나는 간격(초)
+
 function parade(card, k, mark){
   let box = card.querySelector('.pk-runners');
   if (!box) {
@@ -228,9 +232,18 @@ function parade(card, k, mark){
   else if (mark) top = mark.getBoundingClientRect().bottom - b.top + 2;
   else top = b.height - 40;
   box.style.top = Math.max(0, Math.min(top, b.height - 36)).toFixed(0) + 'px';
+
+  // 카드가 감당할 만큼만 내보낸다.
+  // 한 마리 폭이 24px 인데 218px 짜리 폰 카드에 12마리를 넣으면 이웃 간격이
+  // 23px 이 된다 — 줄지어 가는 게 아니라 서로 겹친 벽이 되어 지나간다.
+  // 36px 에 한 마리면 몸 사이에 12px 이 남아 한 줄로 읽힌다.
+  // 큰 화면(440px)에서는 12마리가 그대로 나가므로 모은 사람의 보상은 안 깎인다.
+  const wide = box.clientWidth;
+  const n = Math.max(1, Math.min(k.h, Math.round(wide / 36)));
+
   let html = '';
-  for (let i = 0; i < k.h; i++) {
-    const delay = (i * 0.085).toFixed(3);
+  for (let i = 0; i < n; i++) {
+    const delay = (i * GAP).toFixed(3);
     if (i === 0 && k.m === 'turtle') {
       html += `<svg class="pk tt go runner rider c-${k.c} f-${k.f} lv-${k.l}"
         viewBox="0 0 44 42" aria-hidden="true" focusable="false"
@@ -247,10 +260,15 @@ function parade(card, k, mark){
   void box.offsetWidth;          // 리플로우 강제 — 연달아 눌러도 처음부터 다시 간다
   // left 를 움직이면 매 프레임 레이아웃을 다시 잰다. transform 은 GPU 가 한다.
   // 얼마나 가야 하는지는 여기서만 알 수 있어서 변수로 넘긴다.
-  box.style.setProperty('--span', (box.clientWidth + 130) + 'px');
+  box.style.setProperty('--span', (wide + 130) + 'px');
   box.innerHTML = html;
   clearTimeout(box._t);
-  box._t = setTimeout(() => { box.innerHTML = ''; }, 1900);
+  // 마지막 주자가 도착하고 나서 치운다.
+  // 예전에는 1900ms 로 박아두었다. 12마리면 마지막이 935ms 늦게 떠나 2435ms 에
+  // 끝나는데, 그 전에 상자를 비우니 카드 한복판에서 투명도 1인 채로 여덟 마리가
+  // 한꺼번에 사라졌다. 걸어 나가는 게 아니라 끊겼다.
+  box._t = setTimeout(() => { box.innerHTML = ''; },
+                      (DASH + GAP * (n - 1)) * 1000 + 80);
 }
 
 /* 복사 버튼에서 부른다.
