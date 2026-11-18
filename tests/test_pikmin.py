@@ -11,6 +11,7 @@
 7. 피크민이 쓰는 클래스 이름을 **다른 스타일시트가 홑 선택자로 잡으면 안 된다.**
    이름만 보고 잡는 규칙은 남의 그림에 올라탄다.
 8. 복사 효과는 카드가 감당할 만큼만 내보내고, 마지막 한 마리가 도착한 뒤에 치운다.
+9. **fetch 로 붙인 조각에도 표식을 그려야 한다.** pikmin.js 는 혼자 깨어나지 않는다.
 """
 import re
 
@@ -492,3 +493,55 @@ class ParadeTest(BaseTest):
         self.assertIsNotNone(m, 'CSS 에서 dash 길이를 못 찾았다')
         self.assertIn('const DASH = %s;' % m.group(1), js,
                       'JS 의 DASH 가 CSS 의 dash 길이와 달라졌다')
+
+
+class FragmentDrawTest(BaseTest):
+    """9. fetch 로 붙인 조각에도 표식을 그려야 한다 — 2026-11-18
+
+    pikmin.js 는 DOMContentLoaded 와 htmx:afterSettle/afterSwap 에만 깨어난다.
+    그런데 목록 무한 스크롤(appendCards)과 댓글 모달은 HTMX 가 아니라 맨 fetch 다.
+    그 행사가 안 열리니 새로 붙은 `.pk-mark` 는 빈 껍데기로 남는다.
+
+    잰 값: 목록을 끝까지 내리면 표식 84개 중 그려진 것이 **12개**였다. 첫 쪽
+    말고는 하나도 없었다. 댓글 모달은 켠 사람의 표식이 **0개** 그려졌다.
+
+    `window.pikminDraw(root)` 를 붙이는 자리에서 직접 불러야 한다.
+    """
+
+    #: 표식이 들어 있는 조각 템플릿
+    MARK_FRAGMENTS = ('coordinates/_card_list.html',
+                      'comments/_comment_modal_content.html')
+
+    def _tpl(self, rel):
+        return (settings.BASE_DIR / 'templates' / rel).read_text(encoding='utf-8')
+
+    def test_조각에_표식이_들어_있다(self):
+        """전제부터 확인한다. 조각에 표식이 없으면 아래 테스트가 헛돈다"""
+        for rel in self.MARK_FRAGMENTS:
+            self.assertIn('pikmin_mark', self._tpl(rel),
+                          '%s 에 표식이 없다 - 이 테스트의 전제가 깨졌다' % rel)
+
+    def test_무한_스크롤이_붙인_카드를_그린다(self):
+        js = self._tpl('coordinates/list.html')
+        i = js.find('function appendCards')
+        self.assertNotEqual(i, -1, 'appendCards 를 못 찾았다')
+        body = js[i:i + 800]
+        self.assertIn('pikminDraw', body,
+                      '불러온 카드에 pikminDraw 를 안 부르면 첫 쪽 말고는 '
+                      '표식이 전부 빈 껍데기로 남는다')
+
+    def test_댓글을_가져오는_모든_곳이_그린다(self):
+        """조각 주소를 부르는 자리를 전부 훑는다. 한 곳만 고치면 다른 곳이 남는다"""
+        found = 0
+        for path in sorted((settings.BASE_DIR / 'templates').rglob('*.html')):
+            text = path.read_text(encoding='utf-8')
+            for m in re.finditer(r"fetch\('/comments/list/", text):
+                found += 1
+                near = text[m.start():m.start() + 500]
+                self.assertIn(
+                    'pikminDraw', near,
+                    '%s 의 %d번째 글자 근처: 댓글을 붙이고 pikminDraw 를 안 불렀다'
+                    % (path.name, m.start()))
+        self.assertGreaterEqual(found, 2,
+                                '댓글을 가져오는 자리를 하나도 못 찾았다 - '
+                                '찾는 방식이 깨졌다')

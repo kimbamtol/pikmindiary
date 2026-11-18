@@ -1432,6 +1432,10 @@
             newCards.forEach(function (card) {
                 coordGrid.appendChild(card);
                 attachCopyListeners(card);
+                // 무한 스크롤은 HTMX 가 아니라 맨 fetch 다. pikmin.js 는
+                // htmx:afterSettle 에만 귀를 열어둬서 여기선 안 깨어난다.
+                // 안 부르면 첫 쪽 말고는 표식이 전부 빈 껍데기로 남는다.
+                if (window.pikminDraw) window.pikminDraw(card);
             });
         }
 
@@ -1558,7 +1562,10 @@
         openModal('comment-modal');
         fetch('/comments/list/' + coordId + '/')
             .then(function(r) { return r.text(); })
-            .then(function(html) { body.innerHTML = html; })
+            .then(function(html) {
+                body.innerHTML = html;
+                if (window.pikminDraw) window.pikminDraw(body);   // 댓글 쓴 사람 표식
+            })
             .catch(function() { body.innerHTML = '<p class="cm-empty">댓글을 불러올 수 없습니다.</p>'; });
     }
 
@@ -1584,7 +1591,10 @@
                 var body = document.getElementById('comment-modal-body');
                 fetch('/comments/list/' + currentCommentCoordId + '/')
                     .then(function(r) { return r.text(); })
-                    .then(function(html) { body.innerHTML = html; });
+                    .then(function(html) {
+                        body.innerHTML = html;
+                        if (window.pikminDraw) window.pikminDraw(body);
+                    });
                 // 카드의 댓글 카운트 업데이트
                 var btns = document.querySelectorAll('.comment-btn-sm');
                 btns.forEach(function(btn) {
