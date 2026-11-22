@@ -263,6 +263,58 @@ class ButtonClassTest(BaseTest):
                         '.paging-btn.on 규칙이 없다')
 
 
+class ScrollRestoreTest(BaseTest):
+    """이어보기를 고른 사람의 '돌아올 자리' 기억 (2026-11-22, 건의 #30 ㄱ)
+
+    예전에는 sessionStorage 였다. 탭을 닫으면 지워져서, 엽서작하다가 창을
+    닫고 나중에 들어오면 220쪽짜리 목록을 첫 쪽부터 다시 내려야 했다.
+
+    localStorage 는 탭을 닫아도 남는다. 다만 두 가지를 같이 지켜야 한다.
+    - 영영 남으면 어제 보던 30쪽으로 끌고 간다 → 시간 제한이 필요하다
+    - 시크릿창은 저장소 접근 자체가 던진다 → try/catch 로 감싸야 한다
+    """
+
+    def _tpl(self):
+        with open(TPL, encoding='utf-8') as f:
+            return f.read()
+
+    def _block(self):
+        tpl = self._tpl()
+        i = tpl.find('// 무한 스크롤 + 스크롤 복원')
+        self.assertNotEqual(i, -1, '무한 스크롤 블록을 못 찾았다')
+        return tpl[i:i + 4000]
+
+    def test_sessionStorage_로_되돌아가지_않는다(self):
+        code = self._block()
+        # 주석에는 남아 있어도 된다 - 실제로 부르는 곳만 본다
+        self.assertTrue(not re.search(r'sessionStorage\s*\.', code),
+                        'sessionStorage 를 아직 부르고 있다')
+        self.assertTrue('localStorage' in code, 'localStorage 를 안 쓴다')
+
+    def test_오래된_기록은_버린다(self):
+        code = self._block()
+        self.assertTrue('KEEP_MS' in code, '시간 제한이 없다')
+        self.assertTrue(re.search(r'Date\.now\(\)\s*-\s*\w+\.at\s*>\s*KEEP_MS', code),
+                        '저장 시각과 비교하는 곳이 없다')
+        self.assertTrue(re.search(r'at:\s*Date\.now\(\)', code),
+                        '저장할 때 시각을 안 적는다')
+
+    def test_저장소가_막혀도_안_터진다(self):
+        """시크릿창에서는 localStorage 접근이 예외를 던진다"""
+        code = self._block()
+        for fn in ('function remember', 'function recall'):
+            i = code.find(fn)
+            self.assertNotEqual(i, -1, '%s 가 없다' % fn)
+            self.assertTrue('catch' in code[i:i + 450],
+                            '%s 에 try/catch 가 없다' % fn)
+
+    def test_한_번_쓰고_지운다(self):
+        """지우지 않으면 목록에 올 때마다 30쪽으로 끌려간다"""
+        code = self._block()
+        i = code.find('function recall')
+        self.assertTrue('removeItem' in code[i:i + 450], 'recall 이 기록을 안 지운다')
+
+
 class ScrollGuardTest(BaseTest):
     """규칙 6 - 쪽수 보기에서는 무한 스크롤 코드가 아예 안 돈다"""
 

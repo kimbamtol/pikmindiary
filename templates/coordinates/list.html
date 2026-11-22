@@ -1477,6 +1477,26 @@
         if ('{{ list_paging }}' !== 'scroll') return;
 
         var STORAGE_KEY = 'coordListScroll';
+        // 예전에는 sessionStorage 였다 - 탭을 닫으면 지워져서, 엽서작하다가
+        // 창을 닫고 나중에 들어오면 무조건 첫 쪽부터 다시 내려야 했다.
+        // localStorage 는 탭을 닫아도 남는다. 대신 영영 남으면 어제 보던
+        // 30쪽으로 끌고 가 버리니, 30분이 지난 기록은 버린다.
+        var KEEP_MS = 30 * 60 * 1000;
+
+        // 시크릿창이나 저장소를 막아둔 브라우저에서는 접근 자체가 던진다.
+        function remember(v) {
+            try { localStorage.setItem(STORAGE_KEY, JSON.stringify(v)); } catch (e) { }
+        }
+        function recall() {
+            try {
+                var raw = localStorage.getItem(STORAGE_KEY);
+                localStorage.removeItem(STORAGE_KEY);   // 한 번만 쓴다
+                if (!raw) return null;
+                var v = JSON.parse(raw);
+                if (!v.at || Date.now() - v.at > KEEP_MS) return null;
+                return v;
+            } catch (e) { return null; }
+        }
         var currentPage = 1;
         var isLoading = false;
         var hasNext = {% if has_next %}true{% else %}false{% endif %};
@@ -1518,20 +1538,19 @@
         coordGrid.addEventListener('click', function (e) {
             var link = e.target.closest('a[href*="/coordinates/"]');
             if (link && !e.target.closest('button')) {
-                sessionStorage.setItem(STORAGE_KEY, JSON.stringify({
+                remember({
                     page: currentPage,
                     scrollY: window.scrollY,
-                    filters: currentFilters
-                }));
+                    filters: currentFilters,
+                    at: Date.now()
+                });
             }
         });
 
         // --- 스크롤 복원 시도 ---
-        var saved = sessionStorage.getItem(STORAGE_KEY);
-        if (saved) {
-            sessionStorage.removeItem(STORAGE_KEY);
+        var state = recall();
+        if (state) {
             try {
-                var state = JSON.parse(saved);
                 if (state.filters === currentFilters && state.page > 1) {
                     isLoading = true;
                     // 복원 중 로딩 표시
