@@ -59,17 +59,48 @@ def coordinate_list(request):
     else:  # latest
         queryset = queryset.order_by('-created_at')
     
-    # 무한 스크롤을 위한 페이지네이션 (12개씩)
-    PAGE_SIZE = 12
+    # 한 쪽에 몇 장을 보낼지는 화면 폭이 정한다 (PC 30장 / 그보다 좁으면 24장).
+    # 어느 밀도에서도 마지막 줄에 이가 빠지지 않는 수로 골랐다.
+    from apps.core.context_processors import page_size as _page_size
+    PAGE_SIZE = _page_size(request)
+
     page_number = request.GET.get('page', '1')
     try:
         page_number = int(page_number)
     except ValueError:
         page_number = 1
 
+    total_count = queryset.count()
+    total_pages = max(1, -(-total_count // PAGE_SIZE))   # 올림 나누기
+    page_number = min(max(page_number, 1), total_pages)  # 없는 쪽을 달라고 해도 끝 쪽을 준다
+
     offset = (page_number - 1) * PAGE_SIZE
     first_page_items = list(queryset[offset:offset + PAGE_SIZE])
-    has_next = queryset.count() > offset + PAGE_SIZE
+    has_next = total_count > offset + PAGE_SIZE
+
+    # 쪽번호 줄. 양 끝과 현재 둘레만 보여주고 벌어진 자리는 None(…)으로 남긴다.
+    # 2,630장이면 88쪽이라 전부 찍으면 줄이 화면을 넘어간다.
+    def _page_window(cur, last, around=2):
+        want = {1, last}
+        want.update(range(max(1, cur - around), min(last, cur + around) + 1))
+        out, prev = [], 0
+        for n in sorted(want):
+            if prev and n - prev > 1:
+                out.append(None)
+            out.append(n)
+            prev = n
+        return out
+
+    # 좁은 화면은 번호가 두 줄로 넘친다. 현재 둘레를 하나만 보여준다.
+    page_numbers = _page_window(page_number, total_pages,
+                                around=2 if PAGE_SIZE >= 30 else 1)
+
+    # 쪽을 넘겨도 검색어·분류·정렬이 따라가야 한다. 비면 빈 문자열이다.
+    from urllib.parse import urlencode
+    _keep = {k: v for k, v in (
+        ('q', query), ('category', category), ('sort', sort), ('region', region_filter)
+    ) if v}
+    qs_prefix = (urlencode(_keep) + '&') if _keep else ''
 
     # 좋아요/북마크 상태 조회
     coord_ids = [c.pk for c in first_page_items]
@@ -159,6 +190,13 @@ def coordinate_list(request):
         'regions': Coordinate.Region.choices,
         'ranker_stats': ranker_stats,
         'has_next': has_next,
+        'page_number': page_number,
+        'total_pages': total_pages,
+        'total_count': total_count,
+        'page_numbers': page_numbers,
+        'prev_page': page_number - 1 if page_number > 1 else 0,
+        'next_page_num': page_number + 1 if has_next else 0,
+        'qs_prefix': qs_prefix,
         'site_notice': site_notice,
         'user_liked_coords': user_liked_coords,
         'user_bookmarked_coords': user_bookmarked_coords,

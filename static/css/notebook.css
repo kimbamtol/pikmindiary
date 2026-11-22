@@ -1074,7 +1074,10 @@ body[data-ui="notebook"] .density-group {
     border: 1.5px solid var(--nb-rule);
     border-radius: 999px;
 }
-body[data-ui="notebook"] .density-btn.on {
+/* 넘기기 버튼(쪽수/이어보기)은 밀도 버튼과 같은 모양이어야 한다.
+   클래스를 겹칠 수 없어서(base.html 의 밀도 핸들러가 가로챈다) 여기에 나란히 적는다. */
+body[data-ui="notebook"] .density-btn.on,
+body[data-ui="notebook"] .paging-btn.on {
     background: var(--primary);
     color: #fff;
     box-shadow: none;

@@ -168,6 +168,21 @@ class CustomUser(AbstractUser):
         default=ListDensity.NORMAL,
     )
 
+    class ListPaging(models.TextChoices):
+        PAGES = 'pages', '쪽수로 보기'
+        SCROLL = 'scroll', '계속 이어보기'
+
+    # 목록을 쪽으로 끊어 볼지, 내리면 계속 붙을지.
+    # 기본은 쪽수다 - 주소에 ?page=N 이 박혀야 뒤로가기와 즐겨찾기가 자리를 기억한다.
+    # 무한 스크롤은 그 자리를 sessionStorage 에 적어두는데 탭을 닫으면 지워지고,
+    # 돌아올 때 2쪽부터 N쪽까지를 한꺼번에 다시 받는다(30쪽이면 요청 29개).
+    list_paging = models.CharField(
+        '목록 넘기기 방식',
+        max_length=10,
+        choices=ListPaging.choices,
+        default=ListPaging.PAGES,
+    )
+
     # ───── 피크민 (이름 옆 표식 + 복사 효과) ─────
     # 색과 꽃은 고를 수 있다. 비워두면 id 에서 자동으로 뽑는다.
     # 머리(잎/봉오리/꽃)와 마릿수는 못 고른다 — copy_total 에서 계산된다.

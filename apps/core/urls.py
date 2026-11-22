@@ -18,4 +18,5 @@ urlpatterns = [
 
     # 목록 보기 방식
     path('display/density/', views.set_list_density, name='set_list_density'),
+    path('display/paging/', views.set_list_paging, name='set_list_paging'),
 ]

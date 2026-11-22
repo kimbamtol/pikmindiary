@@ -82,6 +82,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'apps.core.context_processors.design_beta',
                 'apps.core.context_processors.list_density',
+                'apps.core.context_processors.list_paging',
             ],
         },
     },

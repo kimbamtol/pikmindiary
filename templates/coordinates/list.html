@@ -116,6 +116,10 @@
                     <button type="button" class="density-btn {% if list_density == 'normal' %}on{% endif %}" data-density="normal">보통</button>
                     <button type="button" class="density-btn {% if list_density == 'dense' %}on{% endif %}" data-density="dense">촘촘</button>
                 </div>
+                <div class="density-group paging-group" role="group" aria-label="목록 넘기기 방식">
+                    <button type="button" class="paging-btn {% if list_paging != 'scroll' %}on{% endif %}" data-paging="pages">쪽수</button>
+                    <button type="button" class="paging-btn {% if list_paging == 'scroll' %}on{% endif %}" data-paging="scroll">이어보기</button>
+                </div>
                 <span class="density-hint">사진을 누르면 좌표가 복사됩니다</span>
             </div>
 
@@ -125,12 +129,42 @@
             </div>
 
 
-            <!-- 무한 스크롤 로딩 표시 -->
-            {% if has_next %}
+            <!-- 무한 스크롤 로딩 표시 (이어보기를 고른 사람에게만) -->
+            {% if has_next and list_paging == 'scroll' %}
             <div id="scroll-sentinel" class="scroll-loading">
                 <div class="loading-spinner"></div>
                 <span>로딩 중...</span>
             </div>
+            {% endif %}
+
+            <!-- 쪽번호 줄 -->
+            {% if list_paging != 'scroll' and total_pages > 1 %}
+            <nav class="pagination" aria-label="쪽 넘기기">
+                {% if prev_page %}
+                <a href="?{{ qs_prefix }}page={{ prev_page }}" rel="prev">←<span class="page-word"> 이전</span></a>
+                {% else %}
+                <span class="disabled">←<span class="page-word"> 이전</span></span>
+                {% endif %}
+
+                {% for n in page_numbers %}
+                    {% if n %}
+                        {% if n == page_number %}
+                        <span class="current" aria-current="page">{{ n }}</span>
+                        {% else %}
+                        <a href="?{{ qs_prefix }}page={{ n }}">{{ n }}</a>
+                        {% endif %}
+                    {% else %}
+                        <span class="page-gap">…</span>
+                    {% endif %}
+                {% endfor %}
+
+                {% if next_page_num %}
+                <a href="?{{ qs_prefix }}page={{ next_page_num }}" rel="next"><span class="page-word">다음 </span>→</a>
+                {% else %}
+                <span class="disabled"><span class="page-word">다음 </span>→</span>
+                {% endif %}
+            </nav>
+            <p class="page-count">전체 {{ total_count }}장 가운데 {{ page_number }} / {{ total_pages }} 쪽</p>
             {% endif %}
 
             {% else %}
@@ -220,7 +254,10 @@
         padding: 3px;
         gap: 2px;
     }
-    .density-btn {
+    /* 넘기기 버튼은 모양만 같고 동작은 다르다. class 를 겹치면
+       base.html 의 밀도 핸들러가 먼저 집어가서 'on' 을 붙여버린다. */
+    .density-btn,
+    .paging-btn {
         border: none;
         background: none;
         color: #555555;
@@ -231,11 +268,45 @@
         white-space: nowrap;
         transition: background 0.15s ease, color 0.15s ease;
     }
-    .density-btn.on {
+    .density-btn.on,
+    .paging-btn.on {
         background: var(--bg-primary);
         color: var(--text-primary);
         font-weight: 700;
         box-shadow: var(--shadow-sm);
+    }
+
+    /* 쪽번호 줄 - 바탕은 main.css 의 .pagination 을 그대로 쓴다.
+       여기서는 목록에만 필요한 것(줄바꿈, 생략표, 장수 줄)만 덧댄다. */
+    .pagination {
+        flex-wrap: wrap;
+        align-items: center;
+        margin: var(--spacing-lg) 0 var(--spacing-sm);
+    }
+    .pagination .page-gap {
+        min-width: 0;
+        height: auto;
+        padding: 0 2px;
+        background: none;
+        color: #999999;
+    }
+    .pagination .disabled { opacity: 0.45; }
+    .page-count {
+        text-align: center;
+        font-size: 0.82rem;
+        color: var(--text-secondary);
+        margin-bottom: var(--spacing-lg);
+    }
+    @media (max-width: 620px) {
+        /* 390px 폰에 열 개가 한 줄로 들어가야 한다. 110쪽짜리 번호까지 들어가므로
+           여유가 거의 없다 - 간격과 폭을 같이 줄여야 겨우 맞는다. */
+        .pagination { gap: 4px; }
+        .pagination a,
+        .pagination span { min-width: 36px; padding: 0 6px; }
+        /* 쪽이 110까지 가면 '이전/다음' 글자를 넣을 자리가 없다.
+           화살표만 남겨야 한 줄에 들어온다.
+           main.css 의 `.pagination span` 이 더 세서 .page-word 만으로는 안 먹는다. */
+        .pagination .page-word { display: none; }
     }
 
     /* 밀도별 칸 수 */
@@ -1401,6 +1472,10 @@
 
     // 무한 스크롤 + 스크롤 복원
     (function () {
+        // 쪽수 보기를 고른 사람에게는 아예 켜지 않는다.
+        // 주소의 ?page=N 이 자리를 기억하므로 복원 장치 자체가 필요 없다.
+        if ('{{ list_paging }}' !== 'scroll') return;
+
         var STORAGE_KEY = 'coordListScroll';
         var currentPage = 1;
         var isLoading = false;

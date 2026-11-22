@@ -168,3 +168,22 @@ def set_list_density(request):
         # 기기를 옮겨도 따라오도록 계정에도 남긴다
         CustomUser.objects.filter(pk=request.user.pk).update(list_density=value)
     return response
+
+
+@require_POST
+def set_list_paging(request):
+    """목록 넘기기 방식 저장 - 회원은 계정에, 비회원은 쿠키에"""
+    from apps.accounts.models import CustomUser
+
+    value = request.POST.get('paging', '')
+    if value not in dict(CustomUser.ListPaging.choices):
+        return JsonResponse({'ok': False, 'error': '알 수 없는 넘기기 방식입니다.'}, status=400)
+
+    response = JsonResponse({'ok': True, 'paging': value})
+    response.set_cookie(
+        'pd_paging', value, max_age=COOKIE_MAX_AGE,
+        samesite='Lax', secure=request.is_secure()
+    )
+    if request.user.is_authenticated:
+        CustomUser.objects.filter(pk=request.user.pk).update(list_paging=value)
+    return response

@@ -5,6 +5,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <script>
+    /* 화면 폭을 서버에 알려준다. 서버는 이걸 보고 한 쪽에 몇 장을 보낼지 정한다
+       (PC 30장 / 그보다 좁으면 24장). 쿠키가 없으면 좁은 쪽으로 친다.
+       머리에서 미리 적어둬야 다음 요청부터 바로 맞는 수가 온다.
+       1100px 은 목록 칸 수가 바뀌는 지점이다 - list.html 의 @media 와 같은 값이다. */
+    (function () {
+        try {
+            var w = (window.innerWidth >= 1100) ? 'pc' : 'mo';
+            if (document.cookie.indexOf('pd_w=' + w) === -1) {
+                document.cookie = 'pd_w=' + w + ';path=/;max-age=15552000;samesite=Lax'
+                    + (location.protocol === 'https:' ? ';secure' : '');
+            }
+        } catch (e) { }
+    })();
+    </script>
     <title>{% block title %}피크민 다이어리{% endblock %}</title>
     <link rel="icon" type="image/svg+xml" href="{% static 'img/favicon.svg' %}">
     <meta name="description"
@@ -52,7 +68,7 @@
     {% if beta_enabled %}<link rel="stylesheet" href="{% static 'css/design-beta.css' %}?v=20261116b">{% endif %}
     {% if ui_notebook %}
     <link href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/notebook.css' %}?v=20261116b">
+    <link rel="stylesheet" href="{% static 'css/notebook.css' %}?v=20261122a">
     {% endif %}
     {% block extra_css %}{% endblock %}
 
@@ -422,6 +438,40 @@
                     body: 'density=' + encodeURIComponent(value),
                     credentials: 'same-origin'
                 }).catch(function () {});
+            });
+        });
+    })();
+    </script>
+
+    <script>
+    /* 목록 넘기기 방식 전환 (쪽수 / 계속 이어보기).
+       밀도와 달리 화면을 다시 그려야 해서, 저장이 끝나면 쪽 번호를 떼고 새로 연다. */
+    (function () {
+        var buttons = document.querySelectorAll('.paging-btn');
+        if (!buttons.length) return;
+        function csrf() {
+            var m = document.cookie.match('(^|;)\\s*csrftoken\\s*=\\s*([^;]+)');
+            return m ? decodeURIComponent(m.pop()) : '';
+        }
+        buttons.forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var value = btn.getAttribute('data-paging');
+                if (btn.classList.contains('on')) return;
+                buttons.forEach(function (b) { b.classList.toggle('on', b === btn); });
+                fetch('/display/paging/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRFToken': csrf(),
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: 'paging=' + encodeURIComponent(value),
+                    credentials: 'same-origin'
+                }).then(function () {
+                    var u = new URL(window.location.href);
+                    u.searchParams.delete('page');   // 방식을 바꾸면 첫 쪽부터 본다
+                    window.location.replace(u.toString());
+                }).catch(function () { window.location.reload(); });
             });
         });
     })();
