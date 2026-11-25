@@ -42,6 +42,30 @@
                 </div>
 
                 <h1 class="detail-title">{% if coordinate.is_nerfed %}<span class="nerf-badge">[너프됨]</span> {% endif %}{{ coordinate.title }}</h1>
+
+                {% if coordinate.is_gone or coordinate.gone_n %}
+                {% comment %}
+                없어졌다는 제보. 목록 카드의 「?」와 같은 내용을 보여주고,
+                여기서는 바로 답할 수 있게 한다 - 글까지 열어본 사람이
+                실제로 다녀온 사람일 가능성이 높다.
+                {% endcomment %}
+                <div class="gone-notice">
+                    {% if coordinate.is_gone %}
+                    <strong>없어진 곳이에요.</strong>
+                    운영자가 확인했어요. 지금은 없는 자리예요. 다시 생겼다면 알려주세요.
+                    {% else %}
+                    <strong>없어졌다는 제보가 있어요.</strong>
+                    {% if coordinate.gone_last %}{{ coordinate.gone_last|date:"n월 j일" }}에 {% endif %}{{ coordinate.gone_n }}명이 알려주셨어요.{% if coordinate.alive_n %} {{ coordinate.alive_n }}명은 아직 있다고 해요.{% endif %}
+                    아직 확인 전이에요.
+                    <span class="gone-sub">버섯은 잠깐 사라졌다가 5분 뒤에 다시 생기기도 해요.</span>
+                    {% endif %}
+                    <span class="gone-ask">다녀오셨다면 알려주세요.</span>
+                    <span class="gone-btns">
+                        <button type="button" class="gone-vote on" data-vote="ALIVE">아직 있어요</button>
+                        <button type="button" class="gone-vote" data-vote="GONE">저도 없었어요</button>
+                    </span>
+                </div>
+                {% endif %}
                 {% if coordinate.is_nerfed %}
                 <div class="nerf-notice">
                     이 자리의 엽서가 바뀌었다는 제보가 모였습니다.
@@ -556,6 +580,36 @@
         border-color: var(--primary);
         background: var(--primary-light);
     }
+
+    .gone-notice {
+        margin: 10px 0 14px;
+        padding: 11px 14px;
+        border-radius: 10px;
+        background: #fdf1e0;
+        border: 1.5px solid #e9cfa4;
+        color: #6f4c10;
+        font-size: 0.92rem;
+        line-height: 1.55;
+    }
+    .gone-notice .gone-sub { display: block; color: #8d7a52; font-size: 0.84rem; margin-top: 2px; }
+    .gone-notice .gone-ask { display: block; margin-top: 6px; font-weight: 700; }
+    .gone-notice .gone-btns { display: flex; gap: 7px; margin-top: 8px; }
+    .gone-notice .gone-vote {
+        flex: 0 1 150px;
+        padding: 8px 10px;
+        font-size: 0.86rem; font-weight: 700;
+        border-radius: 8px;
+        border: 1.4px solid #d9cfb6;
+        background: #fff;
+        color: #5a5245;
+        cursor: pointer;
+    }
+    .gone-notice .gone-vote.on {
+        background: var(--primary, #6a9a52);
+        border-color: var(--primary, #6a9a52);
+        color: #fff;
+    }
+    .gone-notice .gone-vote[disabled] { opacity: .55; cursor: default; }
 
     .nerf-badge {
         color: #C0392B;
@@ -1285,6 +1339,38 @@ function nerfCsrf() {
     var m = document.cookie.match('(^|;)\\s*csrftoken\\s*=\\s*([^;]+)');
     return m ? decodeURIComponent(m.pop()) : '';
 }
+
+/* 없어졌다는 제보에 답하기. 제보 창구는 하나(toggle_nerf)라
+   「아직 있어요」도 같은 길로 보낸다 - 한 사람 한 표가 저절로 지켜진다. */
+(function () {
+    var box = document.querySelector('.gone-notice');
+    if (!box) return;
+    box.addEventListener('click', function (e) {
+        var b = e.target.closest('.gone-vote');
+        if (!b) return;
+        var btns = box.querySelectorAll('.gone-vote');
+        btns.forEach(function (x) { x.disabled = true; });
+        fetch('/coordinates/{{ coordinate.pk }}/nerf/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': nerfCsrf(),
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: 'kind=' + encodeURIComponent(b.getAttribute('data-vote')),
+            credentials: 'same-origin'
+        }).then(function (r) { return r.json(); }).then(function (data) {
+            var ask = box.querySelector('.gone-ask');
+            if (ask) ask.textContent = data.reported
+                ? '알려주셔서 고맙습니다. 운영자가 확인할게요.'
+                : '답을 취소했어요.';
+            var row = box.querySelector('.gone-btns');
+            if (row) row.remove();
+        }).catch(function () {
+            btns.forEach(function (x) { x.disabled = false; });
+        });
+    });
+})();
 
 function openNerfSheet() {
     var sheet = document.getElementById('nerfSheet');

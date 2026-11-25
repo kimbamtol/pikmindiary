@@ -433,6 +433,10 @@ def change_list(request):
             ],
             'suggested': suggested,
             'gone_votes': b['counts'].get(NerfReport.ChangeKind.GONE, 0),
+            # 목록 카드의 「?」가 세는 것과 같은 값이다 (apps/coordinates/gone.py).
+            # 없어졌다는 표와 그 반대표를 나란히 둬야 운영자가 판단할 수 있다.
+            'gone_n': b['counts'].get(NerfReport.ChangeKind.GONE, 0),
+            'alive_n': b['counts'].get(NerfReport.ChangeKind.ALIVE, 0),
             'first_image': b['coord'].images.first(),
         })
 
@@ -537,10 +541,43 @@ def change_apply(request, pk):
         )
         messages.success(request, f'#{pk} [너프됨] 표시를 켰습니다.')
 
+    elif action == 'gone':
+        # 그 자리에 아무것도 없다고 확정한다. [너프됨](사진이 조금 달라짐)과는
+        # 다른 이야기라 같이 켜지 않는다. 글은 지우지 않고 목록에 흐리게 남긴다 -
+        # 그래야 「어 살아났는데요」 하는 제보를 다시 받을 수 있다.
+        Coordinate.objects.filter(pk=pk).update(
+            is_gone=True,
+            gone_at=coordinate.gone_at or now,
+            change_checked_at=now,
+        )
+        if coordinate.author:
+            Notification.objects.create(
+                recipient=coordinate.author,
+                actor=request.user,
+                notification_type=Notification.NotificationType.NERF,
+                coordinate=coordinate,
+                message=f"'{coordinate.title}'이(가) 없어졌다는 제보를 확인했어요. "
+                        f"목록에서 흐리게 표시됩니다. 다시 생겼다면 알려주세요.",
+            )
+        messages.success(request, f'#{pk} 「없어짐」으로 확정했습니다.')
+
+    elif action == 'alive':
+        # 가봤더니 멀쩡하더라. 확정을 되돌리고 「없어졌다」 표만 지운다.
+        # 「사진이 달라요」 같은 다른 제보는 건드리지 않는다.
+        NerfReport.objects.filter(
+            coordinate=coordinate,
+            change_kind__in=(NerfReport.ChangeKind.GONE, NerfReport.ChangeKind.ALIVE),
+        ).delete()
+        Coordinate.objects.filter(pk=pk).update(
+            is_gone=False, gone_at=None, change_checked_at=now,
+        )
+        messages.success(request, f'#{pk} 「없어짐」을 풀고 그 제보를 지웠습니다.')
+
     elif action == 'clear':
         NerfReport.objects.filter(coordinate=coordinate).delete()
         Coordinate.objects.filter(pk=pk).update(
-            nerf_report_count=0, is_nerfed=False, nerfed_at=None, change_checked_at=now,
+            nerf_report_count=0, is_nerfed=False, nerfed_at=None,
+            is_gone=False, gone_at=None, change_checked_at=now,
         )
         messages.success(request, f'#{pk} 제보를 지우고 표시를 껐습니다.')
 

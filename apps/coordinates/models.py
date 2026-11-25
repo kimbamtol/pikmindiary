@@ -83,6 +83,12 @@ class Coordinate(models.Model):
     # 엽서 변경(너프) 제보
     nerf_report_count = models.PositiveIntegerField(_('엽서 변경 제보 수'), default=0)
     is_nerfed = models.BooleanField(_('엽서 변경됨'), default=False)
+    # 그 자리의 버섯·빅플라워가 아예 사라졌다고 운영자가 확정한 상태.
+    # is_nerfed(사진이 조금 달라짐)와는 다른 이야기다 - 이건 "가봐야 없다" 는 뜻이다.
+    # 확정해도 글은 지우지 않는다. 목록에 흐리게 남겨둬야
+    # "어 살아났는데요" 하는 제보를 다시 받을 수 있다.
+    is_gone = models.BooleanField(_('없어짐'), default=False)
+    gone_at = models.DateTimeField(_('없어짐 확정일'), null=True, blank=True)
     nerfed_at = models.DateTimeField(_('변경 표시일'), null=True, blank=True)
     # 운영자가 제보 목록에서 '확인 완료'를 누른 시각.
     # 이 시각 이후에 들어온 제보만 관리자 화면에 다시 뜬다.
@@ -311,8 +317,17 @@ class NerfReport(models.Model):
         BIGFLOWER = 'BIGFLOWER', _('빅플라워가 됐어요')
         SEEDLING = 'SEEDLING', _('모종이 됐어요')
         GONE = 'GONE', _('아예 없어졌어요')
+        ALIVE = 'ALIVE', _('아직 있어요')
 
-    # 분류 정정으로 이어지는 제보만 매핑한다 (PHOTO/GONE 은 분류를 바꾸지 않는다)
+    # 「아직 있어요」는 반대표다. 제보 수에 섞으면 안 된다.
+    # 이게 [너프됨] 자동 계산에 들어가면, 멀쩡하다고 말한 사람이
+    # 오히려 너프 표시를 켜는 꼴이 된다.
+    COUNTED_KINDS = (
+        ChangeKind.PHOTO, ChangeKind.MUSHROOM, ChangeKind.BIGFLOWER,
+        ChangeKind.SEEDLING, ChangeKind.GONE,
+    )
+
+    # 분류 정정으로 이어지는 제보만 매핑한다 (PHOTO/GONE/ALIVE 는 분류를 바꾸지 않는다)
     CATEGORY_FOR_KIND = {
         ChangeKind.MUSHROOM: Coordinate.Category.MUSHROOM,
         ChangeKind.BIGFLOWER: Coordinate.Category.BIGFLOWER,

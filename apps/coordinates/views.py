@@ -78,6 +78,10 @@ def coordinate_list(request):
     first_page_items = list(queryset[offset:offset + PAGE_SIZE])
     has_next = total_count > offset + PAGE_SIZE
 
+    # 카드 오른쪽 위 「?」가 쓸 값을 한 번에 붙인다 (쿼리 1개)
+    from .gone import attach_gone_state
+    attach_gone_state(first_page_items)
+
     # 쪽번호 줄. 양 끝과 현재 둘레만 보여주고 벌어진 자리는 None(…)으로 남긴다.
     # 2,630장이면 88쪽이라 전부 찍으면 줄이 화면을 넘어간다.
     def _page_window(cur, last, around=2):
@@ -278,7 +282,14 @@ def coordinate_detail(request, pk):
     nerf_settings = SiteSettings.get_settings()
     nerf_window = max(1, nerf_settings.nerf_window_days)
     nerf_since = timezone.now() - timedelta(days=nerf_window)
-    nerf_recent = NerfReport.objects.filter(coordinate=coordinate, created_at__gte=nerf_since).count()
+    # 「아직 있어요」는 반대표라 제보 수에서 뺀다
+    nerf_recent = NerfReport.objects.filter(
+        coordinate=coordinate, created_at__gte=nerf_since,
+        change_kind__in=NerfReport.COUNTED_KINDS).count()
+
+    # 카드와 같은 「?」 값을 상세에도 붙인다
+    from .gone import attach_gone_state
+    attach_gone_state([coordinate])
 
     if request.user.is_authenticated:
         mine = NerfReport.objects.filter(coordinate=coordinate, user=request.user).first()
@@ -302,7 +313,11 @@ def coordinate_detail(request, pk):
         'nerf_window_days': nerf_window,
         'my_nerf_report': my_nerf,
         'my_nerf_kind': mine.change_kind if mine else '',
-        'nerf_kinds': NerfReport.ChangeKind.choices,
+        # 「아직 있어요」는 제보 종류 목록에 넣지 않는다.
+        # 그건 "무엇이 달라졌나" 가 아니라 "없어졌다" 에 대한 반대표라서,
+        # 「?」 안내에서만 누를 수 있어야 한다.
+        'nerf_kinds': [(c, l) for c, l in NerfReport.ChangeKind.choices
+                       if c != NerfReport.ChangeKind.ALIVE],
         'is_nerf_owner': bool(
             request.user.is_authenticated
             and (coordinate.author_id == request.user.pk or request.user.is_staff)
@@ -938,8 +953,12 @@ def toggle_nerf_report(request, pk):
     window = max(1, settings_obj.nerf_window_days)
     since = timezone.now() - timedelta(days=window)
 
-    recent = NerfReport.objects.filter(coordinate=coordinate, created_at__gte=since).count()
-    total = NerfReport.objects.filter(coordinate=coordinate).count()
+    # 「아직 있어요」는 반대표라 제보 수에서 뺀다.
+    # 안 빼면 멀쩡하다고 말한 사람이 [너프됨]을 켜는 꼴이 된다.
+    counted = NerfReport.objects.filter(
+        coordinate=coordinate, change_kind__in=NerfReport.COUNTED_KINDS)
+    recent = counted.filter(created_at__gte=since).count()
+    total = counted.count()
 
     was_nerfed = coordinate.is_nerfed
     # 자동 계산은 **켜기만** 한다. 끄지 않는다.

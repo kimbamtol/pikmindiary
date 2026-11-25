@@ -70,6 +70,17 @@
                             <span class="vote-who">{{ row.voters|join:", " }}{% if row.total > 6 %} 외{% endif %}</span>
                         </div>
 
+                        {% if row.gone_n or row.coord.is_gone %}
+                        <div class="chg-gone">
+                            {% if row.coord.is_gone %}
+                            <strong>없어짐으로 확정된 글입니다.</strong> 목록에 흐리게 나옵니다.
+                            {% else %}
+                            없어졌다 <b>{{ row.gone_n }}</b>명
+                            {% if row.alive_n %}/ 아직 있다 <b>{{ row.alive_n }}</b>명{% else %}(반대 의견 없음){% endif %}
+                            {% endif %}
+                        </div>
+                        {% endif %}
+
                         {% if row.suggested %}
                         <div class="chg-hint">
                             제보 {{ row.suggested.votes }}명이 <strong>{{ row.suggested.label }}</strong>로 바뀌었다고 합니다.
@@ -102,6 +113,17 @@
                     {% if not row.coord.is_nerfed %}
                     <button type="submit" name="action" value="nerf" class="btn btn-outline" title="사진이 바뀌었을 때만 쓰세요">사진 바뀜 표시 [너프됨]</button>
                     {% endif %}
+
+                    {% if row.coord.is_gone %}
+                    <button type="submit" name="action" value="alive" class="btn btn-outline"
+                        title="가봤더니 멀쩡하더라 - 없어짐을 풀고 그 제보를 지웁니다"
+                        onclick="return confirm('「없어짐」을 풀고 없어졌다는 제보를 지웁니다. 계속할까요?')">없어짐 풀기</button>
+                    {% elif row.gone_n %}
+                    <button type="submit" name="action" value="gone" class="btn btn-outline"
+                        title="그 자리에 아무것도 없을 때만 쓰세요 - 목록에 흐리게 남습니다"
+                        onclick="return confirm('「없어짐」으로 확정합니다. 목록에 흐리게 남고 글쓴이에게 알림이 갑니다. 계속할까요?')">없어짐 확정</button>
+                    {% endif %}
+
                     <button type="submit" name="action" value="done" class="btn btn-outline">확인 완료</button>
                     <button type="submit" name="action" value="clear" class="btn btn-danger-text"
                         onclick="return confirm('제보를 모두 지우고 너프 표시도 끕니다. 계속할까요?')">제보 지우기</button>
@@ -173,6 +195,16 @@
         margin-top: 10px; background: #FFF8E1; color: #7A5B00;
         border-radius: var(--radius-sm); padding: 8px 12px; font-size: 0.88rem;
     }
+    .chg-gone {
+        margin-top: 6px;
+        padding: 5px 9px;
+        border-radius: 7px;
+        background: #fdf1e0;
+        border: 1px solid #e9cfa4;
+        color: #7a5312;
+        font-size: 0.86rem;
+    }
+    .chg-gone b { font-size: 1rem; }
     .chg-actions {
         display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
         margin-top: var(--spacing-md); padding-top: var(--spacing-md);

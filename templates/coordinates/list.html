@@ -276,6 +276,82 @@
         box-shadow: var(--shadow-sm);
     }
 
+    /* ── 없어졌다는 제보 ─────────────────────────────── */
+    /* 「?」는 사진 오른쪽 위. 왼쪽 위는 분류 칸이 쓰고 있고,
+       아래쪽은 복사할 때 피크민이 걸어가는 자리라 비워둔다
+       (pikmin.js 가 사진 아래끝에서 36px 을 땅으로 삼는다). */
+    .gone-q {
+        position: absolute;
+        top: 7px; right: 7px;
+        width: 26px; height: 26px;
+        padding: 0;
+        border: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, .95);
+        color: #b5761a;
+        font-size: 15px; font-weight: 900; line-height: 26px;
+        text-align: center;
+        box-shadow: 0 1px 5px rgba(0, 0, 0, .3);
+        cursor: pointer;
+        z-index: 4;
+    }
+    .gone-q:hover { background: #fff; color: #8a5a10; }
+    .coord-gone .gone-q { color: #666; }
+
+    /* 운영자가 「없어짐」을 확정한 글. 지우지 않고 흐리게만 둔다 -
+       그래야 「어 살아났는데요」 하는 제보를 다시 받을 수 있다. */
+    .coord-gone .coord-card-image img,
+    .coord-gone .coord-card-placeholder { filter: grayscale(.72) brightness(.66); }
+
+    /* 안내. 넓은 화면은 카드 옆 말풍선, 좁은 화면은 가운데 모달.
+       사진 상자는 overflow:hidden 이라 카드에 붙여야 안 잘린다. */
+    .gone-pop {
+        position: absolute;
+        top: 40px; right: 8px;
+        width: 238px;
+        padding: 12px 13px;
+        background: var(--bg-primary, #fffdf7);
+        border: 1.5px solid var(--nb-rule, #e3d9c2);
+        border-radius: 12px;
+        box-shadow: 0 6px 22px rgba(0, 0, 0, .26);
+        text-align: left;
+        z-index: 30;
+    }
+    .gone-pop h4 { margin: 0 0 6px; font-size: 13.5px; font-weight: 800; color: #8a5a10; }
+    .gone-pop p  { margin: 0 0 5px; font-size: 11.5px; line-height: 1.5; color: var(--text-primary, #4a4238); }
+    .gone-pop p.sub { color: var(--text-secondary, #8d8475); font-size: 10.5px; }
+    .gone-pop .gone-btns { display: flex; gap: 5px; margin-top: 9px; }
+    .gone-pop .gone-btns button {
+        flex: 1;
+        padding: 7px 2px;
+        font-size: 11px; font-weight: 700;
+        border-radius: 7px;
+        border: 1.4px solid var(--nb-rule, #d9cfb6);
+        background: var(--bg-secondary, #fff);
+        color: var(--text-primary, #5a5245);
+        cursor: pointer;
+    }
+    .gone-pop .gone-btns button.on {
+        background: var(--primary, #6a9a52);
+        border-color: var(--primary, #6a9a52);
+        color: #fff;
+    }
+    .gone-pop .gone-btns button[disabled] { opacity: .55; cursor: default; }
+
+    /* 좁은 화면 - 촘촘 보기 카드는 120px 라 말풍선이 카드보다 커진다 */
+    .gone-back { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 1200; }
+    .gone-back .gone-pop {
+        position: fixed;
+        top: 50%; left: 50%; right: auto;
+        transform: translate(-50%, -50%);
+        width: min(300px, calc(100vw - 48px));
+        padding: 16px 17px;
+    }
+    .gone-back .gone-pop h4 { font-size: 15px; }
+    .gone-back .gone-pop p  { font-size: 13px; }
+    .gone-back .gone-pop p.sub { font-size: 11.5px; }
+    .gone-back .gone-pop .gone-btns button { font-size: 12.5px; padding: 9px 2px; }
+
     /* 쪽번호 줄 - 바탕은 main.css 의 .pagination 을 그대로 쓴다.
        여기서는 목록에만 필요한 것(줄바꿈, 생략표, 장수 줄)만 덧댄다. */
     .pagination {
@@ -1469,6 +1545,125 @@
             console.error('Bookmark toggle failed:', error);
         }
     }
+
+    /* ── 없어졌다는 제보 안내 ─────────────────────────────
+       「?」는 사진 위에 얹혀 있는데, 사진 전체가 글 링크이고 촘촘 보기에서는
+       누르면 좌표까지 복사된다. 그래서 문서 단계에서 먼저 잡아 멈춘다.
+       카드는 무한 스크롤로 계속 늘어나므로 카드마다 거는 대신 한 군데서 받는다. */
+    (function () {
+        var NARROW = 620;      // list.html 의 @media 와 같은 값
+        var open = null;       // 지금 떠 있는 안내
+
+        function close() {
+            if (!open) return;
+            if (open.back) open.back.remove(); else open.pop.remove();
+            open = null;
+        }
+
+        function textFor(d) {
+            var gone = parseInt(d.goneN || '0', 10);
+            var alive = parseInt(d.aliveN || '0', 10);
+            var when = d.goneLast || '';
+            if (d.goneDone === '1') {
+                return ['없어진 곳이에요',
+                        '운영자가 확인했어요. 지금은 없는 자리예요.',
+                        '다시 생겼다면 아래로 알려주세요.'];
+            }
+            var line = when ? (when + '에 ') : '';
+            line += gone + '명이 없어졌다고 알려주셨어요.';
+            if (alive > 0) line += ' ' + alive + '명은 아직 있다고 해요.';
+            return ['없어졌다는 제보가 있어요',
+                    line + ' 아직 확인 전이에요.',
+                    '버섯은 잠깐 사라졌다가 5분 뒤에 다시 생기기도 해요.'];
+        }
+
+        function build(btn) {
+            var d = btn.dataset;
+            var t = textFor(d);
+            var pop = document.createElement('div');
+            pop.className = 'gone-pop';
+            pop.innerHTML =
+                '<h4></h4><p></p><p class="sub"></p>' +
+                '<div class="gone-btns">' +
+                '<button type="button" class="on" data-vote="ALIVE">아직 있어요</button>' +
+                '<button type="button" data-vote="GONE">저도 없었어요</button>' +
+                '</div>';
+            pop.querySelector('h4').textContent = t[0];
+            pop.querySelectorAll('p')[0].textContent = t[1];
+            pop.querySelectorAll('p')[1].textContent = t[2];
+
+            pop.addEventListener('click', function (e) {
+                e.preventDefault(); e.stopPropagation();
+                var b = e.target.closest('button[data-vote]');
+                if (!b) return;
+                vote(d.gonePk, b.getAttribute('data-vote'), pop);
+            });
+            return pop;
+        }
+
+        function vote(pk, kind, pop) {
+            var btns = pop.querySelectorAll('button[data-vote]');
+            btns.forEach(function (b) { b.disabled = true; });
+            fetch('/coordinates/' + pk + '/nerf/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': goneCsrf(),
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: 'kind=' + encodeURIComponent(kind),
+                credentials: 'same-origin'
+            }).then(function (r) { return r.json(); }).then(function (data) {
+                pop.querySelectorAll('p')[0].textContent =
+                    data.reported
+                        ? '알려주셔서 고맙습니다. 운영자가 확인할게요.'
+                        : '답을 취소했어요.';
+                pop.querySelectorAll('p')[1].textContent = '';
+                pop.querySelector('.gone-btns').remove();
+                setTimeout(close, 1600);
+            }).catch(function () {
+                btns.forEach(function (b) { b.disabled = false; });
+                pop.querySelectorAll('p')[1].textContent = '잠시 뒤에 다시 눌러주세요.';
+            });
+        }
+
+        function goneCsrf() {
+            var m = document.cookie.match('(^|;)\\s*csrftoken\\s*=\\s*([^;]+)');
+            return m ? decodeURIComponent(m.pop()) : '';
+        }
+
+        document.addEventListener('click', function (e) {
+            var btn = e.target.closest('.gone-q');
+            if (btn) {
+                // 글로 넘어가지도, 좌표가 복사되지도 않게 한다
+                e.preventDefault();
+                e.stopPropagation();
+                if (open && open.btn === btn) { close(); return; }
+                close();
+                var pop = build(btn);
+                if (window.innerWidth <= NARROW) {
+                    var back = document.createElement('div');
+                    back.className = 'gone-back';
+                    back.appendChild(pop);
+                    back.addEventListener('click', function (ev) {
+                        if (ev.target === back) close();
+                    });
+                    document.body.appendChild(back);
+                    open = {btn: btn, pop: pop, back: back};
+                } else {
+                    var card = btn.closest('.coord-card');
+                    card.appendChild(pop);
+                    open = {btn: btn, pop: pop, back: null};
+                }
+                return;
+            }
+            if (open && !e.target.closest('.gone-pop')) close();
+        }, true);
+
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') close();
+        });
+    })();
 
     // 무한 스크롤 + 스크롤 복원
     (function () {

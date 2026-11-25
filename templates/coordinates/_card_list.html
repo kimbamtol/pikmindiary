@@ -1,6 +1,6 @@
 {% load pikmin %}
 {% for coord in coords %}
-<article class="card coord-card">
+<article class="card coord-card{% if coord.is_gone %} coord-gone{% endif %}">
     <a href="{% url 'coordinates:detail' pk=coord.pk %}">
         <div class="coord-card-image">
             {% if coord.images.first %}
@@ -11,6 +11,21 @@
             <span class="badge badge-primary coord-card-category">
                 {{ coord.get_category_display }}
             </span>
+            {% if coord.is_gone or coord.gone_n %}
+            {% comment %}
+            「?」는 사진 전체를 덮은 글 링크 위에 얹힌다. 촘촘 보기에서는
+            사진을 누르면 좌표가 복사되기까지 한다. 그래서 JS 가 이 버튼의
+            클릭을 먼저 잡아 멈춘다 (list.html 의 goneNotice).
+            {% endcomment %}
+            <button type="button" class="gone-q"
+                    data-gone-pk="{{ coord.pk }}"
+                    data-gone-n="{{ coord.gone_n|default:0 }}"
+                    data-alive-n="{{ coord.alive_n|default:0 }}"
+                    data-gone-done="{% if coord.is_gone %}1{% else %}0{% endif %}"
+                    data-gone-last="{{ coord.gone_last|date:'n월 j일' }}"
+                    aria-label="{% if coord.is_gone %}없어진 곳{% else %}없어졌다는 제보가 있어요{% endif %}"
+                    title="{% if coord.is_gone %}없어진 곳{% else %}없어졌다는 제보가 있어요{% endif %}">?</button>
+            {% endif %}
         </div>
 
         <div class="coord-card-content">
