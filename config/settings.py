@@ -83,6 +83,7 @@ TEMPLATES = [
                 'apps.core.context_processors.design_beta',
                 'apps.core.context_processors.list_density',
                 'apps.core.context_processors.list_paging',
+                'apps.core.context_processors.canonical_url',
             ],
         },
     },

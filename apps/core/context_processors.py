@@ -69,3 +69,38 @@ def design_beta(request):
         'beta_enabled': enabled,
         'ui_notebook': enabled and request.COOKIES.get(UI_COOKIE) != UI_CLASSIC,
     }
+
+
+# 「이 페이지의 정식 주소는 이것」을 구글에 알려주는 값 (rel=canonical).
+#
+# 왜 필요한가: nginx 가 pikmindiary.com 과 www.pikmindiary.com 을 둘 다 받는다.
+# 301 로 한쪽으로 몰아줘도 예전에 www 로 퍼진 링크가 남아 있어서, 주소를
+# 못박아두지 않으면 구글이 같은 글을 두 개로 센다. 2026-11-27 서치 콘솔에
+# 「표준이 없는 중복 페이지」 304건으로 올라와 있었다.
+#
+# 쿼리는 보여주는 글이 실제로 달라지는 것만 남긴다.
+#   page, category, region  남긴다 - 다른 글이 나온다
+#   sort                    떼어낸다 - 같은 글을 순서만 바꾼 것이다
+#   q (검색)                떼어낸다 - 검색 결과는 색인될 이유가 없다
+#
+# page 는 절대 떼면 안 된다. 2쪽 이후 글로 구글이 찾아가는 길이 그것뿐이다.
+# page=1 은 떼는데, 1쪽은 쿼리 없는 주소와 같은 화면이라서다.
+CANONICAL_PARAMS = ('page', 'category', 'region')
+
+
+def canonical_url(request):
+    from urllib.parse import urlencode
+
+    from django.conf import settings
+
+    keep = []
+    for key in CANONICAL_PARAMS:
+        value = request.GET.get(key, '').strip()
+        if not value or (key == 'page' and value == '1'):
+            continue
+        keep.append((key, value))
+
+    url = settings.SITE_URL.rstrip('/') + request.path
+    if keep:
+        url += '?' + urlencode(keep)
+    return {'canonical_url': url}

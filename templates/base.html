@@ -43,7 +43,7 @@
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">{% endblock %}
     {% block og_url %}
-    <meta property="og:url" content="https://{{ request.get_host }}{{ request.path }}">{% endblock %}
+    <meta property="og:url" content="{{ canonical_url }}">{% endblock %}
     <meta property="og:locale" content="ko_KR">
 
     <!-- Twitter Card -->
@@ -53,7 +53,7 @@
     <meta name="twitter:image" content="{% block twitter_image %}https://{{ request.get_host }}{% static 'img/og-default.png' %}{% endblock %}">
 
     <!-- Canonical URL -->
-    {% block canonical %}{% endblock %}
+    {% block canonical %}<link rel="canonical" href="{{ canonical_url }}">{% endblock %}
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
