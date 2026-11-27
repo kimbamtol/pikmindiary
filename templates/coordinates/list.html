@@ -971,6 +971,78 @@
         margin-top: var(--spacing-sm);
     }
 
+    /* 업데이트 내역 - 달 버튼으로 끊어 보기.
+       예전에는 41줄이 한 덩어리로 쏟아져서 읽을 수가 없었다. */
+    .update-body { padding: 0; }
+
+    .up-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        padding: 12px var(--spacing-lg);
+        background: var(--bg-secondary);
+        border-bottom: 1px solid var(--bg-tertiary);
+        position: sticky;      /* 내려도 버튼이 따라온다 */
+        top: 0;
+        z-index: 2;
+    }
+
+    .up-chip {
+        font: inherit;
+        font-size: 0.82rem;
+        cursor: pointer;
+        padding: 5px 13px;
+        border-radius: var(--radius-full);
+        border: 1px solid var(--bg-tertiary);
+        background: var(--bg-primary);
+        color: var(--text-secondary);
+        transition: border-color var(--transition-fast), color var(--transition-fast);
+    }
+
+    .up-chip:hover { border-color: var(--primary); color: var(--primary-dark); }
+    .up-chip.on { background: var(--primary); border-color: var(--primary); color: #fff; }
+
+    .up-panel { display: none; padding: 4px var(--spacing-lg) var(--spacing-lg); }
+    .up-panel.on { display: block; }
+
+    .up-year {
+        font-size: 0.76rem;
+        color: var(--text-light);
+        letter-spacing: 0.04em;
+        margin: 14px 0 -6px;
+    }
+
+    .up-day {
+        font-weight: 700;
+        font-size: 0.93rem;
+        color: var(--primary-dark);
+        margin: 16px 0 8px;
+        padding-bottom: 5px;
+        border-bottom: 1px dashed var(--bg-tertiary);
+    }
+
+    .up-ent { padding: 9px 0 9px 11px; border-left: 3px solid var(--primary-light); }
+    .up-ent + .up-ent { margin-top: 2px; }
+    .up-fix { border-left-color: var(--bg-tertiary); }
+
+    .up-tag {
+        display: inline-block;
+        margin-bottom: 3px;
+        font-size: 0.68rem;
+        font-weight: 700;
+        padding: 2px 7px;
+        border-radius: var(--radius-full);
+        background: var(--primary-light);
+        color: var(--primary-dark);
+    }
+
+    .up-fix .up-tag { background: var(--bg-tertiary); color: var(--text-secondary); }
+    .up-ent p { margin: 0; font-size: 0.86rem; line-height: 1.75; }
+
+    @media (max-width: 560px) {
+        .up-tabs, .up-panel { padding-left: var(--spacing-md); padding-right: var(--spacing-md); }
+    }
+
     /* 메인 컨텐츠 */
     .coord-main-content {
         min-width: 0;
@@ -1271,8 +1343,29 @@
             <h3>🔄 업데이트 내역</h3>
             <button class="modal-close" onclick="closeModal('update-modal')">&times;</button>
         </div>
-        <div class="modal-body">
-            {{ site_notice.update_log|linebreaks }}
+        <div class="modal-body update-body">
+            {% with groups=site_notice.update_groups %}
+            <div class="up-tabs">
+                {% for g in groups %}
+                <button type="button" class="up-chip{% if forloop.first %} on{% endif %}"
+                        data-up="{{ g.key }}">{{ g.label }}</button>
+                {% endfor %}
+            </div>
+            {% for g in groups %}
+            <div class="up-panel{% if forloop.first %} on{% endif %}" id="{{ g.key }}">
+                {% if g.year %}<div class="up-year">{{ g.year }}년</div>{% endif %}
+                {% for d in g.days %}
+                <div class="up-day">{{ d.label }}</div>
+                {% for it in d.items %}
+                <div class="up-ent{% if it.fix %} up-fix{% endif %}">
+                    <span class="up-tag">{% if it.fix %}고침{% else %}새 기능{% endif %}</span>
+                    <p>{{ it.text }}</p>
+                </div>
+                {% endfor %}
+                {% endfor %}
+            </div>
+            {% endfor %}
+            {% endwith %}
         </div>
     </div>
 </div>
@@ -1916,6 +2009,21 @@
                 count.textContent = data.like_count;
             }).catch(function(err) { console.error('Comment like failed:', err); });
     }
+
+    // 업데이트 내역 - 달 버튼을 누르면 그 달만 보인다.
+    // 모달 겹침은 .modal-overlay 를 직접 눌렀을 때만 닫히므로 여기서 막을 게 없다.
+    document.addEventListener('click', function (e) {
+        var chip = e.target.closest('.up-chip');
+        if (!chip) return;
+        var box = chip.closest('.update-body');
+        if (!box) return;
+        box.querySelectorAll('.up-chip').forEach(function (c) { c.classList.remove('on'); });
+        box.querySelectorAll('.up-panel').forEach(function (p) { p.classList.remove('on'); });
+        chip.classList.add('on');
+        var panel = box.querySelector('#' + chip.dataset.up);
+        if (panel) panel.classList.add('on');
+        box.scrollTop = 0;      // 긴 달을 보다 짧은 달로 가면 빈 화면이 된다
+    });
 
     // ESC 키로 닫기
     document.addEventListener('keydown', function(e) {

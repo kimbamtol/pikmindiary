@@ -1,5 +1,15 @@
+import re
+
 from django.db import models
 from django.conf import settings
+
+# 업데이트 내역 한 줄의 생김새: *내용 (26.11.25)
+UPDATE_LINE = re.compile(r'^\*(?P<text>.*?)\s*\((?P<y>\d\d)\.(?P<m>\d\d)\.(?P<d>\d\d)\)\s*$')
+
+# 이 말이 들어 있으면 「고침」으로 본다. 나머지는 새 기능이다.
+# '수정' 하나만 보면 안 된다 - 「글 수정 시에도 ... 버튼 추가」 같은
+# 새 기능까지 고침으로 끌려온다. 고친 글은 늘 '문제' 나 '고쳤' 을 쓴다.
+FIX_WORDS = ('문제', '고쳤', '고침')
 
 
 class SiteNotice(models.Model):
@@ -29,6 +39,68 @@ class SiteNotice(models.Model):
     
     def __str__(self):
         return f"[{self.get_location_display()}] {self.title or '공지'}"
+
+    def update_groups(self):
+        """업데이트 내역을 달 > 날짜 > 줄 로 묶어 돌려준다. 최신이 앞이다.
+
+        예전에는 41줄을 통째로 쏟아놔서 읽을 수가 없었다. 달 버튼을 누르면
+        그 달만 보이게 하려고 여기서 묶는다.
+
+        날짜를 못 읽은 줄은 버리지 않는다. 맨 뒤 「기타」로 모아서 어쨌든
+        화면에 나오게 한다 - 관리자가 형식을 조금 어긋나게 적었다고 해서
+        공지가 조용히 사라지면 알아차릴 방법이 없다.
+        """
+        months, odd = [], []
+        index = {}
+
+        for raw in self.update_log.splitlines():
+            raw = raw.strip()
+            if not raw:
+                continue
+
+            m = UPDATE_LINE.match(raw)
+            if not m:
+                odd.append(raw.lstrip('*').strip())
+                continue
+
+            y, mm, dd = m.group('y'), m.group('m'), m.group('d')
+            text = m.group('text')
+            item = {'text': text, 'fix': any(w in text for w in FIX_WORDS)}
+
+            month = index.get((y, mm))
+            if month is None:
+                month = {
+                    'key': 'u%s%s' % (y, mm),
+                    'year': '20' + y,
+                    'label': '%d월' % int(mm),
+                    'days': [],
+                    '_days': {},
+                }
+                index[(y, mm)] = month
+                months.append(month)
+
+            day = month['_days'].get(dd)
+            if day is None:
+                day = {'label': '%d월 %d일' % (int(mm), int(dd)), 'items': []}
+                month['_days'][dd] = day
+                month['days'].append(day)
+            day['items'].append(item)
+
+        # 적은 순서가 오래된 것부터라 뒤집는다. 날짜와 줄도 같이 뒤집는다.
+        months.reverse()
+        for month in months:
+            month.pop('_days')
+            month['days'].reverse()
+            for day in month['days']:
+                day['items'].reverse()
+
+        if odd:
+            months.append({
+                'key': 'uodd', 'year': '', 'label': '기타',
+                'days': [{'label': '날짜를 읽지 못한 줄',
+                          'items': [{'text': t, 'fix': False} for t in odd]}],
+            })
+        return months
 
 
 class Suggestion(models.Model):
